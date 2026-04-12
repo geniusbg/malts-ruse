@@ -74,9 +74,9 @@ const DEFAULT_HOMEPAGE_SETTINGS: Omit<HomepageSettings, 'id' | 'stats'> = {
     'From specialty coffee mornings to signature cocktail nights, delicious sandwiches and aromatic shisha – we craft moods for every hour.',
   descriptionRo:
     'De la cafea de dimineață până la cocktailuri seara, sandvișuri și shisha – creăm atmosfera potrivită oricând.',
-  moodTextBg: 'Бар, кафе, сандвичи, шиша – перфектната атмосфера за деня и вечерта',
-  moodTextEn: 'Bar, coffee, sandwiches, shisha – the perfect atmosphere for day and evening',
-  moodTextRo: 'Bar, cafea, sandvișuri, shisha – atmosfera potrivită zi și seară',
+  moodTextBg: 'Ястия • Напитки • Craft бира • Добро настроение',
+  moodTextEn: 'Food • Drinks • Craft Beer • Good Times',
+  moodTextRo: 'Food • Băuturi • Craft beer • Clipe faine',
   offeringsNoteBg: 'Заповядай за класика или открий нещо ново — при нас денят и вечерта имат вкус.',
   offeringsNoteEn: 'Come for the classics or discover something new — here, every hour has its own flavor.',
   offeringsNoteRo: 'Vino pentru clasice sau descoperă ceva nou — aici, fiecare oră are gustul ei.',

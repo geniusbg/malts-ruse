@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import LoadingScreen from '@/components/LoadingScreen';
+import ConfirmModal from '@/components/ConfirmModal';
+import { eurToBgn } from '@/lib/currency';
 
 type PromoRow = {
   id: string;
@@ -15,7 +17,19 @@ type PromoRow = {
   product: { nameBg: string; nameEn: string; nameRo: string };
 };
 
-type ProductOpt = { id: string; nameBg: string; nameEn: string; nameRo: string; priceBgn: number; priceEur: number };
+type ProductOpt = {
+  id: string;
+  nameBg: string;
+  nameEn: string;
+  nameRo: string;
+  priceBgn: number;
+  priceEur: number;
+  quantity: number;
+  unit: string;
+  categoryNameBg: string;
+  categoryNameEn: string;
+  categoryNameRo: string;
+};
 
 function toDatetimeLocalValue(iso: string): string {
   const d = new Date(iso);
@@ -49,6 +63,11 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
     label: string;
   } | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [deletePromoId, setDeletePromoId] = useState<string | null>(null);
+  const [productSearch, setProductSearch] = useState('');
+  const [productListOpen, setProductListOpen] = useState(false);
+  const productComboRef = useRef<HTMLDivElement>(null);
+  const productSearchInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -60,11 +79,24 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
       if (pr.promotions) setPromotions(pr.promotions);
       if (prod.products) {
         setProducts(
-          prod.products.map((p: ProductOpt & { priceBgn: unknown }) => ({
-            ...p,
-            priceBgn: Number(p.priceBgn),
-            priceEur: Number(p.priceEur),
-          }))
+          prod.products.map(
+            (p: ProductOpt & {
+              priceBgn: unknown;
+              category?: { nameBg?: string; nameEn?: string; nameRo?: string };
+            }) => ({
+              id: p.id,
+              nameBg: p.nameBg,
+              nameEn: p.nameEn,
+              nameRo: p.nameRo,
+              priceBgn: Number(p.priceBgn),
+              priceEur: Number(p.priceEur),
+              quantity: typeof p.quantity === 'number' ? p.quantity : Number(p.quantity) || 1,
+              unit: p.unit || 'pcs',
+              categoryNameBg: p.category?.nameBg ?? '',
+              categoryNameEn: p.category?.nameEn ?? '',
+              categoryNameRo: p.category?.nameRo ?? '',
+            })
+          )
         );
       }
     } catch {
@@ -82,10 +114,74 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
     if (status === 'authenticated') load();
   }, [status, load, locale]);
 
+  const productName = (p: ProductOpt) =>
+    locale === 'en' ? p.nameEn : locale === 'ro' ? p.nameRo : p.nameBg;
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    const haystack = (p: ProductOpt) => {
+      const names = `${p.nameBg} ${p.nameEn} ${p.nameRo}`.toLowerCase();
+      const cat = `${p.categoryNameBg} ${p.categoryNameEn} ${p.categoryNameRo}`.toLowerCase();
+      const qty = String(p.quantity);
+      const unit = (p.unit || '').toLowerCase();
+      return `${names} ${cat} ${qty} ${unit}`;
+    };
+    if (!q) return products;
+    return products.filter((p) => haystack(p).includes(q));
+  }, [products, productSearch]);
+
+  const productsForSelect = useMemo(() => {
+    if (!form.productId) return filteredProducts;
+    const selected = products.find((p) => p.id === form.productId);
+    if (!selected) return filteredProducts;
+    if (filteredProducts.some((p) => p.id === form.productId)) return filteredProducts;
+    return [selected, ...filteredProducts];
+  }, [products, filteredProducts, form.productId]);
+
+  useEffect(() => {
+    if (!productListOpen) return;
+    const t = window.setTimeout(() => productSearchInputRef.current?.focus(), 0);
+    return () => window.clearTimeout(t);
+  }, [productListOpen]);
+
+  useEffect(() => {
+    if (!productListOpen) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      const el = productComboRef.current;
+      if (el && !el.contains(e.target as Node)) setProductListOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setProductListOpen(false);
+    };
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [productListOpen]);
+
+  const pickProduct = (id: string) => {
+    const p = products.find((x) => x.id === id);
+    setForm((f) => ({
+      ...f,
+      productId: id,
+      priceBgn: p ? String(p.priceBgn) : f.priceBgn,
+      priceEur: p ? String(p.priceEur) : f.priceEur,
+    }));
+    setProductListOpen(false);
+    setProductSearch('');
+  };
+
   const createPromo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.productId || !form.startsAt || !form.endsAt || !form.priceBgn || !form.priceEur) {
+    if (!form.productId || !form.startsAt || !form.endsAt || form.priceEur === '') {
       setErr('Попълнете всички полета');
+      return;
+    }
+    const priceEurNum = parseFloat(form.priceEur);
+    if (Number.isNaN(priceEurNum) || priceEurNum < 0) {
+      setErr('Въведете валидна цена в евро');
       return;
     }
     setSubmitting(true);
@@ -98,8 +194,8 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
           productId: form.productId,
           startsAt: new Date(form.startsAt).toISOString(),
           endsAt: new Date(form.endsAt).toISOString(),
-          priceBgn: parseFloat(form.priceBgn),
-          priceEur: parseFloat(form.priceEur),
+          priceBgn: eurToBgn(priceEurNum),
+          priceEur: priceEurNum,
           label: form.label.trim() || null,
         }),
       });
@@ -121,8 +217,10 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
     }
   };
 
-  const remove = async (id: string) => {
-    if (!confirm('Изтриване на промоцията?')) return;
+  const executeRemovePromo = async () => {
+    if (!deletePromoId) return;
+    const id = deletePromoId;
+    setDeletePromoId(null);
     try {
       const res = await fetch(`/api/promotions/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Грешка');
@@ -153,6 +251,11 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    const priceEurNum = parseFloat(editing.priceEur);
+    if (Number.isNaN(priceEurNum) || priceEurNum < 0) {
+      setErr('Въведете валидна цена в евро');
+      return;
+    }
     setSavingEdit(true);
     setErr(null);
     try {
@@ -162,8 +265,8 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
         body: JSON.stringify({
           startsAt: new Date(editing.startsAt).toISOString(),
           endsAt: new Date(editing.endsAt).toISOString(),
-          priceBgn: parseFloat(editing.priceBgn),
-          priceEur: parseFloat(editing.priceEur),
+          priceBgn: eurToBgn(priceEurNum),
+          priceEur: priceEurNum,
           label: editing.label.trim() || null,
         }),
       });
@@ -183,10 +286,19 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
   }
 
   const now = Date.now();
+  const selectedProduct = products.find((p) => p.id === form.productId);
+  const productTriggerLabel =
+    selectedProduct != null
+      ? productName(selectedProduct)
+      : locale === 'en'
+        ? '— choose product —'
+        : locale === 'ro'
+          ? '— alege produs —'
+          : '— избери продукт —';
 
   return (
-    <div className="p-4 md:p-8 pt-24 md:pt-28 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Промоции</h1>
+    <div className="max-w-5xl mx-auto w-full">
+      <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Промоции</h1>
       <p className="malts-muted text-sm mb-8">
         Промо цена в зададен период. На менюто се показва ефективната цена и бадж „Промо“.
       </p>
@@ -199,30 +311,98 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
       >
         <h2 className="font-semibold text-lg">Нова промоция</h2>
         <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block malts-subtle text-sm mb-1">Продукт</label>
-            <select
-              required
-              value={form.productId}
-              onChange={(e) => {
-                const id = e.target.value;
-                const p = products.find((x) => x.id === id);
-                setForm((f) => ({
-                  ...f,
-                  productId: id,
-                  priceBgn: p ? String(p.priceBgn) : f.priceBgn,
-                  priceEur: p ? String(p.priceEur) : f.priceEur,
-                }));
-              }}
-              className="w-full malts-inset px-3 py-2"
-            >
-              <option value="">— избери —</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nameBg}
-                </option>
-              ))}
-            </select>
+          <div className="md:col-span-2 space-y-2">
+            <label className="block malts-subtle text-sm mb-1" id="promo-product-label">
+              Продукт
+            </label>
+            <div ref={productComboRef} className="relative">
+              <button
+                type="button"
+                id="promo-product-trigger"
+                aria-haspopup="listbox"
+                aria-expanded={productListOpen}
+                aria-labelledby="promo-product-label promo-product-trigger"
+                onClick={() => setProductListOpen((o) => !o)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2.5 text-left text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent-tint-border)]"
+              >
+                <span className={selectedProduct ? '' : 'malts-muted'}>{productTriggerLabel}</span>
+                <span className="text-[var(--malts-subtle)] shrink-0" aria-hidden>
+                  {productListOpen ? '▲' : '▼'}
+                </span>
+              </button>
+              {productListOpen && (
+                <div
+                  className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-72 flex-col overflow-hidden rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] shadow-lg"
+                  role="listbox"
+                  aria-label={
+                    locale === 'en'
+                      ? 'Products'
+                      : locale === 'ro'
+                        ? 'Produse'
+                        : 'Продукти'
+                  }
+                >
+                  <div
+                    className="shrink-0 border-b border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-2"
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    <input
+                      ref={productSearchInputRef}
+                      type="search"
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      placeholder={
+                        locale === 'en'
+                          ? 'Search (name, category, qty…)…'
+                          : locale === 'ro'
+                            ? 'Caută (nume, categorie, cant.)…'
+                            : 'Търси (име, категория, колич.)…'
+                      }
+                      className="malts-field w-full text-sm"
+                      autoComplete="off"
+                      aria-label={
+                        locale === 'en'
+                          ? 'Search products'
+                          : locale === 'ro'
+                            ? 'Caută produse'
+                            : 'Търсене в продукти'
+                      }
+                      onKeyDown={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  <ul className="min-h-0 flex-1 overflow-y-auto py-1">
+                    {productsForSelect.length === 0 ? (
+                      <li className="px-3 py-4 text-sm malts-muted">
+                        {locale === 'en'
+                          ? 'No products match.'
+                          : locale === 'ro'
+                            ? 'Niciun rezultat.'
+                            : 'Няма съвпадения.'}
+                      </li>
+                    ) : (
+                      productsForSelect.map((p) => (
+                        <li key={p.id} role="presentation">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={form.productId === p.id}
+                            className={`w-full px-3 py-2.5 text-left text-sm transition-colors ${
+                              form.productId === p.id
+                                ? 'bg-[var(--malts-accent-tint)] text-[var(--malts-ink)]'
+                                : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                            }`}
+                            onClick={() => pickProduct(p.id)}
+                          >
+                            {productName(p)}
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+            <input type="hidden" value={form.productId} required readOnly aria-hidden tabIndex={-1} />
           </div>
           <div>
             <label className="block malts-subtle text-sm mb-1">Етикет (по избор)</label>
@@ -254,27 +434,32 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
             />
           </div>
           <div>
-            <label className="malts-label">Цена лв.</label>
-            <input
-              required
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.priceBgn}
-              onChange={(e) => setForm((f) => ({ ...f, priceBgn: e.target.value }))}
-              className="w-full malts-inset px-3 py-2 rounded-lg"
-            />
-          </div>
-          <div>
-            <label className="malts-label">Цена €</label>
+            <label className="malts-label">Цена (€) *</label>
             <input
               required
               type="number"
               step="0.01"
               min="0"
               value={form.priceEur}
-              onChange={(e) => setForm((f) => ({ ...f, priceEur: e.target.value }))}
+              onChange={(e) => {
+                const v = e.target.value;
+                setForm((f) => ({
+                  ...f,
+                  priceEur: v,
+                  priceBgn: v === '' ? '' : String(eurToBgn(parseFloat(v) || 0)),
+                }));
+              }}
               className="w-full malts-inset px-3 py-2 rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="malts-label">≈ лв. (по фиксиран курс)</label>
+            <input
+              readOnly
+              type="text"
+              value={form.priceBgn === '' ? '' : `${form.priceBgn} лв.`}
+              className="w-full malts-inset px-3 py-2 rounded-lg malts-muted cursor-not-allowed"
+              aria-readonly="true"
             />
           </div>
         </div>
@@ -333,27 +518,36 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                             />
                           </div>
                           <div>
-                            <label className="malts-label text-xs">Цена лв.</label>
-                            <input
-                              type="number"
-                              required
-                              step="0.01"
-                              min="0"
-                              value={editing.priceBgn}
-                              onChange={(e) => setEditing((x) => (x ? { ...x, priceBgn: e.target.value } : x))}
-                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="malts-label text-xs">Цена €</label>
+                            <label className="malts-label text-xs">Цена (€) *</label>
                             <input
                               type="number"
                               required
                               step="0.01"
                               min="0"
                               value={editing.priceEur}
-                              onChange={(e) => setEditing((x) => (x ? { ...x, priceEur: e.target.value } : x))}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setEditing((x) =>
+                                  x
+                                    ? {
+                                        ...x,
+                                        priceEur: v,
+                                        priceBgn: v === '' ? '' : String(eurToBgn(parseFloat(v) || 0)),
+                                      }
+                                    : x
+                                );
+                              }}
                               className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="malts-label text-xs">≈ лв.</label>
+                            <input
+                              readOnly
+                              type="text"
+                              value={editing.priceBgn === '' ? '' : `${editing.priceBgn} лв.`}
+                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm malts-muted cursor-not-allowed"
+                              aria-readonly="true"
                             />
                           </div>
                         </div>
@@ -394,7 +588,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                     {new Date(p.startsAt).toLocaleString('bg')} – {new Date(p.endsAt).toLocaleString('bg')}
                   </td>
                   <td className="p-3">
-                    {p.priceBgn.toFixed(2)} лв / €{p.priceEur.toFixed(2)}
+                    €{p.priceEur.toFixed(2)} · {p.priceBgn.toFixed(2)} лв.
                   </td>
                   <td className="p-3">
                     {active ? (
@@ -415,7 +609,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                     </button>
                     <button
                       type="button"
-                      onClick={() => remove(p.id)}
+                      onClick={() => setDeletePromoId(p.id)}
                       className="text-[var(--malts-danger)] hover:underline"
                     >
                       Изтрий
@@ -430,6 +624,17 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
           <p className="p-6 malts-muted text-center">Няма записани промоции.</p>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!deletePromoId}
+        title="Изтриване на промоция"
+        message="Сигурни ли сте, че искате да изтриете тази промоция?"
+        confirmLabel="Изтрий"
+        cancelLabel="Отказ"
+        tone="danger"
+        onCancel={() => setDeletePromoId(null)}
+        onConfirm={executeRemovePromo}
+      />
     </div>
   );
 }

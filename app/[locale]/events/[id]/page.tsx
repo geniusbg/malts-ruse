@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { formatDateForLocale } from '@/lib/date-utils';
+import { eventDetailImageUrl } from '@/lib/event-images';
 
 export const revalidate = 0;
 
@@ -28,13 +29,14 @@ export default async function EventDetailPage({
        (event.locationRo || event.location))
     : event.location;
   const eventDate = new Date(event.eventDate);
+  const detailImageSrc = eventDetailImageUrl(event);
 
   const backLabel =
     locale === 'bg' ? 'Назад към събития' : locale === 'en' ? 'Back to events' : 'Înapoi la evenimente';
 
   return (
     <main className="min-h-screen malts-surface text-[var(--malts-ink)] pt-24 md:pt-28 pb-16">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto max-w-5xl px-4">
         <Link
           href={`/${locale}/events`}
           className="inline-flex items-center gap-2 malts-muted hover:text-[var(--malts-accent)] mb-8 transition-colors"
@@ -47,15 +49,15 @@ export default async function EventDetailPage({
 
         <div className="malts-card rounded-2xl overflow-hidden shadow-sm">
           {/* Event Image */}
-          {event.imageUrl && (
-            <div className="relative h-96 w-full overflow-hidden bg-[var(--malts-inset)]">
+          {detailImageSrc && (
+            <div className="relative flex w-full items-center justify-center bg-[var(--malts-inset)] px-2 py-4 md:px-4 md:py-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={event.imageUrl}
+                src={detailImageSrc}
                 alt={eventTitle}
-                loading="lazy"
+                loading="eager"
                 decoding="async"
-                className="w-full h-full object-cover"
+                className="mx-auto block h-auto max-h-[min(88vh,960px)] w-auto max-w-full object-contain object-center"
               />
             </div>
           )}

@@ -144,7 +144,7 @@ export default function LocationSettingsPage({
             <span aria-hidden>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">Адрес</h1>
+          <h1 className="malts-admin-heading-font malts-admin-page-title">Адрес</h1>
           <p className="mt-2 malts-muted max-w-2xl">
             Настрой адреса на заведението за всички езици. Адресът се показва на главната страница.
           </p>
@@ -158,9 +158,9 @@ export default function LocationSettingsPage({
               type="button"
               onClick={handleSaveSettings}
               disabled={settingsLoading || savingSettings}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                 settingsLoading || savingSettings
-                  ? 'malts-btn-secondary opacity-50 cursor-not-allowed'
+                  ? 'malts-btn-secondary cursor-not-allowed opacity-50'
                   : 'malts-btn-primary'
               }`}
             >

@@ -202,7 +202,7 @@ Older “Luna Bar” documentation was removed during cleanup; Malts v1 docs liv
 - `/bg/admin/categories` - **Category management** (NEW!)
 - `/bg/admin/products` - Product management
 - `/bg/admin/products/new` - Add product
-- `/bg/admin/products/[id]/edit` - Edit product
+- `/bg/admin/products/[productRef]/edit` - Edit product (`productRef` = slug or UUID)
 - `/bg/admin/events` - Event management
 - `/bg/admin/events/new` - Add event
 - `/bg/admin/qr` - QR generation & printing
@@ -219,9 +219,9 @@ Older “Luna Bar” documentation was removed during cleanup; Malts v1 docs liv
 - `DELETE /api/categories/[id]` - Delete category (validates no products)
 - `GET /api/products` - Products list
 - `POST /api/products` - Create product
-- `GET /api/products/[id]` - Get single product
-- `PUT /api/products/[id]` - Update product
-- `DELETE /api/products/[id]` - Delete product
+- `GET /api/products/[productRef]` - Get single product (slug or UUID)
+- `PUT /api/products/[productRef]` - Update product
+- `DELETE /api/products/[productRef]` - Delete product
 
 ### Ordering System:
 - `POST /api/orders/create` - Create new order (triggers Pusher)

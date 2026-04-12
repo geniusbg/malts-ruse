@@ -9,18 +9,27 @@ const languageNames: Record<Locale, string> = {
   ro: 'RO',
 };
 
+function pathWithNewLocale(pathname: string, newLocale: Locale): string {
+  const segments = pathname.split('/').filter(Boolean);
+  const hasLocalePrefix = segments[0] && locales.includes(segments[0] as Locale);
+  const rest = hasLocalePrefix ? segments.slice(1).join('/') : segments.join('/');
+  return rest ? `/${newLocale}/${rest}` : `/${newLocale}`;
+}
+
 export default function LanguageSwitcher() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentLocale = pathname.split('/')[1] as Locale;
+  const seg = pathname.split('/').filter(Boolean)[0];
+  const currentLocale = (locales.includes(seg as Locale) ? seg : 'bg') as Locale;
 
   const switchLocale = (newLocale: Locale) => {
-    const pathWithoutLocale = pathname.split('/').slice(2).join('/');
+    if (newLocale === currentLocale) return;
+    const base = pathWithNewLocale(pathname, newLocale);
     const queryString = searchParams.toString();
-    const newPath = `/${newLocale}/${pathWithoutLocale}${queryString ? `?${queryString}` : ''}`;
-    router.push(newPath);
+    const newPath = `${base}${queryString ? `?${queryString}` : ''}`;
+    router.push(newPath, { scroll: false });
   };
 
   return (

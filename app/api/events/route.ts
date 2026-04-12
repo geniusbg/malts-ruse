@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         brandId,
         ...(publishedOnly ? { isPublished: true } : {}),
       },
-      orderBy: { eventDate: 'asc' },
+      orderBy: [{ isExternal: 'asc' }, { eventDate: 'asc' }],
     });
 
     return NextResponse.json({ events }, { status: 200 });

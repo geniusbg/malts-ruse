@@ -43,6 +43,8 @@ export interface Event {
   location: string;
   is_external: boolean;
   image_url?: string;
+  image_card_url?: string;
+  image_detail_url?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;

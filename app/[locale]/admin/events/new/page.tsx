@@ -22,7 +22,7 @@ export default function NewEventPage() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold mb-8">Добави събитие</h1>
+      <h1 className="malts-admin-heading-font malts-admin-page-title mb-8">Добави събитие</h1>
       
       <div className="malts-card p-8">
         <EventForm onSubmit={handleSubmit} locale={locale} />

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -35,15 +36,16 @@ export default function StaffNav({ locale }: StaffNavProps) {
         <div className="container mx-auto px-4 py-1">
           <div className="flex items-center justify-between">
           {/* Logo/Title */}
-          <Link href={`/${locale}/staff`} className="flex items-center gap-3">
-            <div className="h-16 flex items-center">
-              <img 
-                src="/malts-logo-landscape.svg"
-                alt="Malt's"
-                className="h-[64px] w-auto"
-                style={{ aspectRatio: '3.5/1' }}
-              />
-            </div>
+          <Link href={`/${locale}/staff`} className="flex h-16 max-h-16 items-center gap-3 sm:max-h-20">
+            <Image
+              src="/malts-logo-nav.webp"
+              alt="Malt's"
+              width={400}
+              height={331}
+              sizes="(max-width: 768px) 200px, 260px"
+              className="malts-brand-filter h-full w-auto max-h-16 min-h-0 shrink-0 object-contain object-left sm:max-h-20"
+              priority
+            />
             <span className="text-xl font-bold text-[var(--malts-ink)] hidden sm:inline">Staff Dashboard</span>
           </Link>
 

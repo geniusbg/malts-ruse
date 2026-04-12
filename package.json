@@ -10,12 +10,18 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:backfill-slugs": "ts-node --project prisma/tsconfig.seed.json prisma/backfill-product-slugs.ts",
+    "seed:hot-drinks": "ts-node --project prisma/tsconfig.seed.json prisma/seed-hot-drinks.ts",
     "db:studio": "prisma studio",
     "icons:generate": "node scripts/generate-icons.mjs",
-    "menu-icon:generate": "node scripts/rasterize-nasheto-menu.mjs"
+    "menu-icon:generate": "node scripts/rasterize-nasheto-menu.mjs",
+    "logo:optimize": "node scripts/optimize-malts-logo.mjs && node scripts/optimize-malts-logo-nav.mjs",
+    "favicon:optimize": "node scripts/optimize-favicon-from-png.mjs",
+    "pwa-icons:optimize": "node scripts/optimize-pwa-icons-from-hero.mjs",
+    "assets:optimize": "npm run logo:optimize && npm run pwa-icons:optimize && npm run favicon:optimize"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "ts-node --project prisma/tsconfig.seed.json prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",

@@ -12,11 +12,11 @@ import ServiceWorkerUpdater from '@/components/ServiceWorkerUpdater';
 import PendingApprovalsBanner from '@/components/PendingApprovalsBanner';
 import LoadingScreen from '@/components/LoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 import { 
   isPushSupported, 
   isSubscribed, 
   subscribeToPush,
-  showTestNotification,
   getPushSupportDetails
 } from '@/lib/push-notifications';
 import { formatBulgarianDateTime, formatBulgarianTime } from '@/lib/date-utils';
@@ -579,19 +579,6 @@ export default function StaffDashboard() {
 
       await subscribeToPush();
       setPushEnabled(true);
-      
-      // Show MIUI-specific warning
-      if (isMIUI()) {
-        setToast({ 
-          message: '✅ Push активиран! ⚠️ За Redmi/Xiaomi: Разреши Автозапуск и Нотификации в Настройки → Приложения → Chrome', 
-          type: 'info' 
-        });
-      } else {
-        setToast({ message: 'Push notifications активирани! 🔔', type: 'success' });
-      }
-      
-      // Show test notification
-      setTimeout(() => showTestNotification(), 1000);
     } catch (error: any) {
       console.error('Enable push error:', error);
       if (isMIUI()) {
@@ -657,6 +644,10 @@ export default function StaffDashboard() {
       return () => clearTimeout(timer);
     }
   }, [status, locale]);
+
+  useLockScroll(
+    showCancelModal || showApprovalModal || notifications.length > 0
+  );
 
   // Show loading screen
   if (status === 'loading' || initialLoading) {
@@ -851,40 +842,14 @@ export default function StaffDashboard() {
               </button>
             )}
 
-            {/* Push Enable Button */}
-            {isPWA && !pushEnabled && isPushSupported() && (
+            {!pushEnabled && isPushSupported() && (
               <button
                 onClick={handleEnablePush}
                 className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 animate-pulse"
               >
-                🔔 Активирай Push
+                🔔 Активирай нотификации
               </button>
             )}
-
-              {/* Status Indicators */}
-              {isPWA && pushEnabled && (
-                <>
-                  <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-xl px-4 py-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                      <span className="text-[var(--malts-ink)]">PWA & Push Active</span>
-                    </div>
-                  </div>
-                  {isMIUI() && (
-                    <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl px-4 py-3">
-                      <div className="flex items-start gap-2 text-sm">
-                        <span className="text-yellow-400">⚠️</span>
-                        <div className="flex-1">
-                          <p className="text-yellow-200 font-semibold mb-1">Redmi/Xiaomi настройки</p>
-                          <p className="text-yellow-300/80 text-xs">
-                            За да работи push: Настройки → Приложения → Chrome → Автозапуск и Нотификации
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
 
               {/* User Menu */}
               <div className="relative">
@@ -940,37 +905,13 @@ export default function StaffDashboard() {
             </button>
           )}
 
-          {isPWA && !pushEnabled && isPushSupported() && (
+          {!pushEnabled && isPushSupported() && (
             <button
               onClick={handleEnablePush}
               className="w-full px-4 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 animate-pulse text-sm"
             >
-              🔔 Активирай Push
+              🔔 Активирай нотификации
             </button>
-          )}
-          
-          {isPWA && pushEnabled && (
-            <>
-              <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-xl px-4 py-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-[var(--malts-ink)]">PWA & Push Active</span>
-                </div>
-              </div>
-              {isMIUI() && (
-                <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-xl px-4 py-3">
-                  <div className="flex items-start gap-2 text-sm">
-                    <span className="text-yellow-400">⚠️</span>
-                    <div className="flex-1">
-                      <p className="text-yellow-200 font-semibold mb-1">Redmi/Xiaomi настройки</p>
-                      <p className="text-yellow-300/80 text-xs">
-                        За да работи push: Настройки → Приложения → Chrome → Автозапуск и Нотификации
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
           )}
 
           {/* Mobile User Menu */}
@@ -1452,9 +1393,11 @@ export default function StaffDashboard() {
                 <div className="flex justify-between text-sm mt-2">
                   <span className="malts-subtle">Общо:</span>
                   <span className="font-semibold text-lg">
-                    {selectedApproval.order?.totalBgn 
-                      ? Number(selectedApproval.order.totalBgn).toFixed(2) + ' лв.'
-                      : 'N/A'}
+                    {selectedApproval.order?.totalBgn != null ? (
+                      <Price priceBgn={Number(selectedApproval.order.totalBgn)} />
+                    ) : (
+                      'N/A'
+                    )}
                   </span>
                 </div>
               </div>
@@ -1467,7 +1410,7 @@ export default function StaffDashboard() {
                       <div key={`${selectedApproval.orderId}-item-${item.id || idx}`} className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3 flex justify-between">
                         <span>{item.productName} x {item.quantity}</span>
                         <span className="font-semibold">
-                          {(Number(item.priceBgn) * item.quantity).toFixed(2)} лв.
+                          <Price priceBgn={Number(item.priceBgn) * item.quantity} />
                         </span>
                       </div>
                     ))}

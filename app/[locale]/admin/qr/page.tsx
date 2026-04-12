@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
+import ConfirmModal from '@/components/ConfirmModal';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 import { formatBulgarianDateTime } from '@/lib/date-utils';
 
 interface QRCodeSettings {
@@ -224,6 +226,8 @@ export default function QRCodesPage() {
   const [generated, setGenerated] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showUnsavedGenerateModal, setShowUnsavedGenerateModal] = useState(false);
+  const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
   const [showRedirectsModal, setShowRedirectsModal] = useState(false);
   const [settings, setSettings] = useState<QRCodeSettings>(DEFAULT_SETTINGS);
   const [savedSettings, setSavedSettings] = useState<QRCodeSettings>(DEFAULT_SETTINGS);
@@ -243,6 +247,8 @@ export default function QRCodesPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [sortBy, setSortBy] = useState<'tableNumber' | 'scanCount' | 'lastScanned'>('tableNumber');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  useLockScroll(showConfirmModal || showRedirectsModal || showUnsavedGenerateModal);
 
   // Load settings from API on mount
   useEffect(() => {
@@ -288,6 +294,7 @@ export default function QRCodesPage() {
   const handleSaveSettings = async () => {
     setSaving(true);
     setSaveSuccess(false);
+    setSettingsSaveError(null);
     try {
       const response = await fetch('/api/qr/settings', {
         method: 'PUT',
@@ -304,11 +311,11 @@ export default function QRCodesPage() {
         setTimeout(() => setSaveSuccess(false), 2000); // Hide success message after 2 seconds
       } else {
         console.error('Failed to save QR settings:', response.status, response.statusText);
-        alert('Грешка при запазване на настройките. Моля опитайте отново.');
+        setSettingsSaveError('Грешка при запазване на настройките. Моля опитайте отново.');
       }
     } catch (error) {
       console.error('Error saving QR settings:', error);
-      alert('Грешка при запазване на настройките. Моля опитайте отново.');
+      setSettingsSaveError('Грешка при запазване на настройките. Моля опитайте отново.');
     } finally {
       setSaving(false);
     }
@@ -340,8 +347,8 @@ export default function QRCodesPage() {
   const generateQRCodes = async (confirmed: boolean = false) => {
     // Warn if there are unsaved changes
     if (hasUnsavedChanges && !confirmed) {
-      const proceed = confirm('⚠️ Има незаписани промени в настройките. При генериране ще се използват текущите (незаписани) настройки.\n\nИскате ли да продължите?');
-      if (!proceed) return;
+      setShowUnsavedGenerateModal(true);
+      return;
     }
 
     if (generated && !confirmed) {
@@ -588,7 +595,7 @@ export default function QRCodesPage() {
     <div>
       <div className="mb-6 md:mb-8 no-print">
         <div className="mb-4">
-          <h1 className="text-2xl md:text-4xl font-bold mb-2">QR Кодове за маси</h1>
+          <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">QR Кодове за маси</h1>
           {generated && tables.length > 0 && (
             <p className="malts-muted text-sm md:text-base">
               ✅ {tables.length} QR кода запазени в базата
@@ -601,20 +608,20 @@ export default function QRCodesPage() {
               setShowRedirectsModal(true);
               loadRedirectTables();
             }}
-            className="px-4 md:px-6 py-2 md:py-3 malts-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
+            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all"
           >
             🔗 Пренасочвания
           </button>
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="px-4 md:px-6 py-2 md:py-3 malts-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
+            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all"
           >
             {showSettings ? '❌ Затвори настройки' : '⚙️ Настройки'}
           </button>
           <button
             onClick={() => generateQRCodes(false)}
             disabled={loading}
-            className="px-4 md:px-6 py-2 md:py-3 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 text-sm md:text-base"
+            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50"
           >
             {loading ? 'Генериране...' : generated ? '🔄 Регенерирай' : '✨ Генерирай'}
           </button>
@@ -623,13 +630,13 @@ export default function QRCodesPage() {
               <button
                 onClick={downloadAllQRCodes}
                 disabled={loading}
-                className="px-4 md:px-6 py-2 md:py-3 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 text-sm md:text-base"
+                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50"
               >
                 {loading ? 'Изтегляне...' : '⬇️ Изтегли PDF'}
               </button>
               <button
                 onClick={printAllQRCodes}
-                className="px-4 md:px-6 py-2 md:py-3 malts-btn-primary rounded-lg font-semibold transition-all text-sm md:text-base"
+                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all"
               >
                 🖨️ Принтирай
               </button>
@@ -899,6 +906,11 @@ export default function QRCodesPage() {
           </div>
 
           <div className="mt-6 pt-4 border-t border-[var(--malts-hairline)]">
+            {settingsSaveError && (
+              <div className="mb-4 malts-alert malts-alert-error">
+                <p className="text-sm">{settingsSaveError}</p>
+              </div>
+            )}
             {hasUnsavedChanges && (
               <div className="mb-4 malts-alert malts-alert-warning">
                 <p className="text-sm">
@@ -959,6 +971,20 @@ export default function QRCodesPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={showUnsavedGenerateModal}
+        title="Незаписани настройки"
+        message="Има незаписани промени в настройките. При генериране ще се използват текущите (незаписани) настройки.\n\nИскате ли да продължите?"
+        confirmLabel="Продължи"
+        cancelLabel="Отказ"
+        tone="default"
+        onCancel={() => setShowUnsavedGenerateModal(false)}
+        onConfirm={() => {
+          setShowUnsavedGenerateModal(false);
+          void generateQRCodes(true);
+        }}
+      />
 
       {loading && !generated && (
         <LoadingScreen locale="bg" />

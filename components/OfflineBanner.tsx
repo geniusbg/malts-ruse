@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 
 interface OfflineBannerProps {
   onStatusChange?: (isBlocked: boolean) => void;
@@ -198,6 +199,8 @@ export default function OfflineBanner({ onStatusChange, onBackOnline }: OfflineB
       };
     }
   }, [onStatusChange, isOffline]);
+
+  useLockScroll(isOffline);
 
   if (!isOffline) return null;
 

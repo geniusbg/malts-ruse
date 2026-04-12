@@ -68,6 +68,7 @@ model Category {
 
 model Product {
   id            String              @id @default(uuid())
+  slug          String              @map("slug")
   categoryId    String              @map("category_id")
   category      Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   nameBg        String              @map("name_bg")
@@ -91,6 +92,7 @@ model Product {
   createdAt     DateTime            @default(now()) @map("created_at")
   updatedAt     DateTime            @updatedAt @map("updated_at")
 
+  @@unique([slug])
   @@index([categoryId])
   @@index([isAvailable])
   @@index([isHidden])
@@ -136,7 +138,12 @@ model Event {
   isExternal    Boolean  @default(false) @map("is_external")
   externalUrl   String?  @map("external_url")
   contactInfo   String?  @map("contact_info")
+  /// Legacy single image; kept for old rows. Prefer imageCardUrl + imageDetailUrl.
   imageUrl      String?  @map("image_url")
+  /// Optimized for list cards / thumbnails (smaller file after upload).
+  imageCardUrl  String?  @map("image_card_url")
+  /// Full hero on the single-event page.
+  imageDetailUrl String? @map("image_detail_url")
   isPublished   Boolean  @default(false) @map("is_published")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")

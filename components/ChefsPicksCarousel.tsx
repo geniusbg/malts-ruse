@@ -3,9 +3,12 @@
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Price from '@/components/Price';
+import { productParamForUrl } from '@/lib/product-url';
 
 interface Product {
   id: string;
+  slug?: string | null;
   nameBg: string;
   nameEn: string;
   nameRo: string;
@@ -13,8 +16,12 @@ interface Product {
   descriptionEn?: string | null;
   descriptionRo?: string | null;
   priceBgn: number;
+  quantity?: number;
+  unit?: string;
   imageUrl?: string | null;
   categoryId: string;
+  /** Public menu URLs use slug instead of raw id */
+  categorySlug?: string;
   category: {
     nameBg: string;
     nameEn: string;
@@ -72,10 +79,10 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
   return (
     <section className="mt-16 md:mt-24">
       <div className="text-center mb-10 md:mb-12">
-        <h2 className="text-3xl md:text-5xl font-bold mb-3">
+        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-3">
           {locale === 'bg' ? 'Избрани от нас' : locale === 'en' ? "Chef's Picks" : 'Unsere Auswahl'}
         </h2>
-        <p className="malts-muted text-lg">
+        <p className="malts-muted text-lg md:text-xl malts-display-secondary">
           {locale === 'bg' 
             ? 'Специални предложения и любими вкусове' 
             : locale === 'en' 
@@ -108,7 +115,17 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
             {products.map((product) => {
               const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
               const categoryName = locale === 'bg' ? product.category.nameBg : locale === 'en' ? product.category.nameEn : product.category.nameRo;
-              
+              const qty = product.quantity ?? 1;
+              const unit = product.unit ?? 'pcs';
+              const unitSuffix =
+                unit === 'pcs'
+                  ? locale === 'bg'
+                    ? 'бр.'
+                    : locale === 'en'
+                      ? 'pcs'
+                      : 'buc.'
+                  : unit;
+
               return (
                 <div
                   key={product.id}
@@ -128,18 +145,14 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
                         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,16,0.65)] via-transparent to-transparent opacity-60"></div>
                       </div>
                     ) : (
-                      <div className="h-48 w-full bg-[var(--malts-inset)] flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden bg-[rgba(26,24,16,0.06)] flex items-center justify-center border border-[var(--malts-hairline)]">
-                            <Image
-                              src="/malts-logo-landscape.svg"
-                              alt="Malt's"
-                              width={200}
-                              height={200}
-                              className="w-[180px] h-[180px] md:w-[220px] md:h-[220px] object-contain opacity-70"
-                            />
-                          </div>
-                        </div>
+                      <div className="relative h-48 w-full overflow-hidden bg-[var(--malts-inset)] flex items-center justify-center px-4 py-3 border-b border-[var(--malts-hairline)]/60">
+                        <Image
+                          src="/malts-logo-landscape.svg"
+                          alt="Malt's"
+                          width={320}
+                          height={120}
+                          className="w-full max-w-[min(100%,320px)] h-auto max-h-[9rem] object-contain opacity-80"
+                        />
                       </div>
                     )}
                     
@@ -155,12 +168,19 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
                            product.descriptionRo}
                         </p>
                       )}
-                      <div className="mt-auto flex items-center justify-between">
-                        <div className="text-2xl font-bold">
-                          {Number(product.priceBgn).toFixed(2)} лв.
+                      <div className="mt-auto flex items-end justify-between gap-3">
+                        <div className="min-w-0 flex flex-col gap-0.5">
+                          <Price
+                            priceBgn={Number(product.priceBgn)}
+                            inline
+                            className="text-sm md:text-base text-[var(--malts-ink)]"
+                          />
+                          <span className="text-sm malts-muted tabular-nums">
+                            {qty} {unitSuffix}
+                          </span>
                         </div>
                         <Link
-                          href={`/${locale}/menu?category=${product.categoryId}&product=${product.id}`}
+                          href={`/${locale}/menu?category=${encodeURIComponent(product.categorySlug || product.categoryId)}&product=${encodeURIComponent(productParamForUrl(product))}`}
                           className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center"
                         >
                           {locale === 'bg' ? 'Виж' : locale === 'en' ? 'View' : 'Ansehen'}

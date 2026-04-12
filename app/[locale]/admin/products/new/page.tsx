@@ -65,7 +65,7 @@ export default function NewProductPage() {
 
   return (
     <div>
-      <h1 className="text-4xl font-bold mb-8">Добави продукт</h1>
+      <h1 className="malts-admin-heading-font malts-admin-page-title mb-8">Добави продукт</h1>
       
       <div className="malts-card p-8">
         <ProductForm

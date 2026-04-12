@@ -2,10 +2,18 @@
 
 import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+const backToSiteLabel: Record<string, string> = {
+  bg: 'Назад към сайта',
+  en: 'Back to site',
+  ro: 'Înapoi la site',
+};
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = pathname?.split('/')[1] || 'bg';
   const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,14 +70,16 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         <div className="malts-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
-            <div className="flex items-center justify-center mb-3">
+            <div className="flex items-center justify-center">
               <img
                 src="/malts.svg"
                 alt="Malt's"
-                className="h-[148px] sm:h-[188px] w-auto max-w-[420px]"
+                className="h-[220px] sm:h-[260px] md:h-[292px] w-auto max-w-full object-contain"
               />
             </div>
-            <p className="malts-muted text-sm sm:text-base">Admin панел</p>
+            <p className="malts-admin-panel-title mt-6 sm:mt-7 text-center text-lg sm:text-xl md:text-2xl leading-snug px-1">
+              {'Admin & Staff'}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
@@ -116,11 +126,32 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="malts-btn-primary malts-btn-admin-compact w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Влизане...' : 'Вход'}
             </button>
           </form>
+
+          <Link
+            href={`/${locale}`}
+            className="malts-btn-secondary malts-btn-admin-compact mt-4 flex w-full items-center justify-center gap-2 rounded-lg font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--malts-accent)] focus-visible:ring-offset-2"
+          >
+            <svg
+              className="h-4 w-4 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            <span>{backToSiteLabel[locale] ?? backToSiteLabel.bg}</span>
+          </Link>
 
           <p className="text-center malts-muted text-xs sm:text-sm mt-6 pt-6 border-t border-[var(--malts-hairline)]">
             Контакт: <span className="font-medium text-[var(--malts-ink)]">support@gsoft.bg</span>

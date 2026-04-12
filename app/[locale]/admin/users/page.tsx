@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import LoadingScreen from '@/components/LoadingScreen';
+import Toast from '@/components/Toast';
 import { formatBulgarianDate } from '@/lib/date-utils';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 
 interface User {
   id: string;
@@ -25,6 +27,9 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+
+  useLockScroll(showAddForm || showEditForm || showDeleteConfirm);
 
   useEffect(() => {
     params.then(p => setLocale(p.locale));
@@ -85,21 +90,28 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
         setSelectedUser(null);
       } else {
         const error = await response.json();
-        alert(error.error || 'Грешка при изтриване');
+        setToast({ message: error.error || 'Грешка при изтриване', type: 'error' });
       }
     } catch (error) {
-      alert('Грешка при изтриване на потребител');
+      setToast({ message: 'Грешка при изтриване на потребител', type: 'error' });
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">👥 Потребители</h1>
+        <h1 className="malts-admin-heading-font malts-admin-page-title">👥 Потребители</h1>
         {canCreateAdmin && (
           <button
             onClick={() => setShowAddForm(true)}
-            className="px-4 sm:px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-colors whitespace-nowrap"
+            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap transition-colors"
           >
             + Добави потребител
           </button>
@@ -234,6 +246,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
             setShowAddForm(false);
             fetchUsers();
           }}
+          onError={(message) => setToast({ message, type: 'error' })}
         />
       )}
 
@@ -250,6 +263,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
             setSelectedUser(null);
             fetchUsers();
           }}
+          onError={(message) => setToast({ message, type: 'error' })}
         />
       )}
 
@@ -267,7 +281,19 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
   );
 }
 
-function EditUserForm({ user, locale, onClose, onSuccess }: { user: User; locale: string; onClose: () => void; onSuccess: () => void }) {
+function EditUserForm({
+  user,
+  locale,
+  onClose,
+  onSuccess,
+  onError,
+}: {
+  user: User;
+  locale: string;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: (message: string) => void;
+}) {
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
   const [name, setName] = useState(user.name);
@@ -293,10 +319,10 @@ function EditUserForm({ user, locale, onClose, onSuccess }: { user: User; locale
         onSuccess();
       } else {
         const error = await response.json();
-        alert(error.error || 'Грешка при редактиране');
+        onError(error.error || 'Грешка при редактиране');
       }
     } catch (error) {
-      alert('Грешка при редактиране на потребител');
+      onError('Грешка при редактиране на потребител');
     } finally {
       setLoading(false);
     }
@@ -369,14 +395,14 @@ function EditUserForm({ user, locale, onClose, onSuccess }: { user: User; locale
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 malts-btn-secondary rounded-lg font-semibold transition-colors"
+              className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
             >
               Отказ
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-colors disabled:opacity-50"
+              className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
             >
               {loading ? 'Запазване...' : 'Запази'}
             </button>
@@ -398,13 +424,13 @@ function DeleteConfirmModal({ user, onClose, onConfirm }: { user: User; onClose:
         <div className="flex gap-4">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 malts-btn-secondary rounded-lg font-semibold transition-colors"
+            className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
           >
             Отказ
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-colors"
+            className="malts-btn-danger malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
           >
             Изтрий
           </button>
@@ -414,7 +440,17 @@ function DeleteConfirmModal({ user, onClose, onConfirm }: { user: User; onClose:
   );
 }
 
-function AddUserForm({ locale, onClose, onSuccess }: { locale: string; onClose: () => void; onSuccess: () => void }) {
+function AddUserForm({
+  locale,
+  onClose,
+  onSuccess,
+  onError,
+}: {
+  locale: string;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: (message: string) => void;
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -448,10 +484,10 @@ function AddUserForm({ locale, onClose, onSuccess }: { locale: string; onClose: 
           errorMessage = error.details;
         }
         
-        alert(errorMessage);
+        onError(errorMessage);
       }
     } catch (error) {
-      alert('Грешка при създаване на потребител');
+      onError('Грешка при създаване на потребител');
     } finally {
       setLoading(false);
     }
@@ -512,14 +548,14 @@ function AddUserForm({ locale, onClose, onSuccess }: { locale: string; onClose: 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 malts-btn-secondary rounded-lg font-semibold transition-colors"
+              className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
             >
               Отказ
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-colors disabled:opacity-50"
+              className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
             >
               {loading ? 'Създаване...' : 'Създай'}
             </button>

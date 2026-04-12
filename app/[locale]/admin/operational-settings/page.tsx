@@ -98,7 +98,7 @@ export default function OperationalSettingsPage({
 
   if (!isSuper) {
     return (
-      <div className="p-8 pt-28 max-w-2xl mx-auto">
+      <div className="p-6 md:p-8 max-w-2xl mx-auto w-full">
         <div className="malts-card p-6">
           <p className="malts-muted">Само Super Admin може да редактира тези настройки.</p>
         </div>
@@ -107,8 +107,8 @@ export default function OperationalSettingsPage({
   }
 
   return (
-    <div className="p-4 md:p-8 pt-24 md:pt-28 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Оперативни настройки</h1>
+    <div className="max-w-2xl mx-auto w-full">
+      <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Оперативни настройки</h1>
       <p className="malts-muted text-sm mb-8">
         Лимит на маси за QR, активиране на поръчки и повикване на сервитьор (сървърна проверка).
       </p>
@@ -153,7 +153,7 @@ export default function OperationalSettingsPage({
           type="button"
           onClick={save}
           disabled={saving}
-          className="w-full py-3 malts-btn-primary font-semibold disabled:opacity-50"
+          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold disabled:opacity-50"
         >
           {saving ? 'Запис…' : 'Запази'}
         </button>

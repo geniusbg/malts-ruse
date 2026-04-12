@@ -1,11 +1,17 @@
 import { prisma } from '@/lib/prisma';
-
-
+import Link from 'next/link';
+import Image from 'next/image';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
-export default async function ContactPage() {
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: loc } = await params;
+  const locale = loc === 'en' || loc === 'ro' ? loc : 'bg';
 
   const workingHours = await prisma.workingHours.findMany({
 
@@ -61,10 +67,17 @@ export default async function ContactPage() {
 
             <div className="malts-card rounded-2xl p-8 shadow-sm">
 
-              <div className="flex justify-center mb-6 -mt-4">
-
-                <img src="/malts-logo-landscape.svg" alt="Malt's" className="w-full max-w-md h-auto" />
-
+              <div className="mb-6 -mt-4 flex justify-center">
+                <Link href={`/${locale}`} className="inline-block max-w-full">
+                  <Image
+                    src="/malts-logo-nav.webp"
+                    alt="Malt's"
+                    width={400}
+                    height={331}
+                    sizes="(max-width: 768px) 280px, 360px"
+                    className="malts-brand-filter h-auto w-full max-w-[min(100%,280px)] object-contain sm:max-w-[320px]"
+                  />
+                </Link>
               </div>
 
 

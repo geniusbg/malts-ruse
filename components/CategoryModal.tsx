@@ -147,19 +147,28 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div 
+    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain">
+      <div
         className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden
       />
-
-      {/* Modal */}
-      <div className="relative z-10 w-full max-w-2xl mx-4 malts-card max-h-[90vh] overflow-y-auto">
-        <div className="p-6 md:p-8">
+      <div
+        className="relative z-10 flex min-h-[100dvh] min-h-[100svh] items-center justify-center p-3 py-10 sm:p-4 sm:py-12"
+        onClick={onClose}
+      >
+        <div
+          data-modal-scroll
+          className="malts-card w-full max-w-2xl max-h-[min(88dvh,92svh)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg touch-pan-y"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="category-modal-title"
+          onClick={(e) => e.stopPropagation()}
+        >
+        <div className="p-4 sm:p-6 md:p-8">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold">
+          <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6">
+            <h2 id="category-modal-title" className="min-w-0 text-xl font-bold sm:text-2xl md:text-3xl">
               {category ? 'Редактирай категория' : 'Добави нова категория'}
             </h2>
             <button
@@ -288,11 +297,11 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:gap-4 sm:pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 malts-btn-primary rounded-lg font-semibold transition-all flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="malts-btn-primary malts-btn-admin-compact order-2 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-1 sm:flex-1"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -310,12 +319,13 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-8 py-3 malts-btn-secondary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="malts-btn-secondary malts-btn-admin-compact order-1 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-2 sm:w-auto"
               >
                 Отказ
               </button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

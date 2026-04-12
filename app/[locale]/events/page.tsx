@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { getDefaultBrandId } from '@/lib/brand';
+import { eventCardImageUrl } from '@/lib/event-images';
 
 export const revalidate = 0;
 
@@ -39,12 +41,15 @@ export default async function EventsPage({
   const locale = loc === 'en' || loc === 'ro' ? loc : 'bg';
   const t = copy[locale];
 
+  const brandId = await getDefaultBrandId();
+
   const events = await prisma.event.findMany({
     where: {
+      brandId,
       eventDate: { gte: new Date() },
       isPublished: true,
     },
-    orderBy: { eventDate: 'asc' },
+    orderBy: [{ isExternal: 'asc' }, { eventDate: 'asc' }],
   });
 
   return (
@@ -62,6 +67,8 @@ export default async function EventsPage({
             {events.map((event: {
               id: string;
               imageUrl: string | null;
+              imageCardUrl?: string | null;
+              imageDetailUrl?: string | null;
               isExternal: boolean;
               titleBg: string;
               titleEn: string;
@@ -91,6 +98,7 @@ export default async function EventsPage({
                     : event.locationRo || event.location
                 : event.location;
               const eventDate = new Date(event.eventDate);
+              const cardImageSrc = eventCardImageUrl(event);
 
               return (
                 <Link
@@ -98,11 +106,11 @@ export default async function EventsPage({
                   href={`/${loc}/events/${event.id}`}
                   className="malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent)]/40 hover:shadow-md transition-all block group shadow-sm"
                 >
-                  {event.imageUrl && (
+                  {cardImageSrc && (
                     <div className="relative h-64 w-full overflow-hidden bg-[var(--malts-inset)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={event.imageUrl}
+                        src={cardImageSrc}
                         alt={eventTitle}
                         loading="lazy"
                         decoding="async"

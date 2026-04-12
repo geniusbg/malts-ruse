@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -73,38 +74,26 @@ export default function AdminNav({ locale }: AdminNavProps) {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--malts-paper)]/92 backdrop-blur-md border-b border-[var(--malts-hairline)]">
         <div className="w-full px-3 sm:px-4 lg:px-6 py-1">
-          <div className="grid grid-cols-[1fr_auto_1fr] lg:grid-cols-[auto_1fr_auto] items-center gap-3">
-          {/* Left: Logo (desktop) */}
-          <div className="hidden lg:flex items-center justify-start">
-            <Link href={`/${locale}/admin`} className="flex items-center flex-shrink-0">
-              <div className="h-20 flex items-center">
-                <img
-                  src="/malts-logo-landscape.svg"
-                  alt="Malt's"
-                  className="h-[64px] w-auto max-w-[240px]"
-                  style={{ aspectRatio: '3.6/1' }}
-                />
-              </div>
-            </Link>
-          </div>
+          <div className="flex w-full min-w-0 items-center justify-between gap-3 lg:gap-4">
+          {/* Logo: винаги вляво (мобилен + десктоп) */}
+          <Link
+            href={`/${locale}/admin`}
+            className="flex h-16 max-h-16 min-w-0 shrink-0 items-center lg:h-20 lg:max-h-20"
+          >
+            <Image
+              src="/malts-logo-nav.webp"
+              alt="Malt's"
+              width={400}
+              height={331}
+              sizes="(max-width: 1024px) 200px, 260px"
+              className="malts-brand-filter h-full w-auto max-h-16 min-h-0 min-w-0 shrink-0 object-contain object-left lg:max-h-20"
+              priority
+            />
+          </Link>
 
-          {/* Center: Logo (mobile) */}
-          <div className="lg:hidden flex items-center justify-center">
-            <Link href={`/${locale}/admin`} className="flex items-center">
-              <div className="h-16 flex items-center">
-                <img
-                  src="/malts-logo-landscape.svg"
-                  alt="Malt's"
-                  className="h-[56px] w-auto"
-                  style={{ aspectRatio: '3.6/1' }}
-                />
-              </div>
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:block min-w-0">
-            <div className="flex items-center justify-center gap-1 overflow-x-auto whitespace-nowrap no-scrollbar py-1">
+          {/* Desktop Navigation — център на лентата */}
+          <div className="hidden min-w-0 flex-1 lg:block">
+            <div className="flex items-center justify-center gap-1 overflow-x-auto whitespace-nowrap py-1 no-scrollbar">
               {navLinks.map((link) => (
                 (() => {
                   const { icon, text } = splitEmojiLabel(link.label);
@@ -112,7 +101,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-3 rounded-2xl transition-colors text-base font-semibold shrink-0 ${
+                  className={`malts-admin-nav-tab px-4 py-3 rounded-2xl transition-colors shrink-0 ${
                     isActive(link.href)
                       ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
                       : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
@@ -120,7 +109,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 >
                   <span className="flex flex-col items-center justify-center gap-1 leading-tight">
                     {icon ? <span className="text-2xl leading-none">{icon}</span> : null}
-                    <span className="text-[15px]">{text}</span>
+                    <span className="malts-admin-nav-tab-label">{text}</span>
                   </span>
                 </Link>
                   );
@@ -129,8 +118,8 @@ export default function AdminNav({ locale }: AdminNavProps) {
             </div>
           </div>
 
-          {/* Right: User menu (desktop) / hamburger (mobile) */}
-          <div className="flex items-center justify-end">
+          {/* Вдясно: потребител (desktop) / hamburger (mobile) */}
+          <div className="flex shrink-0 items-center justify-end">
             <div className="hidden lg:block relative">
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -199,7 +188,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block py-4 px-4 rounded-2xl transition-colors font-semibold mb-2 ${
+                className={`malts-admin-nav-tab block py-4 px-4 rounded-2xl transition-colors mb-2 ${
                   isActive(link.href)
                     ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
                     : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
@@ -207,7 +196,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
               >
                 <span className="flex flex-col items-center justify-center gap-1 leading-tight">
                   {icon ? <span className="text-2xl leading-none">{icon}</span> : null}
-                  <span className="text-[15px]">{text}</span>
+                  <span className="malts-admin-nav-tab-label">{text}</span>
                 </span>
               </Link>
                 );

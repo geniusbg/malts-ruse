@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import LoadingScreen from '@/components/LoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
+import ConfirmModal from '@/components/ConfirmModal';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 
 interface HomepageSettings {
   id: string;
@@ -103,6 +105,9 @@ export default function HomepageSettingsPage({
   const [editingCard, setEditingCard] = useState<OfferingCard | null>(null);
   const [showCardModal, setShowCardModal] = useState(false);
   const [translateErr, setTranslateErr] = useState<string | null>(null);
+  const [deleteCardId, setDeleteCardId] = useState<string | null>(null);
+
+  useLockScroll(showCardModal);
 
   useEffect(() => {
     let isMounted = true;
@@ -206,9 +211,11 @@ export default function HomepageSettingsPage({
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
-    if (!confirm('Сигурни ли сте, че искате да изтриете тази карта?')) return;
-    
+  const executeDeleteCard = async () => {
+    if (!deleteCardId) return;
+    const cardId = deleteCardId;
+    setDeleteCardId(null);
+
     setSaving(true);
     setError(null);
 
@@ -286,7 +293,7 @@ export default function HomepageSettingsPage({
             <span>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold">Настройки на началната страница</h1>
+          <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки на началната страница</h1>
           <p className="malts-muted mt-2">
             Управлявай съдържанието на секцията "Предложения" на началната страница.
           </p>
@@ -356,9 +363,9 @@ export default function HomepageSettingsPage({
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                   saving
-                    ? 'malts-btn-secondary opacity-50 cursor-not-allowed'
+                    ? 'malts-btn-secondary cursor-not-allowed opacity-50'
                     : 'malts-btn-primary'
                 }`}
               >
@@ -709,9 +716,9 @@ export default function HomepageSettingsPage({
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                   saving
-                    ? 'malts-btn-secondary opacity-50 cursor-not-allowed'
+                    ? 'malts-btn-secondary cursor-not-allowed opacity-50'
                     : 'malts-btn-primary'
                 }`}
               >
@@ -896,7 +903,7 @@ export default function HomepageSettingsPage({
                   });
                   setShowCardModal(true);
                 }}
-                className="px-6 py-3 rounded-xl font-semibold malts-btn-primary transition-all"
+                className="malts-btn-primary malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto"
               >
                 + Добави карта
               </button>
@@ -923,7 +930,7 @@ export default function HomepageSettingsPage({
                         Редактирай
                       </button>
                       <button
-                        onClick={() => handleDeleteCard(card.id)}
+                        onClick={() => setDeleteCardId(card.id)}
                         className="px-3 py-1 rounded-lg malts-btn-danger text-sm"
                       >
                         Изтрий
@@ -1180,24 +1187,26 @@ export default function HomepageSettingsPage({
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
                   <button
+                    type="button"
                     onClick={() => handleSaveCard(editingCard)}
                     disabled={saving}
-                    className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all ${
+                    className={`malts-btn-admin-compact flex-1 rounded-xl font-semibold transition-all ${
                       saving
-                        ? 'malts-btn-secondary opacity-50 cursor-not-allowed'
+                        ? 'malts-btn-secondary cursor-not-allowed opacity-50'
                         : 'malts-btn-primary'
                     }`}
                   >
                     {saving ? 'Запазване...' : 'Запази'}
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       setShowCardModal(false);
                       setEditingCard(null);
                     }}
-                    className="px-6 py-3 rounded-xl font-semibold malts-btn-secondary transition-all"
+                    className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-xl font-semibold transition-all sm:flex-none"
                   >
                     Отказ
                   </button>
@@ -1206,6 +1215,17 @@ export default function HomepageSettingsPage({
             </div>
           </div>
         )}
+
+        <ConfirmModal
+          open={!!deleteCardId}
+          title="Изтриване на карта"
+          message="Сигурни ли сте, че искате да изтриете тази карта?"
+          confirmLabel="Изтрий"
+          cancelLabel="Отказ"
+          tone="danger"
+          onCancel={() => setDeleteCardId(null)}
+          onConfirm={executeDeleteCard}
+        />
       </div>
     </div>
   );

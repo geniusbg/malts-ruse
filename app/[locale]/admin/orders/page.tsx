@@ -9,7 +9,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import PendingApprovalsBanner from '@/components/PendingApprovalsBanner';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import LoadingScreen from '@/components/LoadingScreen';
+import ConfirmModal from '@/components/ConfirmModal';
 import { formatBulgarianDateTime, formatBulgarianDate, formatBulgarianDateRange, formatBulgarianTime } from '@/lib/date-utils';
+import { displayPrice } from '@/lib/currency';
 
 type OrderTab = 'active' | 'history' | 'stats' | 'approvals';
 
@@ -30,6 +32,8 @@ function AdminOrdersPageContent() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [pendingDeleteOrderId, setPendingDeleteOrderId] = useState<string | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<Record<string, boolean>>({});
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
@@ -606,16 +610,16 @@ function AdminOrdersPageContent() {
     return 'днес';
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm('Сигурен ли си, че искаш да изтриеш тази поръчка?\n\nТова действие е необратимо!')) {
-      return;
-    }
-    
+  const executeDeleteOrder = async () => {
+    if (!pendingDeleteOrderId) return;
+    const orderId = pendingDeleteOrderId;
+    setPendingDeleteOrderId(null);
+
     try {
       const response = await fetch(`/api/orders/${orderId}/delete`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         setToast({ message: '✅ Поръчката е изтрита успешно', type: 'success' });
         setShowOrderModal(false);
@@ -633,13 +637,11 @@ function AdminOrdersPageContent() {
     }
   };
 
-  const handleBulkDelete = async () => {
+  const executeBulkDelete = async () => {
+    setShowBulkDeleteConfirm(false);
+
     if (selectedOrderIds.size === 0) {
       setToast({ message: 'Моля, изберете поне една поръчка', type: 'error' });
-      return;
-    }
-
-    if (!confirm(`Сигурен ли си, че искаш да изтриеш ${selectedOrderIds.size} поръчки?\n\nТова действие е необратимо!`)) {
       return;
     }
 
@@ -821,7 +823,7 @@ function AdminOrdersPageContent() {
 
       {/* Header with Tabs */}
       <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6">Поръчки & Статистики</h1>
+        <h1 className="malts-admin-heading-font malts-admin-page-title mb-6">Поръчки & Статистики</h1>
         
         <div className="flex gap-2 bg-[var(--malts-inset)] p-1 rounded-lg overflow-x-auto scrollbar-hide border border-[var(--malts-hairline)]">
           <button
@@ -1119,7 +1121,7 @@ function AdminOrdersPageContent() {
             <div className="mt-4 flex gap-3">
               <button
                 onClick={applyFilters}
-                className="px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-all shadow-lg"
+                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold shadow-lg transition-all"
               >
                 🔍 Търси
               </button>
@@ -1144,7 +1146,7 @@ function AdminOrdersPageContent() {
                   });
                   setPagination(prev => ({ ...prev, page: 1 }));
                 }}
-                className="px-6 py-3 malts-btn-secondary rounded-lg font-semibold transition-all"
+                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all"
               >
                 🔄 Изчисти
               </button>
@@ -1152,17 +1154,11 @@ function AdminOrdersPageContent() {
             
             {/* Revenue Summary */}
               <div className="mt-6 pt-6 border-t border-[var(--malts-hairline)]">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
-                  <p className="malts-subtle text-sm mb-1">Общ приход (BGN)</p>
+                  <p className="malts-subtle text-sm mb-1">Общ приход</p>
                   <p className="text-2xl font-bold">
-                    {Number(historyRevenue.totalBgn).toFixed(2)} лв
-                  </p>
-                </div>
-                <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
-                  <p className="malts-subtle text-sm mb-1">Общ приход (EUR)</p>
-                  <p className="text-2xl font-bold">
-                    €{Number(historyRevenue.totalEur).toFixed(2)}
+                    <Price priceBgn={Number(historyRevenue.totalBgn)} />
                   </p>
                 </div>
                 <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
@@ -1199,7 +1195,7 @@ function AdminOrdersPageContent() {
                       Избрани: {selectedOrderIds.size} поръчки
                     </span>
                     <button
-                      onClick={handleBulkDelete}
+                      onClick={() => setShowBulkDeleteConfirm(true)}
                       disabled={bulkDeleting}
                       className="px-6 py-2 malts-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1425,7 +1421,7 @@ function AdminOrdersPageContent() {
                   <div className="malts-card p-6 border border-[rgba(22,101,52,0.25)] bg-[rgba(22,101,52,0.08)]">
                     <p className="text-[var(--malts-success)] text-sm mb-2">{formatDatePeriod()}</p>
                     <p className="text-3xl font-bold text-[var(--malts-ink)] mb-1">
-                      {Number(revenueStats.today.revenue || 0).toFixed(2)} лв
+                      <Price priceBgn={Number(revenueStats.today.revenue || 0)} />
                     </p>
                     <p className="malts-muted text-sm">
                       {revenueStats.today.orders} поръчки
@@ -1435,7 +1431,7 @@ function AdminOrdersPageContent() {
                   <div className="malts-card p-6 border border-[rgba(29,78,216,0.25)] bg-[rgba(29,78,216,0.06)]">
                     <p className="text-[var(--malts-info)] text-sm mb-2">Тази седмица</p>
                     <p className="text-3xl font-bold text-[var(--malts-ink)] mb-1">
-                      {Number(revenueStats.week.revenue || 0).toFixed(2)} лв
+                      <Price priceBgn={Number(revenueStats.week.revenue || 0)} />
                     </p>
                     <p className="malts-muted text-sm">
                       {revenueStats.week.orders} поръчки
@@ -1445,7 +1441,7 @@ function AdminOrdersPageContent() {
                   <div className="malts-card p-6 border border-[rgba(107,33,168,0.22)] bg-[rgba(107,33,168,0.05)]">
                     <p className="text-[var(--malts-ink)] text-sm mb-2">Този месец</p>
                     <p className="text-3xl font-bold text-[var(--malts-ink)] mb-1">
-                      {Number(revenueStats.month.revenue || 0).toFixed(2)} лв
+                      <Price priceBgn={Number(revenueStats.month.revenue || 0)} />
                     </p>
                     <p className="malts-muted text-sm">
                       {revenueStats.month.orders} поръчки
@@ -1483,7 +1479,7 @@ function AdminOrdersPageContent() {
                         <YAxis 
                           stroke="#9CA3AF"
                           tick={{ fill: '#9CA3AF' }}
-                          label={{ value: 'Приход (лв)', angle: -90, position: 'insideLeft', fill: '#9CA3AF', style: { fontSize: '12px' } }}
+                          label={{ value: 'Приход (€ / лв)', angle: -90, position: 'insideLeft', fill: '#9CA3AF', style: { fontSize: '12px' } }}
                         />
                         <Tooltip
                           contentStyle={{
@@ -1494,7 +1490,11 @@ function AdminOrdersPageContent() {
                           }}
                           cursor={{ fill: 'transparent' }}
                           formatter={(value: any) => {
-                            return [`${Number(value).toFixed(2)} лв`, 'Приход'];
+                            const b = Number(value);
+                            return [
+                              `${displayPrice(b, 'EUR')} / ${displayPrice(b, 'BGN')}`,
+                              'Приход',
+                            ];
                           }}
                           labelFormatter={(label, payload) => {
                             if (payload && payload[0]) {
@@ -1552,7 +1552,7 @@ function AdminOrdersPageContent() {
                               {product.quantitySold}
                             </td>
                             <td className="px-6 py-4 text-right text-[var(--malts-ink)] font-semibold">
-                              {Number(product.revenue || 0).toFixed(2)} лв
+                              <Price priceBgn={Number(product.revenue || 0)} />
                             </td>
                           </tr>
                         ))}
@@ -1610,13 +1610,13 @@ function AdminOrdersPageContent() {
                           <div className="flex justify-between text-sm">
                             <span className="malts-muted">Приход:</span>
                             <span className="text-[var(--malts-ink)] font-semibold">
-                              {Number(table.totalRevenue || 0).toFixed(2)} лв
+                              <Price priceBgn={Number(table.totalRevenue || 0)} />
                             </span>
                           </div>
                           <div className="flex justify-between text-sm">
                             <span className="malts-muted">Ср. поръчка:</span>
                             <span className="text-[var(--malts-ink)] font-semibold">
-                              {Number(table.avgOrderValue || 0).toFixed(2)} лв
+                              <Price priceBgn={Number(table.avgOrderValue || 0)} />
                             </span>
                           </div>
                         </div>
@@ -1649,7 +1649,7 @@ function AdminOrdersPageContent() {
                         setToast({ message: '❌ Грешка при експорт на данни', type: 'error' });
                       }
                     }}
-                    className="px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-colors flex items-center gap-2 justify-center"
+                    className="malts-btn-primary malts-btn-admin-compact flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1922,15 +1922,15 @@ function AdminOrdersPageContent() {
 
                 {/* Admin Actions */}
                 <div className="flex gap-4">
-                  <button
-                    onClick={() => handleDeleteOrder(selectedOrder.id)}
-                    className="flex-1 px-6 py-3 malts-btn-danger rounded-lg font-semibold transition-colors"
-                  >
-                    🗑️ Изтрий поръчка
-                  </button>
+                    <button
+                      onClick={() => setPendingDeleteOrderId(selectedOrder.id)}
+                      className="malts-btn-danger malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+                    >
+                      🗑️ Изтрий поръчка
+                    </button>
                   <button
                     onClick={() => setShowOrderModal(false)}
-                    className="flex-1 px-6 py-3 malts-btn-secondary rounded-lg font-semibold transition-colors"
+                    className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
                   >
                     Затвори
                   </button>
@@ -1988,7 +1988,7 @@ function AdminOrdersPageContent() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-[var(--malts-ink)]">
-                        {approval.order.totalBgn.toFixed(2)} лв.
+                        <Price priceBgn={Number(approval.order.totalBgn)} />
                       </p>
                       <p className="malts-muted text-sm">
                         {approval.order.items.length} артикула
@@ -2055,7 +2055,7 @@ function AdminOrdersPageContent() {
                   <div className="flex justify-between text-sm">
                     <span className="malts-muted">Общо:</span>
                     <span className="text-[var(--malts-ink)] font-semibold text-lg">
-                      {selectedApproval.order.totalBgn.toFixed(2)} лв.
+                      <Price priceBgn={Number(selectedApproval.order.totalBgn)} />
                     </span>
                   </div>
                 </div>
@@ -2068,7 +2068,7 @@ function AdminOrdersPageContent() {
                     <div key={item.id} className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3 flex justify-between">
                       <span className="text-[var(--malts-ink)]">{item.productName} x {item.quantity}</span>
                       <span className="text-[var(--malts-ink)] font-semibold">
-                        {(item.priceBgn * item.quantity).toFixed(2)} лв.
+                        <Price priceBgn={Number(item.priceBgn) * item.quantity} />
                       </span>
                     </div>
                   ))}
@@ -2087,14 +2087,14 @@ function AdminOrdersPageContent() {
                 <button
                   onClick={() => handleApproveOrder(selectedApproval.orderId)}
                   disabled={processingApproval}
-                  className="flex-1 px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {processingApproval ? 'Обработване...' : '✅ Одобри'}
                 </button>
                 <button
                   onClick={() => handleRejectOrder(selectedApproval.orderId)}
                   disabled={processingApproval}
-                  className="flex-1 px-6 py-3 malts-btn-danger rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="malts-btn-danger malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {processingApproval ? 'Обработване...' : '❌ Откажи'}
                 </button>
@@ -2104,7 +2104,7 @@ function AdminOrdersPageContent() {
                     setSelectedApproval(null);
                   }}
                   disabled={processingApproval}
-                  className="px-6 py-3 malts-btn-secondary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Затвори
                 </button>
@@ -2113,6 +2113,28 @@ function AdminOrdersPageContent() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDeleteOrderId}
+        title="Изтриване на поръчка"
+        message="Сигурен ли си, че искаш да изтриеш тази поръчка?\n\nТова действие е необратимо!"
+        confirmLabel="Изтрий"
+        cancelLabel="Отказ"
+        tone="danger"
+        onCancel={() => setPendingDeleteOrderId(null)}
+        onConfirm={executeDeleteOrder}
+      />
+
+      <ConfirmModal
+        open={showBulkDeleteConfirm}
+        title="Масово изтриване"
+        message={`Сигурен ли си, че искаш да изтриеш ${selectedOrderIds.size} поръчки?\n\nТова действие е необратимо!`}
+        confirmLabel="Изтрий всички"
+        cancelLabel="Отказ"
+        tone="danger"
+        onCancel={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={executeBulkDelete}
+      />
     </div>
   );
 }

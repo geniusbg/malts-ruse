@@ -114,9 +114,9 @@
 **Products:**
 - `GET /api/products` - List all
 - `POST /api/products` - Create
-- `GET /api/products/[id]` - Get one
-- `PUT /api/products/[id]` - Update
-- `DELETE /api/products/[id]` - Delete
+- `GET /api/products/[productRef]` - Get one (`productRef` = slug or UUID)
+- `PUT /api/products/[productRef]` - Update
+- `DELETE /api/products/[productRef]` - Delete
 
 **Categories:**
 - `GET /api/categories` - List all

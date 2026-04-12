@@ -18,7 +18,7 @@ VALUES (
   '🍸 Нашето Меню',
   '🍸 Our Menu',
   '🍸 Unser Menü',
-  'Открийте нашата селекция от напитки и деликатеси',
+  'Открийте селекцията ни от напитки и деликатеси',
   'Discover our selection of drinks and delicacies',
   'Entdecken Sie unsere Auswahl an Getränken und Köstlichkeiten',
   NULL

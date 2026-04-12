@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import LoadingScreen from '@/components/LoadingScreen';
+import { getAdminPanelHeading, getSiteDisplayName } from '@/lib/site-display-name';
 
 export default function AdminDashboard({
   params
@@ -11,6 +12,7 @@ export default function AdminDashboard({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = React.use(params);
+  const adminHeading = getAdminPanelHeading(locale, getSiteDisplayName());
   const { data: session, status } = useSession();
   
   // Redirect if not authenticated or wrong role
@@ -79,8 +81,9 @@ export default function AdminDashboard({
     <div className="max-w-7xl mx-auto">
       {/* Welcome Header */}
       <div className="mb-10">
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--malts-ink)] mb-3">Админ Панел</h1>
-        <p className="malts-muted text-lg">Управление на Malts</p>
+        <h1 className="malts-admin-heading-font malts-admin-page-title mb-3 text-balance">
+          {adminHeading}
+        </h1>
       </div>
       
       {/* Stats Cards */}
@@ -127,7 +130,7 @@ export default function AdminDashboard({
 
       {/* Quick Actions */}
       <div className="mt-12">
-        <h2 className="text-2xl md:text-3xl font-bold text-[var(--malts-ink)] mb-6">Бързи действия</h2>
+        <h2 className="malts-admin-heading-font malts-admin-section-title mb-6">Бързи действия</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <a
             href="/bg/admin/products/new"

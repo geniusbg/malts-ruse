@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Category } from '@/lib/types';
-import { bgnToEur } from '@/lib/currency';
+import { bgnToEur, eurToBgn } from '@/lib/currency';
 import ImageUpload from './ImageUpload';
+import CategorySelectCombobox from './CategorySelectCombobox';
 
 interface ProductFormProps {
   categories: Category[];
   initialData?: Partial<ProductFormData>;
   onSubmit: (data: any) => Promise<void>;
   locale: string;
+  /** Extra controls in the submit row (e.g. delete on edit page). */
+  footerAddon?: ReactNode;
 }
 
 type ProductFormData = {
@@ -20,7 +23,7 @@ type ProductFormData = {
   description_en: string;
   description_ro: string;
   category_id: string;
-  price_bgn: number | '';
+  price_eur: number | '';
   unit: string;
   quantity: number;
   is_available: boolean;
@@ -38,7 +41,7 @@ const defaultProductFormData = (categories: Category[]): ProductFormData => ({
   description_en: '',
   description_ro: '',
   category_id: categories[0]?.id || '',
-  price_bgn: 0,
+  price_eur: 0,
   unit: 'pcs',
   quantity: 1,
   is_available: true,
@@ -48,14 +51,28 @@ const defaultProductFormData = (categories: Category[]): ProductFormData => ({
   order: 0
 });
 
-export default function ProductForm({ categories, initialData, onSubmit, locale }: ProductFormProps) {
-  const [formData, setFormData] = useState<ProductFormData>({
-    ...defaultProductFormData(categories),
-    ...(initialData || {})
+export default function ProductForm({
+  categories,
+  initialData,
+  onSubmit,
+  locale,
+  footerAddon,
+}: ProductFormProps) {
+  const [formData, setFormData] = useState<ProductFormData>(() => {
+    const base = defaultProductFormData(categories);
+    const merged = { ...base, ...(initialData || {}) } as ProductFormData & { price_bgn?: number };
+    if (
+      (merged.price_eur === undefined || merged.price_eur === '') &&
+      typeof merged.price_bgn === 'number'
+    ) {
+      merged.price_eur = bgnToEur(merged.price_bgn);
+    }
+    delete (merged as { price_bgn?: number }).price_bgn;
+    return merged;
   });
 
-  const resolvePriceBgn = (price: number | ''): number =>
-    typeof price === 'number' ? price : parseFloat(price || '0') || 0;
+  const resolvePriceEur = (price: number | ''): number =>
+    typeof price === 'number' ? price : parseFloat(String(price || '0')) || 0;
 
   const [loading, setLoading] = useState(false);
   const [translatingField, setTranslatingField] = useState<string | null>(null);
@@ -121,13 +138,13 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
     e.preventDefault();
     setLoading(true);
 
-    // Calculate EUR price
-    const priceBgnValue = resolvePriceBgn(formData.price_bgn);
+    const priceEurValue = resolvePriceEur(formData.price_eur);
+    const priceBgnValue = eurToBgn(priceEurValue);
 
     const dataToSubmit = {
       ...formData,
-      price_bgn: priceBgnValue,
-      price_eur: bgnToEur(priceBgnValue)
+      price_eur: priceEurValue,
+      price_bgn: priceBgnValue
     };
 
     try {
@@ -141,22 +158,18 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Category */}
+      {/* Category: search + tree (+/−) */}
       <div>
-        <label className="malts-label">Категория</label>
-        <select
-          name="category_id"
+        <label className="malts-label" id="product-category-label">
+          Категория *
+        </label>
+        <CategorySelectCombobox
+          categories={categories as any[]}
           value={formData.category_id}
-          onChange={handleChange}
-          className="malts-field"
-          required
-        >
-          {categories.map((cat: any) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name_bg || cat.nameBg || ''}
-            </option>
-          ))}
-        </select>
+          onChange={(id) => setFormData((prev) => ({ ...prev, category_id: id }))}
+          locale={locale}
+          labelId="product-category-label"
+        />
       </div>
 
       {/* Names */}
@@ -279,11 +292,11 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
       {/* Price and Order */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="malts-label">Цена (BGN) *</label>
+          <label className="malts-label">Цена (€) *</label>
           <input
             type="number"
-            name="price_bgn"
-            value={formData.price_bgn || ''}
+            name="price_eur"
+            value={formData.price_eur || ''}
             onChange={handleChange}
             step="0.01"
             min="0"
@@ -292,7 +305,7 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
             required
           />
           <p className="malts-help mt-1">
-            EUR: €{bgnToEur(resolvePriceBgn(formData.price_bgn)).toFixed(2)}
+            ≈ {eurToBgn(resolvePriceEur(formData.price_eur)).toFixed(2)} лв.
           </p>
         </div>
         <div>
@@ -363,7 +376,7 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
 
         {/* Option 1: Upload local file */}
         <div className="malts-card p-4">
-          <h3 className="text-[var(--malts-ink)] font-semibold mb-3">Вариант 1: Upload от компютъра</h3>
+          <h3 className="text-[var(--malts-ink)] font-semibold mb-3">Вариант 1: Добави снимка</h3>
           <ImageUpload
             currentImageUrl={formData.image_url}
             onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
@@ -423,7 +436,7 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
               <div>
                 <span className="font-semibold">🚫 Скрит</span>
                 <p className="text-sm malts-muted mt-1">
-                  Продуктът НЕ ще се показва в менюто. Използвай за продукти които временно не предлагаш или са в подготовка.
+                  Продуктът НЕ се показва в менюто. Използвай за продукти които временно не предлагаш или са в подготовка.
                 </p>
               </div>
             </label>
@@ -448,21 +461,22 @@ export default function ProductForm({ categories, initialData, onSubmit, locale 
       </div>
 
       {/* Submit */}
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-4 sm:items-center">
         <button
           type="submit"
           disabled={loading}
-          className="px-8 py-3 malts-btn-primary font-semibold transition-all disabled:opacity-50"
+          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
         >
           {loading ? 'Запазване...' : 'Запази'}
         </button>
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="px-8 py-3 malts-btn-secondary font-semibold transition-all"
+          className="malts-btn-secondary malts-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
         >
           Отказ
         </button>
+        {footerAddon}
       </div>
     </form>
   );

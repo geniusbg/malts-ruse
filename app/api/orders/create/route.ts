@@ -383,7 +383,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             title: `🔔 Нова поръчка #${order.orderNumber}`,
-            body: `Маса ${tableNumber} - ${items.length} артикула - ${Number(totalBgn).toFixed(2)} лв.`,
+            body: `Маса ${tableNumber} - ${items.length} артикула - €${bgnToEur(Number(totalBgn)).toFixed(2)} (${Number(totalBgn).toFixed(2)} лв.)`,
             url: '/bg/staff'
           })
         });

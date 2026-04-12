@@ -3,6 +3,7 @@
 import { useState, Suspense, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
+import { useLockScroll } from '@/lib/use-lock-scroll';
 
 function CallWaiterContent() {
   const searchParams = useSearchParams();
@@ -19,6 +20,8 @@ function CallWaiterContent() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'checking' | 'valid' | 'invalid'>('checking');
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
+
+  useLockScroll(sessionStatus !== 'valid');
 
   const getSessionMessageForReason = useCallback((reason?: string) => {
     const messages: Record<string, { bg: string; en: string; ro: string }> = {

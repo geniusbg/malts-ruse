@@ -38,7 +38,7 @@ export default function Price({
   const unitDisplay = getUnitLabel();
 
   if (!showBoth) {
-    return <span className={className}>{bgnPrice}{unitDisplay && <span className="text-sm opacity-70 ml-2">({unitDisplay})</span>}</span>;
+    return <span className={className}>{eurPrice}{unitDisplay && <span className="text-sm opacity-70 ml-2">({unitDisplay})</span>}</span>;
   }
 
   if (inline) {

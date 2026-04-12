@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
+import { getDefaultBrandId } from '@/lib/brand';
 import { getLocationSettings } from '@/lib/location-settings';
 import { getHomepageSettings, getHomepageOfferingCards } from '@/lib/homepage-settings';
 import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import { formatDateForLocale } from '@/lib/date-utils';
+import { eventCardImageUrl } from '@/lib/event-images';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -17,13 +19,17 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
 
-  // Fetch next 3 upcoming published events
+  const brandId = await getDefaultBrandId();
+
+  // Fetch next 3 upcoming published events (same tenant as admin API)
   const events = await prisma.event.findMany({
     where: {
+      brandId,
       eventDate: { gte: new Date() },
       isPublished: true
     },
-    orderBy: { eventDate: 'asc' },
+    // В Malts първо, после партньорски; вътре в групата — по дата.
+    orderBy: [{ isExternal: 'asc' }, { eventDate: 'asc' }],
     take: 3
   });
 
@@ -53,7 +59,8 @@ export default async function HomePage({
         select: {
           nameBg: true,
           nameEn: true,
-          nameRo: true
+          nameRo: true,
+          slug: true
         }
       }
     },
@@ -261,25 +268,26 @@ export default async function HomePage({
 
   return (
     <main className="min-h-screen malts-surface">
-      {/* Hero Section with gradient background */}
-      <div className="relative overflow-hidden">
-        <div className="relative container mx-auto px-4 py-12 md:py-20">
+      {/* Hero: overflow-visible so logo drop-shadow / glow is not clipped */}
+      <div className="relative overflow-visible">
+        <div className="relative container mx-auto px-4 pt-8 pb-14 md:pt-12 md:pb-20">
           <div className="text-center">
-            {/* Logo */}
-            <div className="mb-8 md:mb-12 flex justify-center animate-fade-in px-4">
+            {/* Logo — glow clearance; леко нагоре и по-малък от преди */}
+            <div className="-mt-1 mb-6 flex justify-center px-4 py-3 animate-fade-in md:-mt-2 md:mb-10 md:py-5">
               <Image
-                src="/malts.svg"
+                src="/malts-logo-hero.webp"
                 alt="Malt's"
-                width={520}
-                height={520}
-                className="h-auto w-full max-w-[min(100%,380px)] md:max-w-[520px] drop-shadow-[0_0_28px_rgba(196,30,58,0.28)]"
+                width={834}
+                height={812}
+                sizes="(max-width: 768px) 90vw, 440px"
+                className="malts-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[440px]"
                 priority
               />
             </div>
 
-            {/* Tagline */}
-            <div className="mb-8 md:mb-12 flex justify-center">
-              <p className="text-2xl md:text-4xl text-[#f5f0e6] font-normal tracking-wide malts-display inline-flex items-center px-6 py-3 md:px-10 md:py-4 rounded-full bg-[rgba(0,0,0,0.88)] border border-[rgba(0,0,0,0.35)] shadow-[0_14px_40px_rgba(0,0,0,0.25)]">
+            {/* Tagline — red frame + glow; един ред (размерът се смалява леко на тесен екран) */}
+            <div className="mb-8 md:mb-12 flex justify-center px-3 py-6 md:py-8">
+              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.8rem,3.1vw,2.25rem)] text-[#f5f0e6] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
                 {moodText}
               </p>
             </div>
@@ -343,7 +351,7 @@ export default async function HomePage({
             </div>
 
             <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm md:text-base font-semibold uppercase tracking-[0.22em] md:tracking-[0.28em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] malts-section-label-font">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] malts-section-label-font">
                 {sectionLabel}
               </span>
               <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight malts-display">
@@ -448,6 +456,7 @@ export default async function HomePage({
           <ChefsPicksCarousel 
             products={featuredProducts.map((p: any) => ({
               id: p.id,
+              slug: p.slug,
               nameBg: p.nameBg,
               nameEn: p.nameEn,
               nameRo: p.nameRo,
@@ -455,8 +464,11 @@ export default async function HomePage({
               descriptionEn: p.descriptionEn,
               descriptionRo: p.descriptionRo,
               priceBgn: Number(p.priceBgn),
+              quantity: p.quantity ?? 1,
+              unit: p.unit ?? 'pcs',
               imageUrl: p.imageUrl,
               categoryId: p.categoryId,
+              categorySlug: p.category.slug,
               category: {
                 nameBg: p.category.nameBg,
                 nameEn: p.category.nameEn,
@@ -472,13 +484,15 @@ export default async function HomePage({
           <div className="mt-16 md:mt-24">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 md:mb-12 gap-4">
               <div>
-                <h2 className="text-3xl md:text-5xl font-bold mb-2">
+                <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
                   {locale === 'bg' ? 'Предстоящи събития' : locale === 'en' ? 'Upcoming Events' : 'Evenimente viitoare'}
                 </h2>
-                <p className="malts-muted">
-                  {locale === 'bg' ? 'Не пропускай нашите специални вечери' : 
-                   locale === 'en' ? 'Don\'t miss our special nights' : 
-                   'Verpassen Sie nicht unsere besonderen Abende'}
+                <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
+                  {locale === 'bg'
+                    ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
+                    : locale === 'en'
+                      ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
+                      : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
                 </p>
               </div>
               <Link 
@@ -497,6 +511,7 @@ export default async function HomePage({
                 const eventTitle = locale === 'bg' ? event.titleBg : locale === 'en' ? event.titleEn : event.titleRo;
                 const eventDesc = locale === 'bg' ? event.descriptionBg : locale === 'en' ? event.descriptionEn : event.descriptionRo;
                 const eventDate = new Date(event.eventDate);
+                const cardImageSrc = eventCardImageUrl(event);
 
                 return (
                   <Link
@@ -504,13 +519,15 @@ export default async function HomePage({
                     href={`/${locale}/events/${event.id}`}
                     className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block"
                   >
-                    {event.imageUrl && (
+                    {cardImageSrc && (
                       <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={event.imageUrl}
+                          src={cardImageSrc}
                           alt={eventTitle}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,16,0.65)] via-transparent to-transparent opacity-60"></div>
                       </div>
@@ -537,7 +554,7 @@ export default async function HomePage({
                       )}
 
                       <div className="flex items-center text-[var(--malts-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
-                        {locale === 'bg' ? 'Научи повече' : locale === 'en' ? 'Learn more' : 'Mehr erfahren'}
+                        {locale === 'bg' ? 'Научи повече' : locale === 'en' ? 'Learn more' : 'Află mai mult'}
                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>

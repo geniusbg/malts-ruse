@@ -126,7 +126,7 @@ export default function WorkingHoursPage({
       )}
 
       <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--malts-ink)] mb-3">
+        <h1 className="malts-admin-heading-font malts-admin-page-title mb-3">
           {locale === 'bg' ? 'Работно време' : locale === 'en' ? 'Working Hours' : 'Arbeitszeiten'}
         </h1>
         <p className="malts-muted text-lg">
@@ -205,9 +205,10 @@ export default function WorkingHoursPage({
 
         <div className="mt-8 flex justify-end">
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-8 py-3 malts-btn-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all flex items-center gap-2"
+            className="malts-btn-primary malts-btn-admin-compact flex w-full items-center justify-center gap-2 rounded-xl font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving ? (
               <>

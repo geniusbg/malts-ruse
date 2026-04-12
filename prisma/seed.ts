@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
+import { ensureUniqueProductSlug, slugify } from '../lib/slug';
 
 const prisma = new PrismaClient();
 
@@ -154,6 +155,16 @@ async function main() {
     },
   });
   console.log('✅ Demo 3-level categories (demo-hrana → demo-skara → demo-kebapche)');
+
+  const allProducts = await prisma.product.findMany({ select: { id: true, nameBg: true, slug: true } });
+  for (const p of allProducts) {
+    if (p.slug && p.slug !== p.id) continue;
+    const s = await ensureUniqueProductSlug(slugify(p.nameBg) || `item-${p.id.slice(0, 8)}`, p.id);
+    await prisma.product.update({ where: { id: p.id }, data: { slug: s } });
+  }
+  if (allProducts.length > 0) {
+    console.log(`✅ Product slugs backfilled (${allProducts.length})`);
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   for (let i = 1; i <= 30; i++) {

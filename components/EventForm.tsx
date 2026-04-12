@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ImageUpload from '@/components/ImageUpload';
 
 interface EventFormProps {
   initialData?: Partial<EventFormData>;
@@ -26,7 +27,10 @@ type EventFormData = {
   contact_email: string;
   contact_facebook: string;
   is_published: boolean;
-  image_url: string;
+  /** List / card thumbnail (compressed upload or URL). */
+  image_card_url: string;
+  /** Single-event page hero (larger upload or URL). */
+  image_detail_url: string;
 };
 
 const defaultEventFormData: EventFormData = {
@@ -47,7 +51,8 @@ const defaultEventFormData: EventFormData = {
   contact_email: '',
   contact_facebook: '',
   is_published: false,
-  image_url: ''
+  image_card_url: '',
+  image_detail_url: ''
 };
 
 export default function EventForm({ initialData, onSubmit, locale }: EventFormProps) {
@@ -134,22 +139,12 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
     setLoading(true);
 
     try {
-      // Prepare location based on language or direct field
-      let location = formData.location;
-      let locationBg = null;
-      let locationEn = null;
-      let locationRo = null;
-      
-      if (formData.is_external) {
-        // For external events, use language-specific fields
-        location = formData.location_bg || formData.location || '';
-        locationBg = formData.location_bg || null;
-        locationEn = formData.location_en || null;
-        locationRo = formData.location_ro || null;
-      } else {
-        // Internal venue: default location if empty
-        location = formData.location || 'Malts, Русе';
-      }
+      const location = formData.is_external
+        ? (formData.location_bg?.trim() || formData.location?.trim() || '')
+        : (formData.location?.trim() || 'Malts, Русе');
+      const locationBg = formData.is_external ? formData.location_bg?.trim() || null : null;
+      const locationEn = formData.is_external ? formData.location_en?.trim() || null : null;
+      const locationRo = formData.is_external ? formData.location_ro?.trim() || null : null;
 
       // Build contact info from structured fields
       let contactInfo = null;
@@ -178,7 +173,13 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
         externalUrl: formData.external_url || null,
         contactInfo: contactInfo,
         isPublished: formData.is_published,
-        imageUrl: formData.image_url || ''
+        imageCardUrl: formData.image_card_url?.trim() || null,
+        imageDetailUrl: formData.image_detail_url?.trim() || null,
+        // Legacy column: prefer card URL so old readers that only use imageUrl match list/thumbnail use.
+        imageUrl:
+          formData.image_card_url?.trim() ||
+          formData.image_detail_url?.trim() ||
+          null,
       };
       
       await onSubmit(prismaData);
@@ -322,20 +323,20 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       {formData.is_external ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block malts-subtle font-semibold mb-2">Локация (БГ) *</label>
+            <label className="malts-label">Локация (БГ) *</label>
             <input
               type="text"
               name="location_bg"
               value={formData.location_bg}
               onChange={handleChange}
-              className="w-full px-4 py-3 malts-inset focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+              className="malts-field"
               placeholder="София, бул. Витоша 1"
               required
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block malts-subtle font-semibold">Location (EN)</label>
+              <label className="malts-label mb-0">Location (EN)</label>
               <button
                 type="button"
                 onClick={() => handleTranslate('location_en', 'en')}
@@ -350,13 +351,13 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
               name="location_en"
               value={formData.location_en}
               onChange={handleChange}
-              className="w-full px-4 py-3 malts-inset focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+              className="malts-field"
               placeholder="Sofia, Vitosha Blvd 1"
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block malts-subtle font-semibold">Location (RO)</label>
+              <label className="malts-label mb-0">Location (RO)</label>
               <button
                 type="button"
                 onClick={() => handleTranslate('location_ro', 'ro')}
@@ -371,7 +372,7 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
               name="location_ro"
               value={formData.location_ro}
               onChange={handleChange}
-              className="w-full px-4 py-3 malts-inset focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+              className="malts-field"
               placeholder="Sofia, Vitosha Blvd 1"
             />
           </div>
@@ -397,17 +398,54 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
         </div>
       )}
 
-      {/* Image URL */}
-      <div>
-        <label className="malts-label">URL на снимка</label>
-        <input
-          type="text"
-          name="image_url"
-          value={formData.image_url}
-          onChange={handleChange}
-          className="malts-field"
-          placeholder="https://..."
-        />
+      {/* Images: card (list) vs detail page — upload is compressed client-side before /api/upload */}
+      <div className="space-y-6 border-t border-[var(--malts-hairline)] pt-6">
+        <div className="space-y-3">
+          <ImageUpload
+            label="Снимка за картичка / списък"
+            bucket="event-images"
+            currentImageUrl={formData.image_card_url}
+            onImageUploaded={(url) => setFormData((p) => ({ ...p, image_card_url: url }))}
+            recommendedSize="~800px по-дългата страна, за малки картички"
+            compressionOptions={{ maxWidthOrHeight: 800, maxSizeMB: 0.85 }}
+          />
+          <div>
+            <label className="malts-label mb-1">Или URL (картичка)</label>
+            <input
+              type="url"
+              name="image_card_url"
+              value={formData.image_card_url}
+              onChange={handleChange}
+              className="malts-field"
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+        <div className="space-y-3">
+          <ImageUpload
+            label="Снимка за страницата на събитието"
+            bucket="event-images"
+            currentImageUrl={formData.image_detail_url}
+            onImageUploaded={(url) => setFormData((p) => ({ ...p, image_detail_url: url }))}
+            recommendedSize="до ~1600px, за голям изглед"
+            compressionOptions={{ maxWidthOrHeight: 1600, maxSizeMB: 1.75 }}
+          />
+          <div>
+            <label className="malts-label mb-1">Или URL (страница на събитието)</label>
+            <input
+              type="url"
+              name="image_detail_url"
+              value={formData.image_detail_url}
+              onChange={handleChange}
+              className="malts-field"
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+        <p className="malts-help text-sm">
+          Картичката ползва „за картичка“, страницата — „за страницата“. Ако някое липсва, пада се към другото или към
+          стария единичен URL в базата.
+        </p>
       </div>
 
       {/* Checkboxes */}
@@ -417,7 +455,23 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             type="checkbox"
             name="is_external"
             checked={formData.is_external}
-            onChange={handleChange}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setFormData((prev) => {
+                if (checked) {
+                  return {
+                    ...prev,
+                    is_external: true,
+                    location_bg: prev.location_bg || prev.location || '',
+                  };
+                }
+                return {
+                  ...prev,
+                  is_external: false,
+                  location: prev.location?.trim() || prev.location_bg?.trim() || 'Malts, Русе',
+                };
+              });
+            }}
             className="w-5 h-5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] focus:ring-[var(--malts-accent-tint-border)]"
           />
           <span>Партньорско събитие (не в Malts)</span>
@@ -493,18 +547,18 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       )}
 
       {/* Submit */}
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
         <button
           type="submit"
           disabled={loading}
-          className="px-8 py-3 malts-btn-primary font-semibold transition-all disabled:opacity-50"
+          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
         >
           {loading ? 'Запазване...' : 'Запази'}
         </button>
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="px-8 py-3 malts-btn-secondary font-semibold transition-all"
+          className="malts-btn-secondary malts-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
         >
           Отказ
         </button>

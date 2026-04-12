@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import Image from 'next/image';
 import EventForm from '@/components/EventForm';
 import Toast from '@/components/Toast';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -51,16 +50,19 @@ export default function EditEventPage() {
           description_ro: data.event.descriptionRo,
           event_date: new Date(data.event.eventDate).toISOString().slice(0, 16),
           location: data.event.location,
-          location_bg: data.event.locationBg || data.event.location,
-          location_en: data.event.locationEn || data.event.location,
-          location_ro: data.event.locationRo || data.event.location,
+          location_bg: data.event.isExternal
+            ? data.event.locationBg || data.event.location || ''
+            : '',
+          location_en: data.event.locationEn || '',
+          location_ro: data.event.locationRo || '',
           is_external: data.event.isExternal,
           external_url: data.event.externalUrl || '',
           contact_phone: contact_phone,
           contact_email: contact_email,
           contact_facebook: contact_facebook,
           is_published: data.event.isPublished,
-          image_url: data.event.imageUrl || ''
+          image_card_url: data.event.imageCardUrl || data.event.imageUrl || '',
+          image_detail_url: data.event.imageDetailUrl || data.event.imageUrl || '',
         };
         setEvent(formData);
       }
@@ -110,7 +112,7 @@ export default function EditEventPage() {
         />
       )}
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Редактирай събитие</h1>
+        <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Редактирай събитие</h1>
         <p className="malts-muted">Актуализирай информацията за събитието</p>
       </div>
 

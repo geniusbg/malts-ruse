@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getDefaultBrandId } from '@/lib/brand';
+import { ensureUniqueProductSlug, slugify } from '@/lib/slug';
 
 export async function POST(request: Request) {
   try {
@@ -15,9 +16,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
     }
 
+    const slug = await ensureUniqueProductSlug(slugify(data.name_bg) || `item-${Date.now()}`);
+
     // Map snake_case to camelCase for Prisma
     const product = await prisma.product.create({
       data: {
+        slug,
         categoryId: data.category_id,
         nameBg: data.name_bg,
         nameEn: data.name_en,
@@ -68,9 +72,11 @@ export async function GET(request: Request) {
         category: {
           select: {
             order: true,
-            nameBg: true
-          }
-        }
+            nameBg: true,
+            nameEn: true,
+            nameRo: true,
+          },
+        },
       }
     });
 

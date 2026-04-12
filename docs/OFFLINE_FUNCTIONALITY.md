@@ -151,7 +151,7 @@ Boolean променлива която показва дали приложен
 
 ### Модали и форми:
 - `app/[locale]/admin/products/new/page.tsx` - Добавяне на продукт
-- `app/[locale]/admin/products/[id]/edit/page.tsx` - Редактиране на продукт
+- `app/[locale]/admin/products/[productRef]/edit/page.tsx` - Редактиране на продукт (slug или id)
 - `app/[locale]/admin/categories/page.tsx` - Добавяне/редактиране/изтриване на категория
 
 **Как работи:**

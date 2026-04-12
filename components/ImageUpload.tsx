@@ -8,25 +8,41 @@ interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
   bucket: 'product-images' | 'event-images' | 'menu-backgrounds';
   recommendedSize?: string;
+  /** Override label above the control (default: „Снимка“). */
+  label?: string;
+  /** Stronger resize for thumbnails vs hero images. */
+  compressionOptions?: {
+    maxSizeMB?: number;
+    maxWidthOrHeight?: number;
+  };
 }
 
-export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, recommendedSize }: ImageUploadProps) {
+export default function ImageUpload({
+  currentImageUrl,
+  onImageUploaded,
+  bucket,
+  recommendedSize,
+  label = 'Снимка',
+  compressionOptions,
+}: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(currentImageUrl || '');
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
+    setUploadError(null);
     try {
       // CLIENT-SIDE COMPRESSION: Compress image before upload
       // - Resize to max 1200px (larger dimension)
       // - Compress with quality 85%
       // - Convert to WebP if browser supports it (fallback to original format)
       const options = {
-        maxSizeMB: 2, // Maximum file size (MB) - compress if larger
-        maxWidthOrHeight: 1200, // Maximum width or height (pixels)
+        maxSizeMB: compressionOptions?.maxSizeMB ?? 2,
+        maxWidthOrHeight: compressionOptions?.maxWidthOrHeight ?? 1200,
         useWebWorker: false, // Disabled to avoid CSP issues with external scripts
         fileType: 'image/webp', // Try to convert to WebP (will fallback to original if not supported)
       };
@@ -61,11 +77,11 @@ export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, 
         onImageUploaded(url);
       } else {
         const error = await response.json();
-        alert(`Грешка при качване на снимката: ${error.error || 'Неизвестна грешка'}`);
+        setUploadError(`Грешка при качване на снимката: ${error.error || 'Неизвестна грешка'}`);
       }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Грешка при качване на снимката');
+      setUploadError('Грешка при качване на снимката');
     } finally {
       setUploading(false);
     }
@@ -73,7 +89,13 @@ export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, 
 
   return (
     <div className="space-y-4">
-      <label className="malts-label">Снимка</label>
+      <label className="malts-label">{label}</label>
+
+      {uploadError && (
+        <div className="malts-alert malts-alert-error">
+          <p className="text-sm">{uploadError}</p>
+        </div>
+      )}
       
       {preview && (
         <div className={`relative w-full rounded-lg overflow-hidden bg-[var(--malts-inset)] border border-[var(--malts-hairline)] ${
@@ -90,8 +112,8 @@ export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, 
         </div>
       )}
 
-      <div className="flex gap-4">
-        <label className="flex-1 cursor-pointer">
+      <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+        <label className="w-full flex-1 cursor-pointer sm:w-auto">
           <input
             type="file"
             accept="image/*"
@@ -99,9 +121,11 @@ export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, 
             className="hidden"
             disabled={uploading}
           />
-          <div className={`px-6 py-3 malts-btn-primary rounded-lg font-semibold text-center transition-all ${
-            uploading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}>
+          <div
+            className={`malts-btn-primary malts-btn-admin-compact rounded-lg text-center font-semibold transition-all ${
+              uploading ? 'cursor-not-allowed opacity-50' : ''
+            }`}
+          >
             {uploading ? 'Качване...' : 'Избери снимка'}
           </div>
         </label>
@@ -113,7 +137,7 @@ export default function ImageUpload({ currentImageUrl, onImageUploaded, bucket, 
               setPreview('');
               onImageUploaded('');
             }}
-            className="px-6 py-3 malts-btn-danger rounded-lg font-semibold transition-all"
+            className="malts-btn-danger malts-btn-admin-compact w-full rounded-lg font-semibold transition-all sm:w-auto"
           >
             Премахни
           </button>

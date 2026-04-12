@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { findProductIdByRef } from '@/lib/product-resolve';
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ productRef: string }> }
 ) {
   try {
     const data = await request.json();
-    const { id } = await params;
+    const { productRef } = await params;
+    const id = await findProductIdByRef(productRef);
+    if (!id) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
 
-    // Map snake_case to camelCase for Prisma
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -29,8 +33,8 @@ export async function PUT(
         isHidden: data.is_hidden !== undefined ? data.is_hidden : false,
         isFeatured: data.is_featured !== undefined ? data.is_featured : false,
         order: data.order || 0,
-        allergens: data.allergens || []
-      }
+        allergens: data.allergens || [],
+      },
     });
 
     return NextResponse.json({ product }, { status: 200 });
@@ -42,45 +46,46 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ productRef: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { productRef } = await params;
+    const id = await findProductIdByRef(productRef);
+    if (!id) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
 
-    // Check if product has any orders
     const orderCount = await prisma.orderItem.count({
-      where: { productId: id }
+      where: { productId: id },
     });
 
     if (orderCount > 0) {
-      // Product has orders - do soft delete (hide)
       await prisma.product.update({
         where: { id },
         data: {
           isHidden: true,
-          isAvailable: false
-        }
+          isAvailable: false,
+        },
       });
 
-      return NextResponse.json({ 
+      return NextResponse.json({
         success: true,
         deleted: false,
         orderCount,
-        message: `Продуктът е скрит успешно. Има ${orderCount} поръчки с този продукт - историята е запазена.`
-      }, { status: 200 });
-    } else {
-      // No orders - safe to permanently delete
-      await prisma.product.delete({
-        where: { id }
-      });
-
-      return NextResponse.json({ 
-        success: true,
-        deleted: true,
-        message: 'Продуктът е изтрит перманентно (нямаше поръчки с него).'
+        message: `Продуктът е скрит успешно. Има ${orderCount} поръчки с този продукт - историята е запазена.`,
       }, { status: 200 });
     }
-  } catch (error: any) {
+
+    await prisma.product.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      deleted: true,
+      message: 'Продуктът е изтрит перманентно (нямаше поръчки с него).',
+    }, { status: 200 });
+  } catch (error: unknown) {
     console.error('Delete product error:', error);
     return NextResponse.json({ error: 'Грешка при изтриване' }, { status: 500 });
   }
@@ -88,13 +93,17 @@ export async function DELETE(
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ productRef: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { productRef } = await params;
+    const id = await findProductIdByRef(productRef);
+    if (!id) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
 
     const product = await prisma.product.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!product) {
@@ -107,4 +116,3 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

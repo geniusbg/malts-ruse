@@ -1,5 +1,9 @@
-/** Max category levels from root (e.g. Food → Grill → Kebapche = 3). */
-export const MALLS_MAX_CATEGORY_DEPTH = 3;
+/**
+ * Max category levels from root (root = 1). Used by POST/PUT /api/categories.
+ * 3 was too tight: moving a branch (e.g. parent + subcategories) under a non-root
+ * parent pushes the deepest leaf past the limit. 5 fits typical menus + reparenting.
+ */
+export const MALLS_MAX_CATEGORY_DEPTH = 5;
 
 export type CategoryNode = { id: string; parentCategoryId: string | null };
 

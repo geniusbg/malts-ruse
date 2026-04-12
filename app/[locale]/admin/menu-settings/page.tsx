@@ -75,7 +75,7 @@ export default function MenuSettingsPage({
           titleBg: 'Нашето Меню',
           titleEn: 'Our Menu',
           titleRo: 'Meniul nostru',
-          subtitleBg: 'Открийте нашата селекция от напитки и деликатеси',
+          subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
           subtitleEn: 'Discover our selection of drinks and delicacies',
           subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
           backgroundImageUrl: null
@@ -91,7 +91,7 @@ export default function MenuSettingsPage({
         titleBg: 'Нашето Меню',
         titleEn: 'Our Menu',
         titleRo: 'Meniul nostru',
-        subtitleBg: 'Открийте нашата селекция от напитки и деликатеси',
+        subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
         subtitleEn: 'Discover our selection of drinks and delicacies',
         subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
         backgroundImageUrl: null
@@ -163,17 +163,18 @@ export default function MenuSettingsPage({
           <span>←</span>
           <span>Назад към Dashboard</span>
         </button>
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">Настройки на меню</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки на меню</h1>
             <p className="malts-muted mt-2">
               Настрой заглавието, подзаглавието и фоновото изображение на меню страницата.
             </p>
           </div>
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="malts-btn-primary malts-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving ? 'Запазване...' : 'Запази'}
           </button>

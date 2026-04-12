@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { displayPrice } from '@/lib/currency';
+import { getDescendantCategoryIds } from '@/lib/category-navigation';
 import Toast from '@/components/Toast';
 import LoadingScreen from '@/components/LoadingScreen';
+import ConfirmModal from '@/components/ConfirmModal';
+import { productParamForUrl } from '@/lib/product-url';
 
 export default function AdminProductsPage() {
   const pathname = usePathname();
@@ -17,6 +20,7 @@ export default function AdminProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -36,15 +40,54 @@ export default function AdminProductsPage() {
     setLoading(false);
   }
 
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find((c: any) => c.id === categoryId);
-    return category ? category.nameBg : 'Unknown';
+  const categoryRefs = useMemo(
+    () =>
+      categories.map((c: any) => ({
+        id: c.id,
+        parentCategoryId: (c.parentCategoryId ?? c.parent_category_id ?? null) as string | null,
+      })),
+    [categories]
+  );
+
+  const matchesSearchQuery = (p: any) =>
+    searchQuery === '' ||
+    p.nameBg.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.nameRo?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  /** За всеки възел: той + всички подкатегории (за бързо броене и филтър) */
+  const descendantIdsByCategory = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const c of categoryRefs) {
+      map.set(c.id, getDescendantCategoryIds(categoryRefs, c.id));
+    }
+    return map;
+  }, [categoryRefs]);
+
+  const selectedCategoryIds = useMemo(() => {
+    if (selectedCategory === 'all') return null;
+    return descendantIdsByCategory.get(selectedCategory) ?? new Set<string>();
+  }, [selectedCategory, descendantIdsByCategory]);
+
+  /** Пълен път за йерархия (напр. „Бир → Наливна бира“) */
+  const getCategoryPathLabel = (categoryId: string) => {
+    const byId = new Map(categoryRefs.map((c) => [c.id, c]));
+    const names = new Map(categories.map((c: any) => [c.id, c.nameBg ?? c.name_bg ?? '']));
+    const parts: string[] = [];
+    let cur: string | undefined = categoryId;
+    let guard = 0;
+    while (cur && guard < 32) {
+      parts.unshift(names.get(cur) ?? '?');
+      cur = byId.get(cur)?.parentCategoryId ?? undefined;
+      guard += 1;
+    }
+    return parts.join(' → ');
   };
 
-  const handleDelete = async (productId: string, productName: string) => {
-    if (!confirm(`Сигурен ли си, че искаш да изтриеш "${productName}"?\n\nАко продуктът има поръчки, ще бъде само скрит. Ако няма поръчки, ще бъде изтрит перманентно.`)) {
-      return;
-    }
+  const executeDeleteProduct = async () => {
+    if (!deleteTarget) return;
+    const productId = deleteTarget.id;
+    setDeleteTarget(null);
 
     try {
       const response = await fetch(`/api/products/${productId}`, {
@@ -53,7 +96,6 @@ export default function AdminProductsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Reload products
         loadData();
         setToast({ message: `✅ ${data.message}`, type: 'success' });
       } else {
@@ -69,18 +111,13 @@ export default function AdminProductsPage() {
     return <LoadingScreen locale={locale} />;
   }
 
-  const filteredProducts = products.filter(product => {
-    // Filter by category
-    const matchesCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
-    
-    // Filter by search query
-    const matchesSearch = searchQuery === '' || 
-      product.nameBg.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.nameRo?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesCategory && matchesSearch;
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      selectedCategoryIds === null || selectedCategoryIds.has(product.categoryId);
+    return matchesCategory && matchesSearchQuery(product);
   });
+
+  const totalMatchingSearch = products.filter(matchesSearchQuery).length;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -93,10 +130,10 @@ export default function AdminProductsPage() {
         />
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">Продукти</h1>
+        <h1 className="malts-admin-heading-font malts-admin-page-title">Продукти</h1>
         <Link
           href={`/${locale}/admin/products/new`}
-          className="w-full sm:w-auto px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-all text-center"
+          className="malts-btn-primary malts-btn-admin-compact w-full rounded-lg text-center font-semibold transition-all sm:w-auto"
         >
           + Добави продукт
         </Link>
@@ -113,15 +150,13 @@ export default function AdminProductsPage() {
                 : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
             }`}
           >
-            Всички ({products.length})
+            Всички ({totalMatchingSearch})
           </button>
           {categories.map((category: any) => {
-            const count = products.filter(p => p.categoryId === category.id && 
-              (searchQuery === '' || 
-                p.nameBg.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.nameRo?.toLowerCase().includes(searchQuery.toLowerCase())
-              )).length;
+            const inTree = descendantIdsByCategory.get(category.id) ?? new Set();
+            const count = products.filter(
+              (p) => inTree.has(p.categoryId) && matchesSearchQuery(p)
+            ).length;
             return (
               <button
                 key={category.id}
@@ -151,6 +186,11 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Products Grid - Card View */}
+      {filteredProducts.length === 0 ? (
+        <p className="text-center py-16 malts-muted">
+          Няма продукти за този филтър{searchQuery.trim() ? ' / търсене' : ''}.
+        </p>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProducts.map((product: any) => (
           <div
@@ -159,18 +199,18 @@ export default function AdminProductsPage() {
           >
             {/* Product Image */}
             {product.imageUrl ? (
-              <div className="relative h-48 overflow-hidden bg-[var(--malts-inset)]">
+              <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={product.imageUrl}
                   alt={product.nameBg}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-contain"
+                  className="absolute inset-0 h-full w-full object-cover object-center"
                 />
               </div>
             ) : (
-              <div className="h-48 bg-[var(--malts-inset)] flex items-center justify-center">
+              <div className="h-56 bg-[var(--malts-inset)] flex items-center justify-center">
                 <svg className="w-16 h-16 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -186,11 +226,11 @@ export default function AdminProductsPage() {
                     {product.isFeatured && <span className="text-yellow-400">⭐</span>}
                     {product.nameBg}
                   </h3>
-                  <p className="malts-subtle text-xs">{getCategoryName(product.categoryId)}</p>
+                  <p className="malts-subtle text-xs">{getCategoryPathLabel(product.categoryId)}</p>
                 </div>
                 <div className="text-right ml-3">
-                  <div className="text-xl font-bold text-[var(--malts-ink)]">{displayPrice(Number(product.priceBgn), 'BGN')}</div>
-                  <div className="text-xs malts-subtle">{displayPrice(Number(product.priceBgn), 'EUR')}</div>
+                  <div className="text-xl font-bold text-[var(--malts-ink)]">{displayPrice(Number(product.priceBgn), 'EUR')}</div>
+                  <div className="text-xs malts-subtle">{displayPrice(Number(product.priceBgn), 'BGN')}</div>
                   {product.unit && product.quantity && (
                     <div className="text-xs malts-subtle mt-1">
                       {product.quantity} {product.unit === 'pcs' ? 'бр.' : product.unit}
@@ -236,13 +276,13 @@ export default function AdminProductsPage() {
               {/* Actions */}
               <div className="flex gap-2">
                 <Link
-                  href={`/${locale}/admin/products/${product.id}/edit`}
+                  href={`/${locale}/admin/products/${encodeURIComponent(productParamForUrl(product))}/edit`}
                   className="flex-1 px-3 py-2 malts-btn-secondary rounded-lg text-sm font-semibold transition-all text-center"
                 >
                   Редактирай
                 </Link>
                 <button
-                  onClick={() => handleDelete(product.id, product.nameBg)}
+                  onClick={() => setDeleteTarget({ id: product.id, name: product.nameBg })}
                   className="flex-1 px-3 py-2 malts-btn-danger rounded-lg text-sm font-semibold transition-all"
                 >
                   Изтрий
@@ -252,6 +292,22 @@ export default function AdminProductsPage() {
           </div>
         ))}
       </div>
+      )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Изтриване на продукт"
+        message={
+          deleteTarget
+            ? `Сигурен ли си, че искаш да изтриеш „${deleteTarget.name}“?\n\nАко продуктът има поръчки, ще бъде само скрит. Ако няма поръчки, ще бъде изтрит перманентно.`
+            : ''
+        }
+        confirmLabel="Изтрий"
+        cancelLabel="Отказ"
+        tone="danger"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={executeDeleteProduct}
+      />
     </div>
   );
 }

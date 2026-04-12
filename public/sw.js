@@ -1,7 +1,7 @@
 // Malts — Service Worker (PWA & push)
 
 // ⚠️ SW VERSION - Single source of truth (no duplicates)
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const CACHE_NAME = `malts-web-${CACHE_VERSION}`;
 const urlsToCache = [
   '/bg/staff',
@@ -486,18 +486,30 @@ self.addEventListener('push', (event) => {
     }
   };
 
-  console.log('📢📢📢 CALLING showNotification:', data.title);
-  console.log('Options:', JSON.stringify(notificationOptions, null, 2));
-
   event.waitUntil(
-    self.registration.showNotification(data.title, notificationOptions)
-      .then(() => {
-        console.log('✅✅✅ NOTIFICATION SHOWN SUCCESSFULLY!');
-      })
-      .catch(err => {
-        console.error('❌❌❌ NOTIFICATION SHOW FAILED:', err);
-        console.error('Error details:', err.message, err.stack);
-      })
+    (async () => {
+      const perm =
+        typeof Notification !== 'undefined' ? Notification.permission : 'denied';
+      if (perm !== 'granted') {
+        console.warn(
+          '[SW] Push received but notification permission is not granted (' +
+            perm +
+            '). Open the site and allow notifications, or dismiss this.'
+        );
+        return;
+      }
+      try {
+        await self.registration.showNotification(data.title, notificationOptions);
+        console.log('✅ Notification shown:', data.title);
+      } catch (err) {
+        const msg = err && err.message ? String(err.message) : '';
+        if (msg.includes('permission') || msg.includes('Permission')) {
+          console.warn('[SW] showNotification blocked (permission):', msg);
+        } else {
+          console.error('[SW] showNotification failed:', err);
+        }
+      }
+    })()
   );
 });
 

@@ -18,7 +18,7 @@ const DEFAULT_SETTINGS = {
   titleBg: 'Нашето Меню',
   titleEn: 'Our Menu',
   titleRo: 'Meniul nostru',
-  subtitleBg: 'Открийте нашата селекция от напитки и деликатеси',
+  subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
   subtitleEn: 'Discover our selection of drinks and delicacies',
   subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
   backgroundImageUrl: null as string | null,

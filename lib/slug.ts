@@ -54,3 +54,30 @@ export async function ensureUniqueCategorySlug(
   }
 }
 
+/** Уникален slug за продукт (глобално уникален в таблицата products). */
+export async function ensureUniqueProductSlug(
+  slugInput: string,
+  excludeProductId?: string
+): Promise<string> {
+  const base = slugify(slugInput) || `product-${Date.now()}`;
+  let slug = base;
+  let counter = 2;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const existing = await prisma.product.findFirst({
+      where: {
+        slug,
+        ...(excludeProductId ? { NOT: { id: excludeProductId } } : {}),
+      },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return slug;
+    }
+
+    slug = `${base}-${counter++}`;
+  }
+}
+

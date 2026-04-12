@@ -121,7 +121,7 @@ export default function QRRedirectsPage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">🔗 QR Redirects</h1>
+        <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">🔗 QR Redirects</h1>
         <p className="malts-muted">
           Управление на URL адресите на QR кодовете. Промените се прилагат веднага без да принтирате нови кодове.
         </p>
