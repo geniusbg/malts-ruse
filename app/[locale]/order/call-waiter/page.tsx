@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, Suspense, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
 import { useLockScroll } from '@/lib/use-lock-scroll';
@@ -387,13 +388,17 @@ function LoadingScreen() {
   const locale = pathname.split('/')[1] || 'bg';
   
   return (
-    <div className="min-h-screen malts-surface flex items-center justify-center">
+    <div className="malts-surface flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <div className="logo-container h-64 w-64 md:h-96 md:w-96 mx-auto mb-10 animate-pulse-glow">
-          <img
-            src="/malts-logo-landscape.svg"
+        <div className="mx-auto mb-8 flex h-40 w-40 items-center justify-center sm:h-48 sm:w-48 md:mb-10 md:h-56 md:w-56">
+          <Image
+            src="/malts-logo-nav.webp"
             alt="Malt's"
-            className="h-64 w-64 md:h-96 md:w-96"
+            width={400}
+            height={331}
+            sizes="200px"
+            className="malts-brand-filter h-full w-auto max-h-full object-contain"
+            priority
           />
         </div>
         <p className="text-3xl font-medium">

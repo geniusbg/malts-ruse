@@ -1,11 +1,12 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 
 type ConfirmModalProps = {
   open: boolean;
   title?: string;
-  message: string;
+  message: string | ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: 'danger' | 'default';
@@ -63,7 +64,21 @@ export default function ConfirmModal({
             </button>
           </div>
 
-          <p className="malts-muted mb-4 whitespace-pre-line sm:mb-6">{message}</p>
+          {typeof message === 'string' ? (
+            <div className="malts-muted mb-4 space-y-3 sm:mb-6">
+              {message
+                .trim()
+                .split(/\n+/)
+                .filter(Boolean)
+                .map((paragraph, i) => (
+                  <p key={i} className="leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
+            </div>
+          ) : (
+            <div className="malts-muted mb-4 sm:mb-6">{message}</div>
+          )}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <button

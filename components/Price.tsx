@@ -47,7 +47,9 @@ export default function Price({
         <span className="font-semibold">{eurPrice}</span>
         <span className="opacity-70 mx-2">/</span>
         <span className="opacity-90">{bgnPrice}</span>
-        {unitDisplay && <span className="text-sm opacity-70 ml-2">({unitDisplay})</span>}
+        {unitDisplay && (
+          <span className="ml-2 text-xs opacity-80 md:text-sm">({unitDisplay})</span>
+        )}
       </span>
     );
   }

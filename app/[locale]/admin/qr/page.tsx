@@ -8,7 +8,10 @@ import { useLockScroll } from '@/lib/use-lock-scroll';
 import { formatBulgarianDateTime } from '@/lib/date-utils';
 
 interface QRCodeSettings {
+  /** Фон на цялата картка (лого, рамка, текст). */
   backgroundColor: string;
+  /** Фон на светлите полета на QR матрицата (и на SVG изображението). Може да се различава от фона на картата. */
+  qrCodeBackgroundColor: string;
   textColor: string;
   qrCodeColor: string;
   qrCodeSize: number;
@@ -29,6 +32,7 @@ interface QRCodeSettings {
 
 const DEFAULT_SETTINGS: QRCodeSettings = {
   backgroundColor: '#FFFFFF',
+  qrCodeBackgroundColor: '#FFFFFF',
   textColor: '#000000',
   qrCodeColor: '#000000',
   qrCodeSize: 400,
@@ -260,7 +264,15 @@ export default function QRCodesPage() {
         const data = await response.json();
         
         if (data.success && data.settings) {
-          const loadedSettings = { ...DEFAULT_SETTINGS, ...data.settings };
+          const raw = data.settings as Partial<QRCodeSettings>;
+          const loadedSettings: QRCodeSettings = {
+            ...DEFAULT_SETTINGS,
+            ...raw,
+            qrCodeBackgroundColor:
+              raw.qrCodeBackgroundColor != null && String(raw.qrCodeBackgroundColor).trim() !== ''
+                ? String(raw.qrCodeBackgroundColor)
+                : (raw.backgroundColor ?? DEFAULT_SETTINGS.backgroundColor),
+          };
           setSettings(loadedSettings);
           setSavedSettings(loadedSettings); // Track saved settings
         } else {
@@ -369,10 +381,11 @@ export default function QRCodesPage() {
         body: JSON.stringify({
           settings: {
             backgroundColor: settingsToUse.backgroundColor,
+            qrCodeBackgroundColor: settingsToUse.qrCodeBackgroundColor,
             textColor: settingsToUse.textColor,
             qrCodeColor: settingsToUse.qrCodeColor,
-            qrCodeSize: settingsToUse.qrCodeSize
-          }
+            qrCodeSize: settingsToUse.qrCodeSize,
+          },
         })
       });
       const data = await response.json();
@@ -657,11 +670,11 @@ export default function QRCodesPage() {
                 <span className="text-2xl">🎨</span>
                 Цветове
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Row 1: Background Color | QR Code Color | Text Color */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {/* Фон картка | Фон QR матрица | Тъмни модули | Текст */}
             <div>
               <label className="block text-sm font-medium malts-subtle mb-2">
-                Цвят на фона
+                Фон на картата
               </label>
               <div className="flex gap-2">
                 <input
@@ -680,10 +693,34 @@ export default function QRCodesPage() {
               </div>
             </div>
 
-            {/* QR Code Color */}
+            <div>
+              <label className="block text-sm font-medium malts-subtle mb-2">
+                Фон на QR кода
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={settings.qrCodeBackgroundColor}
+                  onChange={(e) => setSettings({ ...settings, qrCodeBackgroundColor: e.target.value })}
+                  className="w-16 h-10 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={settings.qrCodeBackgroundColor}
+                  onChange={(e) => setSettings({ ...settings, qrCodeBackgroundColor: e.target.value })}
+                  className="flex-1 px-3 py-2 malts-inset rounded border border-[var(--malts-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                  placeholder="#FFFFFF"
+                />
+              </div>
+              <p className="malts-help mt-1 text-xs">
+                Светлите полета на матрицата; може да е различен от фона на картата.
+              </p>
+            </div>
+
+            {/* QR Code Color (dark modules) */}
             <div>
               <label className="malts-label">
-                Цвят на QR кода
+                Цвят на модулите (QR)
               </label>
               <div className="flex gap-2">
                 <input
@@ -975,7 +1012,9 @@ export default function QRCodesPage() {
       <ConfirmModal
         open={showUnsavedGenerateModal}
         title="Незаписани настройки"
-        message="Има незаписани промени в настройките. При генериране ще се използват текущите (незаписани) настройки.\n\nИскате ли да продължите?"
+        message={`Има незаписани промени в настройките. При генериране ще се използват текущите (незаписани) настройки.
+
+Искате ли да продължите?`}
         confirmLabel="Продължи"
         cancelLabel="Отказ"
         tone="default"
@@ -1103,6 +1142,7 @@ export default function QRCodesPage() {
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
+                background-color: ${settings.qrCodeBackgroundColor} !important;
               }
               @page {
                 size: ${settings.orientation === 'portrait' ? 'A4 portrait' : 'A4 landscape'};
@@ -1114,7 +1154,7 @@ export default function QRCodesPage() {
           <div className={`grid grid-cols-1 ${settings.orientation === 'portrait' ? 'sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3' : 'sm:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3'} gap-6 md:gap-8`}>
             {tables.map((table) => (
               <div
-                key={`${table.tableNumber}-${settings.qrCodeSize}-${settings.orientation}`}
+                key={`${table.tableNumber}-${settings.qrCodeSize}-${settings.orientation}-${settings.qrCodeBackgroundColor}-${settings.qrCodeColor}`}
                 className="qr-card"
                 style={{ 
                   backgroundColor: settings.backgroundColor,
@@ -1180,7 +1220,7 @@ export default function QRCodesPage() {
                         display: 'block', 
                         width: '100%', 
                         textAlign: 'center',
-                        backgroundColor: 'transparent'
+                        backgroundColor: settings.qrCodeBackgroundColor,
                       }}
                     >
                       <img
@@ -1262,7 +1302,7 @@ export default function QRCodesPage() {
                         className="qr-code-container"
                         style={{ 
                           border: 'none',
-                          backgroundColor: 'transparent',
+                          backgroundColor: settings.qrCodeBackgroundColor,
                           padding: '0',
                           margin: `${settings.qrCodeMargin}px`,
                           borderRadius: '0'

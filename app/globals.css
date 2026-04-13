@@ -4,16 +4,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Beerhouse paper system (public + admin + staff) */
-  --malts-paper: #e8e0d4;
+  /* Beerhouse paper system (public + admin + staff) — по-тъмна „преработена хартия“ */
+  --malts-paper: #d8cfbf;
   --malts-ink: #1a1810;
   --malts-muted: #4a4437;
   --malts-subtle: #6b6255;
 
-  --malts-card: #f7f1e7;
-  --malts-card-hover: #f3ecdf;
-  --malts-inset: #efe6d7;
-  --malts-hairline: #d3c6b4;
+  --malts-card: #ebe4d6;
+  --malts-card-hover: #e4dcc8;
+  --malts-inset: #dfd4c4;
+  --malts-hairline: #c9bda8;
 
   --malts-accent: #b0162f;
   --malts-accent-hover: #921226;
@@ -720,13 +720,13 @@ img[src='/malts-logo-landscape.svg'],
 .malts-surface {
   min-height: 100vh;
   background-color: var(--malts-paper);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, transparent 42%),
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 48%),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 24px,
-      rgba(0, 0, 0, 0.018) 24px,
-      rgba(0, 0, 0, 0.018) 25px
+      rgba(0, 0, 0, 0.022) 24px,
+      rgba(0, 0, 0, 0.022) 25px
     );
   color: var(--malts-ink);
 }

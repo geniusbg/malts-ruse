@@ -13,6 +13,9 @@ export default function ConditionalNav({ children }: { children?: ReactNode }) {
   
   // Hide navigation in admin, staff, and order routes
   const hideNav = pathname.includes('/admin') || pathname.includes('/staff') || pathname.includes('/order');
+  /** Фиксиран CTA на /order не закрива footer при скрол до края */
+  const orderFooterClearance =
+    pathname.includes('/order') && !pathname.includes('/admin') && !pathname.includes('/staff');
   
   // Use inline function to avoid re-renders
   const handleStatusChange = (blocked: boolean) => {
@@ -70,7 +73,11 @@ export default function ConditionalNav({ children }: { children?: ReactNode }) {
           {children}
         </div>
       </div>
-      <footer className="text-center py-4 malts-muted text-sm bg-[var(--malts-paper)]/80 border-t border-[var(--malts-hairline)]">
+      <footer
+        className={`malts-muted border-t border-[var(--malts-hairline)] bg-[var(--malts-paper)]/80 py-4 text-center text-sm ${
+          orderFooterClearance ? 'max-md:mb-28' : ''
+        }`}
+      >
         <div className="flex flex-col items-center gap-1">
           <a 
             href="https://gsoft.bg" 

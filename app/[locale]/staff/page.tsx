@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
@@ -813,16 +814,20 @@ export default function StaffDashboard() {
         {/* Logo Bar */}
         <div className="flex items-center justify-between gap-3 mb-4 md:mb-6">
           {/* Left - Logo */}
-          <div className="h-16 md:h-24 overflow-hidden flex items-center">
-            <Image 
-              src="/malts-logo-landscape.svg"
+          <Link
+            href={`/${locale}/staff`}
+            className="flex h-14 max-h-14 min-w-0 shrink-0 items-center overflow-hidden sm:h-16 sm:max-h-16 md:h-[4.25rem] md:max-h-[4.25rem]"
+          >
+            <Image
+              src="/malts-logo-nav.webp"
               alt="Malt's"
-              width={240}
-              height={240}
-              className="w-auto h-full object-contain"
+              width={400}
+              height={331}
+              sizes="(max-width: 768px) 200px, 260px"
+              className="malts-brand-filter h-full w-auto max-h-14 min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-16 md:max-h-[4.25rem]"
               priority
             />
-          </div>
+          </Link>
 
           {/* Right - Title & PWA Status & User Menu */}
           <div className="flex items-center gap-3 md:gap-4">

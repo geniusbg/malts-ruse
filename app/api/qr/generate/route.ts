@@ -10,7 +10,10 @@ function requireAdmin(role: string | undefined) {
 }
 
 interface QRCodeSettings {
+  /** Фон на цялата картка (в админ прегледа). */
   backgroundColor?: string;
+  /** Фон на светлите полета на матрицата + задният квадрат на SVG изображението на QR. */
+  qrCodeBackgroundColor?: string;
   textColor?: string;
   qrCodeColor?: string;
   qrCodeSize?: number;
@@ -30,8 +33,13 @@ async function generateQRCodeWithTableNumber(
     backgroundColor = '#FFFFFF',
     textColor = '#000000',
     qrCodeColor = '#000000',
-    qrCodeSize = width
+    qrCodeSize = width,
   } = settings;
+
+  const qrLight =
+    settings.qrCodeBackgroundColor != null && String(settings.qrCodeBackgroundColor).trim() !== ''
+      ? String(settings.qrCodeBackgroundColor).trim()
+      : backgroundColor;
 
   // Use qrCodeSize as the actual size for the entire SVG canvas
   // This ensures the QR code takes exactly the space specified in settings
@@ -46,8 +54,8 @@ async function generateQRCodeWithTableNumber(
     errorCorrectionLevel: 'H', // High error correction for embedded text
     color: {
       dark: qrCodeColor,
-      light: backgroundColor
-    }
+      light: qrLight,
+    },
   });
 
   // Debug: Check if SVG was generated
@@ -83,15 +91,15 @@ async function generateQRCodeWithTableNumber(
       .trim();
   }
 
-  // Apply custom colors
+  // Apply custom colors (light cells = qrLight, not necessarily card background)
   qrSvgContent = qrSvgContent
     .replace(/fill="#000000"/g, `fill="${qrCodeColor}"`)
-    .replace(/fill="#ffffff"/g, `fill="${backgroundColor}"`)
+    .replace(/fill="#ffffff"/g, `fill="${qrLight}"`)
     .replace(/fill="black"/gi, `fill="${qrCodeColor}"`)
-    .replace(/fill="white"/gi, `fill="${backgroundColor}"`)
+    .replace(/fill="white"/gi, `fill="${qrLight}"`)
     .replace(/fill="#000"/g, `fill="${qrCodeColor}"`)
-    .replace(/fill="#fff"/gi, `fill="${backgroundColor}"`)
-    .replace(/fill="none"/g, `fill="${backgroundColor}"`);
+    .replace(/fill="#fff"/gi, `fill="${qrLight}"`)
+    .replace(/fill="none"/g, `fill="${qrLight}"`);
 
   // Step 2: Calculate text overlay dimensions
   // Use larger font size (18% of QR code width) for better visibility
@@ -114,8 +122,8 @@ async function generateQRCodeWithTableNumber(
   // Create combined SVG - scale QR code to fill entire canvas
   // Text should be added after scaling to maintain correct size
   const combinedSvg = `<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${svgWidth} ${svgHeight}">
-    <!-- Background -->
-    <rect width="${svgWidth}" height="${svgHeight}" fill="${backgroundColor}" x="0" y="0"/>
+    <!-- Background of QR image (matches light modules) -->
+    <rect width="${svgWidth}" height="${svgHeight}" fill="${qrLight}" x="0" y="0"/>
     
     <!-- QR Code scaled to fill entire canvas -->
     <g transform="scale(${scaleX}, ${scaleY}) translate(${-qrViewBoxX}, ${-qrViewBoxY})">
@@ -124,7 +132,7 @@ async function generateQRCodeWithTableNumber(
     
     <!-- Text overlay (positioned in canvas coordinates, not scaled) -->
     <!-- Use lower opacity circle to avoid darkening the QR code too much -->
-    <circle cx="${svgWidth / 2}" cy="${svgHeight / 2}" r="${circleRadius}" fill="${backgroundColor}" opacity="0.85"/>
+    <circle cx="${svgWidth / 2}" cy="${svgHeight / 2}" r="${circleRadius}" fill="${qrLight}" opacity="0.85"/>
     <text 
       x="${svgWidth / 2}" 
       y="${svgHeight / 2}" 

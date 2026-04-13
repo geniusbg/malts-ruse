@@ -73,27 +73,27 @@ export default function AdminNav({ locale }: AdminNavProps) {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--malts-paper)]/92 backdrop-blur-md border-b border-[var(--malts-hairline)]">
-        <div className="w-full px-3 sm:px-4 lg:px-6 py-1">
-          <div className="flex w-full min-w-0 items-center justify-between gap-3 lg:gap-4">
+        <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6 py-0.5 md:py-1">
+          <div className="flex w-full min-w-0 items-center justify-between gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
           {/* Logo: винаги вляво (мобилен + десктоп) */}
           <Link
             href={`/${locale}/admin`}
-            className="flex h-16 max-h-16 min-w-0 shrink-0 items-center lg:h-20 lg:max-h-20"
+            className="flex h-12 max-h-12 min-w-0 shrink-0 items-center md:h-14 md:max-h-14 xl:h-[4.25rem] xl:max-h-[4.25rem] 2xl:h-20 2xl:max-h-20"
           >
             <Image
               src="/malts-logo-nav.webp"
               alt="Malt's"
               width={400}
               height={331}
-              sizes="(max-width: 1024px) 200px, 260px"
-              className="malts-brand-filter h-full w-auto max-h-16 min-h-0 min-w-0 shrink-0 object-contain object-left lg:max-h-20"
+              sizes="(max-width: 768px) 140px, (max-width: 1280px) 160px, 220px, 260px"
+              className="malts-brand-filter h-full w-auto max-h-12 min-h-0 min-w-0 shrink-0 object-contain object-left md:max-h-14 xl:max-h-[4.25rem] 2xl:max-h-20"
               priority
             />
           </Link>
 
-          {/* Desktop Navigation — център на лентата */}
-          <div className="hidden min-w-0 flex-1 lg:block">
-            <div className="flex items-center justify-center gap-1 overflow-x-auto whitespace-nowrap py-1 no-scrollbar">
+          {/* Desktop Navigation: под xl само икони (+ native title); при нужда хоризонтален скрол */}
+          <div className="hidden min-w-0 flex-1 md:block">
+            <div className="flex touch-pan-x items-center justify-start gap-0.5 overflow-x-auto overflow-y-hidden py-0.5 sm:justify-center sm:gap-1 md:py-1 [scrollbar-width:thin]">
               {navLinks.map((link) => (
                 (() => {
                   const { icon, text } = splitEmojiLabel(link.label);
@@ -101,15 +101,22 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`malts-admin-nav-tab px-4 py-3 rounded-2xl transition-colors shrink-0 ${
+                  title={link.label.trim()}
+                  className={`malts-admin-nav-tab shrink-0 rounded-lg px-1 py-1 transition-colors md:rounded-xl md:px-1.5 md:py-1.5 xl:rounded-2xl xl:px-3 xl:py-2 2xl:px-4 2xl:py-3 ${
                     isActive(link.href)
                       ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
                       : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
                   }`}
                 >
-                  <span className="flex flex-col items-center justify-center gap-1 leading-tight">
-                    {icon ? <span className="text-2xl leading-none">{icon}</span> : null}
-                    <span className="malts-admin-nav-tab-label">{text}</span>
+                  <span className="flex flex-col items-center justify-center gap-0 leading-tight xl:gap-0.5">
+                    {icon ? (
+                      <span className="text-[1.05rem] leading-none md:text-lg xl:text-xl 2xl:text-2xl" aria-hidden>
+                        {icon}
+                      </span>
+                    ) : null}
+                    <span className="hidden text-center text-[0.8125rem] font-semibold leading-tight xl:block 2xl:text-[0.9375rem]">
+                      <span className="max-w-[4.5rem] truncate 2xl:max-w-none 2xl:whitespace-normal">{text}</span>
+                    </span>
                   </span>
                 </Link>
                   );
@@ -118,14 +125,16 @@ export default function AdminNav({ locale }: AdminNavProps) {
             </div>
           </div>
 
-          {/* Вдясно: потребител (desktop) / hamburger (mobile) */}
+          {/* Вдясно: потребител (md+) / hamburger (под md) */}
           <div className="flex shrink-0 items-center justify-end">
-            <div className="hidden lg:block relative">
+            <div className="hidden md:block relative">
               <button
+                type="button"
+                title={(session?.user as any)?.name || 'Профил'}
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl transition-colors border border-[var(--malts-hairline)] bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)]"
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] px-1.5 py-1 transition-colors hover:bg-[var(--malts-card-hover)] md:rounded-xl md:px-2 md:py-1.5 xl:px-3 xl:py-2"
               >
-                <div className="w-6 h-6 rounded-full bg-[var(--malts-accent)] text-[#f5f0e6] flex items-center justify-center font-bold text-sm">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--malts-accent)] text-sm font-bold text-[#f5f0e6] md:h-7 md:w-7">
                   {(session?.user as any)?.name?.[0] || 'A'}
                 </div>
                 <span className="text-[var(--malts-ink)] text-sm font-medium hidden xl:block">
@@ -161,7 +170,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] rounded-xl p-2 transition-colors"
+              className="md:hidden text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] rounded-xl p-2 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -179,7 +188,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-[var(--malts-hairline)] mt-4">
+          <div className="md:hidden border-t border-[var(--malts-hairline)] py-4 mt-2">
             {navLinks.map((link) => (
               (() => {
                 const { icon, text } = splitEmojiLabel(link.label);

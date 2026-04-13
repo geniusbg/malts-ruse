@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState, Suspense, useRef, useCallback, Fragment } from 'react';
+import { useEffect, useLayoutEffect, useState, Suspense, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { useSearchParams, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Price from '@/components/Price';
@@ -15,6 +17,14 @@ import {
   selectCategoryAtDepth,
   MALLS_MAX_CATEGORY_DEPTH,
 } from '@/lib/category-navigation';
+
+/** API/Prisma понякога връщат snake_case; навигацията използва parentCategoryId. */
+function normalizeCategoryRow(c: any) {
+  return {
+    ...c,
+    parentCategoryId: c.parentCategoryId ?? c.parent_category_id ?? null,
+  };
+}
 
 interface CartItem {
   productId: string;
@@ -40,6 +50,9 @@ function OrderPageContent() {
   const [products, setProducts] = useState<any[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
+  /** Мобилен bottom sheet за избор на категория (под lg). */
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
+  const categorySheetPanelRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [categoryPath, setCategoryPath] = useState<string[]>([]);
@@ -49,7 +62,7 @@ function OrderPageContent() {
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
   
   // Lock scroll when cart, session gate, or other full-screen overlays are open
-  useLockScroll(showCart || sessionStatus !== 'valid');
+  useLockScroll(showCart || sessionStatus !== 'valid' || categorySheetOpen);
   const [isOffline, setIsOffline] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requiresApproval, setRequiresApproval] = useState(false);
@@ -100,6 +113,15 @@ function OrderPageContent() {
     if (approvalTimeoutRef.current) {
       clearTimeout(approvalTimeoutRef.current);
       approvalTimeoutRef.current = null;
+    }
+  }, []);
+
+  /** Мобилно: bottom sheet; десктоп: скрол към блока с категориите. */
+  const openCategoryPicker = useCallback(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches) {
+      document.getElementById('order-category-nav')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      setCategorySheetOpen(true);
     }
   }, []);
 
@@ -261,6 +283,26 @@ function OrderPageContent() {
       clearApprovalPolling();
     };
   }, [clearApprovalPolling]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => {
+      if (mq.matches) setCategorySheetOpen(false);
+    };
+    mq.addEventListener('change', closeOnDesktop);
+    closeOnDesktop();
+    return () => mq.removeEventListener('change', closeOnDesktop);
+  }, []);
+
+  /** Хоризонталните редове с чипове понякога остават с грешен scrollLeft (емулация/touch) — винаги отляво. */
+  useLayoutEffect(() => {
+    if (!categorySheetOpen) return;
+    const panel = categorySheetPanelRef.current;
+    if (!panel) return;
+    panel.querySelectorAll<HTMLElement>('[data-order-tier-hscroll]').forEach((el) => {
+      el.scrollLeft = 0;
+    });
+  }, [categorySheetOpen]);
 
   // Listen for order status and approval updates via Pusher
   useEffect(() => {
@@ -433,14 +475,17 @@ function OrderPageContent() {
         const categoriesData = await categoriesRes.json();
         const productsData = await productsRes.json();
 
-        const cats: any[] = categoriesData.categories || [];
+        const rawCats: any[] = categoriesData.categories || [];
+        const cats = rawCats.map(normalizeCategoryRow);
         setCategories(cats);
         setProducts(productsData.products || []);
 
         if (cats.length > 0) {
-          const firstParent = cats.find((c: any) => !c.parentCategoryId);
-          if (firstParent) {
-            setCategoryPath([firstParent.id]);
+          const roots = cats
+            .filter((c: any) => !c.parentCategoryId)
+            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+          if (roots.length > 0) {
+            setCategoryPath([roots[0].id]);
           }
         }
         setLoadProgress(100);
@@ -502,7 +547,14 @@ function OrderPageContent() {
   const cartTotal = cart.reduce((sum, item) => sum + item.priceBgn * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const parentCategories = categories.filter((c: any) => !c.parentCategoryId);
+  const parentCategories = useMemo(
+    () =>
+      categories
+        .filter((c: any) => !c.parentCategoryId)
+        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)),
+    [categories]
+  );
+
   const displayCategoryId = categoryPathLeafId(categoryPath);
   const categoryProducts = products.filter((p: any) => p.categoryId === displayCategoryId);
   const leafIdOrder = categoryPathLeafId(categoryPath);
@@ -718,7 +770,9 @@ function OrderPageContent() {
   }
 
   return (
-    <main className="min-h-screen malts-surface pb-8">
+    <main
+      className={`min-h-screen malts-surface ${tableNumber ? 'pb-16 max-md:pb-24 md:pb-8' : 'pb-8'}`}
+    >
       {/* Toast Notifications - hidden when server is offline */}
       {toast && !isOffline && (
         <Toast
@@ -795,16 +849,20 @@ function OrderPageContent() {
       <div className="bg-[var(--malts-paper)]/92 backdrop-blur-lg border-b border-[var(--malts-hairline)] sticky top-0 z-40">
         <div className="container mx-auto px-4 py-2">
           <div className="flex justify-between items-center gap-4">
-            <div className="h-16 md:h-24 overflow-hidden flex items-center">
-              <Image 
-                src="/malts-logo-landscape.svg" 
-                alt="Malt's" 
-                width={192}
-                height={192}
-                className="w-auto h-full object-contain"
+            <Link
+              href={`/${locale}`}
+              className="flex h-[5.5rem] max-h-[5.5rem] min-w-0 shrink-0 items-center overflow-hidden sm:h-16 sm:max-h-16"
+            >
+              <Image
+                src="/malts-logo-nav.webp"
+                alt="Malt's"
+                width={400}
+                height={331}
+                sizes="(max-width: 640px) 320px, 300px"
+                className="malts-brand-filter h-full w-auto max-h-[5.5rem] min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-16"
                 priority
               />
-            </div>
+            </Link>
             
             <div className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-2 md:gap-3">
@@ -837,11 +895,32 @@ function OrderPageContent() {
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="bg-[var(--malts-paper)]/92 backdrop-blur-lg border-b border-[var(--malts-hairline)] py-4">
+      {/* Category Filter — мобилен: сгъваем панел + ограничена височина; десктоп: пълен ред */}
+      <div
+        id="order-category-nav"
+        className="border-b border-[var(--malts-hairline)] bg-[var(--malts-paper)]/92 py-2 backdrop-blur-lg lg:py-4"
+      >
         <div className="container mx-auto px-4">
-          <>
-            {Array.from({ length: MALLS_MAX_CATEGORY_DEPTH }, (_, depth) => {
+          {(() => {
+            const tierBtnClass = (depth: number, isActive: boolean) =>
+              depth === 0
+                ? `rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm lg:rounded-xl lg:px-6 lg:py-3 lg:text-base ${
+                    isActive
+                      ? 'scale-[1.02] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-lg lg:scale-105'
+                      : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                  }`
+                : `rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-sm lg:rounded-lg lg:px-4 lg:py-2 ${
+                    isActive
+                      ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
+                      : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                  }`;
+
+            const renderTierRow = (
+              depth: number,
+              wrapClass: string,
+              flexClass: string,
+              opts?: { closeCategorySheet?: boolean; markHorizontalTier?: boolean }
+            ) => {
               const tierItems =
                 depth === 0
                   ? parentCategories
@@ -849,75 +928,200 @@ function OrderPageContent() {
                     ? getChildrenOf(categories, categoryPath[depth - 1]!)
                     : [];
               if (tierItems.length === 0) return null;
-
-              const mobileWrap =
-                depth === 0
-                  ? 'lg:hidden overflow-x-auto overflow-y-hidden hide-scrollbar mb-3 -mx-4 px-4'
-                  : depth >= 2
-                    ? 'lg:hidden overflow-x-auto overflow-y-hidden hide-scrollbar mt-3 -mx-4 px-4'
-                    : 'lg:hidden overflow-x-auto overflow-y-hidden hide-scrollbar -mx-4 px-4';
-              const desktopWrap =
-                depth === 0
-                  ? 'hidden lg:block mb-3'
-                  : depth >= 2
-                    ? 'hidden lg:block mt-3'
-                    : 'hidden md:block';
-
-              const btnClass = (isActive: boolean) =>
-                depth === 0
-                  ? `px-6 py-3 rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
-                      isActive
-                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6] shadow-lg scale-105'
-                        : 'bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)]'
-                    }`
-                  : `px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap text-sm ${
-                      isActive
-                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6] border-2 border-[var(--malts-accent)]'
-                        : 'bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)]'
-                    }`;
-
               return (
-                <Fragment key={`order-tier-${depth}`}>
-                  <div className={mobileWrap}>
-                    <div className={`flex ${depth === 0 ? 'gap-3' : 'gap-2'} min-w-max`}>
-                      {tierItems.map((cat: any) => {
-                        const name = locale === 'bg' ? cat.nameBg : locale === 'en' ? cat.nameEn : cat.nameRo;
-                        const isActive = categoryPath[depth] === cat.id;
-                        return (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id))}
-                            className={btnClass(isActive)}
-                          >
-                            {name}
-                          </button>
-                        );
-                      })}
-                    </div>
+                <div
+                  key={`tier-${depth}`}
+                  className={wrapClass}
+                  {...(opts?.markHorizontalTier ? { 'data-order-tier-hscroll': true } : {})}
+                >
+                  <div className={flexClass}>
+                    {tierItems.map((cat: any) => {
+                      const name = locale === 'bg' ? cat.nameBg : locale === 'en' ? cat.nameEn : cat.nameRo;
+                      const isActive = categoryPath[depth] === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            const nextPath = selectCategoryAtDepth(categoryPath, depth, cat.id);
+                            setCategoryPath(nextPath);
+                            if (opts?.closeCategorySheet) {
+                              const leaf = categoryPathLeafId(nextPath);
+                              if (leaf) {
+                                const prodsHere = products.filter((p: any) => p.categoryId === leaf);
+                                const subcats = getChildrenOf(categories, leaf);
+                                if (prodsHere.length > 0 || subcats.length === 0) {
+                                  setCategorySheetOpen(false);
+                                }
+                              }
+                            }
+                          }}
+                          className={tierBtnClass(depth, isActive)}
+                        >
+                          {name}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className={desktopWrap}>
-                    <div className={`flex flex-wrap ${depth === 0 ? 'gap-3' : 'gap-2'} justify-center max-w-6xl mx-auto`}>
-                      {tierItems.map((cat: any) => {
-                        const name = locale === 'bg' ? cat.nameBg : locale === 'en' ? cat.nameEn : cat.nameRo;
-                        const isActive = categoryPath[depth] === cat.id;
-                        return (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id))}
-                            className={btnClass(isActive)}
-                          >
-                            {name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </Fragment>
+                </div>
               );
-            })}
-          </>
+            };
+
+            const sheetTitle =
+              locale === 'bg' ? 'Категории' : locale === 'en' ? 'Categories' : 'Categorii';
+            const pickActionLabel =
+              locale === 'bg' ? 'Избери' : locale === 'en' ? 'Choose' : 'Alege';
+            const openSheetAria =
+              locale === 'bg' ? 'Отвори избор на категория' : locale === 'en' ? 'Open category picker' : 'Deschide categoriile';
+
+            const renderPathSegmentButtons = (variant: 'mobile' | 'sheet') => (
+              <div className="flex w-full min-w-0 flex-wrap items-center gap-x-0.5 gap-y-1 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
+                {categoryPath.map((id, idx) => {
+                  const c = categories.find((x: any) => x.id === id);
+                  if (!c) return null;
+                  const name = locale === 'bg' ? c.nameBg : locale === 'en' ? c.nameEn : c.nameRo;
+                  return (
+                    <span key={`${id}-${idx}`} className="inline-flex max-w-full shrink-0 items-center gap-0.5">
+                      {idx > 0 ? (
+                        <span className="text-[var(--malts-subtle)]" aria-hidden>
+                          ›
+                        </span>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCategoryPath(categoryPath.slice(0, idx + 1));
+                          if (variant === 'mobile') openCategoryPicker();
+                        }}
+                        className={
+                          variant === 'mobile'
+                            ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
+                            : 'rounded-md border border-transparent px-1.5 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
+                        }
+                      >
+                        {name}
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            );
+
+            return (
+              <>
+                <div className="mb-0 flex w-full flex-col gap-1.5 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)]/50 px-3 py-2.5 lg:hidden">
+                  <div className="flex w-full min-w-0 items-center justify-between gap-2">
+                    <span className="min-w-0 shrink text-sm font-semibold text-[var(--malts-ink)]">{sheetTitle}</span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openCategoryPicker()}
+                        className="malts-btn-secondary rounded-md px-2.5 py-1 text-xs font-semibold"
+                      >
+                        {pickActionLabel}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openCategoryPicker()}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--malts-subtle)] transition-colors hover:bg-[var(--malts-inset)]"
+                        aria-label={openSheetAria}
+                      >
+                        <span aria-hidden>▼</span>
+                      </button>
+                    </div>
+                  </div>
+                  {categoryPath.length > 0 ? (
+                    renderPathSegmentButtons('mobile')
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => openCategoryPicker()}
+                      className="w-full rounded-lg border border-dashed border-[var(--malts-hairline)] bg-transparent px-2 py-1.5 text-left text-xs font-medium text-[var(--malts-subtle)] transition-colors hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card)]/40 hover:text-[var(--malts-muted)]"
+                    >
+                      {locale === 'bg'
+                        ? 'Избери категория'
+                        : locale === 'en'
+                          ? 'Choose category'
+                          : 'Alege categoria'}
+                    </button>
+                  )}
+                </div>
+
+                {categorySheetOpen && typeof document !== 'undefined'
+                  ? createPortal(
+                      <>
+                        {/*
+                          Portal към body: иначе fixed е trapped от родител с backdrop-filter и изглежда „под“ sticky хедъра.
+                        */}
+                        <button
+                          type="button"
+                          className="fixed inset-0 z-[100] bg-black/45 backdrop-blur-[2px] lg:hidden"
+                          aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+                          onClick={() => setCategorySheetOpen(false)}
+                        />
+                        <div
+                          ref={categorySheetPanelRef}
+                          role="dialog"
+                          aria-modal="true"
+                          aria-labelledby="order-category-sheet-title"
+                          className="fixed inset-x-0 bottom-0 z-[101] flex max-h-[min(calc(100dvh-7.5rem),540px)] flex-col rounded-t-2xl border border-[var(--malts-hairline)] border-b-0 bg-[var(--malts-card)] shadow-[0_-12px_40px_rgba(0,0,0,0.18)] lg:hidden"
+                        >
+                      <div className="flex shrink-0 flex-col items-center pt-2">
+                        <div className="h-1 w-12 rounded-full bg-[var(--malts-hairline)]" aria-hidden />
+                      </div>
+                      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--malts-hairline)] px-4 pb-3 pt-2">
+                        <div className="min-w-0 flex-1">
+                          <p id="order-category-sheet-title" className="text-base font-bold text-[var(--malts-ink)]">
+                            {sheetTitle}
+                          </p>
+                          {categoryPath.length > 0 ? (
+                            <div className="mt-0.5">{renderPathSegmentButtons('sheet')}</div>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCategorySheetOpen(false)}
+                          className="malts-btn-secondary shrink-0 rounded-lg px-3 py-1.5 text-lg leading-none"
+                          aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div
+                        data-modal-scroll
+                        className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom))] [scrollbar-width:thin]"
+                      >
+                        {Array.from({ length: MALLS_MAX_CATEGORY_DEPTH }, (_, depth) =>
+                          renderTierRow(
+                            depth,
+                            depth === 0
+                              ? 'overflow-x-auto pb-1 [scrollbar-width:thin]'
+                              : depth >= 2
+                                ? 'overflow-x-auto border-t border-[var(--malts-hairline)]/60 pt-2 [scrollbar-width:thin]'
+                                : 'overflow-x-auto border-t border-[var(--malts-hairline)]/60 pt-2 [scrollbar-width:thin]',
+                            `flex min-w-max justify-start ${depth === 0 ? 'gap-2' : 'gap-1.5'} sm:gap-2`,
+                            { closeCategorySheet: true, markHorizontalTier: true }
+                          )
+                        )}
+                      </div>
+                    </div>
+                      </>,
+                      document.body
+                    )
+                  : null}
+
+                <div className="hidden space-y-3 lg:block">
+                  {Array.from({ length: MALLS_MAX_CATEGORY_DEPTH }, (_, depth) =>
+                    renderTierRow(
+                      depth,
+                      depth === 0 ? 'mb-3' : depth >= 2 ? 'mt-3' : '',
+                      `mx-auto flex max-w-6xl flex-wrap justify-center ${depth === 0 ? 'gap-3' : 'gap-2'}`
+                    )
+                  )}
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 
@@ -928,7 +1132,11 @@ function OrderPageContent() {
             return (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4">🔍</div>
-                <p className="malts-muted text-xl">
+                <button
+                  type="button"
+                  onClick={() => openCategoryPicker()}
+                  className="malts-muted hover:text-[var(--malts-ink)] mx-auto max-w-xl text-balance text-xl underline-offset-4 transition-colors hover:underline"
+                >
                   {needsDeeperDrillOrder
                     ? categoryPath.length === 1
                       ? locale === 'bg'
@@ -946,7 +1154,7 @@ function OrderPageContent() {
                       : locale === 'en'
                         ? 'No products in this category'
                         : 'Nu există produse în această categorie'}
-                </p>
+                </button>
               </div>
             );
           }
@@ -998,7 +1206,7 @@ function OrderPageContent() {
                       <div
                         className={`p-4 ${product.isPromoted && !product.imageUrl ? 'pt-11' : ''}`}
                       >
-                        <h3 className="text-lg md:text-xl font-bold text-[var(--malts-ink)] mb-3 group-hover:text-[var(--malts-accent)] transition-colors">
+                        <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--malts-ink)] transition-colors group-hover:text-[var(--malts-accent)] md:text-xl">
                           {productName}
                         </h3>
                         
@@ -1011,10 +1219,10 @@ function OrderPageContent() {
                           </p>
                         ) : null}
                       
-                        <div className="flex justify-between items-center pt-4 border-t border-[var(--malts-hairline)] gap-2">
-                          <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex justify-between items-end gap-2 border-t border-[var(--malts-hairline)] pt-4">
+                          <div className="flex min-w-0 flex-col items-start gap-0.5">
                             {product.basePriceBgn != null && (
-                              <span className="text-[var(--malts-subtle)] line-through text-sm inline-block">
+                              <span className="inline-block text-xs text-[var(--malts-subtle)] line-through md:text-sm">
                                 <Price
                                   priceBgn={Number(product.basePriceBgn)}
                                   inline
@@ -1024,14 +1232,17 @@ function OrderPageContent() {
                             )}
                             <Price
                               priceBgn={Number(product.priceBgn)}
-                              className="text-2xl font-bold text-[var(--malts-ink)]"
+                              className="text-sm font-semibold text-[var(--malts-ink)] md:text-lg lg:text-xl md:font-bold"
                               showBoth={true}
                               inline={true}
+                              unit={product.unit}
+                              quantity={product.quantity}
                             />
                           </div>
                           <button
+                            type="button"
                             onClick={() => addToCart(product)}
-                            className="px-6 py-2 malts-btn-primary rounded-lg font-semibold transition-all text-sm md:text-base"
+                            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
                           >
                             {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
                           </button>
@@ -1201,10 +1412,10 @@ function OrderPageContent() {
 
       {/* Call Waiter Button */}
       {tableNumber && (
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 z-40">
+        <div className="fixed bottom-4 left-4 right-4 z-40 max-md:bottom-[max(1rem,env(safe-area-inset-bottom))] md:left-auto md:right-4">
           <a
             href={`/${locale}/order/call-waiter?table=${tableNumber}`}
-            className="block w-full md:w-auto px-8 py-4 malts-btn-danger rounded-xl font-bold text-lg text-center transition-all shadow-2xl"
+            className="block w-full rounded-xl px-6 py-3 text-center text-base font-bold shadow-2xl transition-all malts-btn-danger md:w-auto md:px-8 md:py-4 md:text-lg"
           >
             🔔 {locale === 'bg' ? 'Повикай сервитьор' : 
                  locale === 'en' ? 'Call Waiter' : 
