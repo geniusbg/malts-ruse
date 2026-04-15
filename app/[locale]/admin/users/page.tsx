@@ -451,10 +451,13 @@ function AddUserForm({
   onSuccess: () => void;
   onError: (message: string) => void;
 }) {
+  const { data: session } = useSession();
+  const currentRole = (session?.user as any)?.role as User['role'] | undefined;
+  const canCreateSuperAdmin = currentRole === 'SUPER_ADMIN';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'ADMIN' | 'STAFF'>('STAFF');
+  const [role, setRole] = useState<'SUPER_ADMIN' | 'ADMIN' | 'STAFF'>('STAFF');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -536,11 +539,12 @@ function AddUserForm({
             <label className="malts-label">Роля</label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as 'ADMIN' | 'STAFF')}
+              onChange={(e) => setRole(e.target.value as 'SUPER_ADMIN' | 'ADMIN' | 'STAFF')}
               className="malts-field"
             >
               <option value="STAFF">STAFF</option>
               <option value="ADMIN">ADMIN</option>
+              {canCreateSuperAdmin ? <option value="SUPER_ADMIN">SUPER_ADMIN</option> : null}
             </select>
           </div>
 

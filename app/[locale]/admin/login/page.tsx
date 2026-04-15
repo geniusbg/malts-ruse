@@ -11,6 +11,12 @@ const backToSiteLabel: Record<string, string> = {
   ro: 'Înapoi la site',
 };
 
+const adminPortalLabel: Record<string, string> = {
+  bg: 'Admin портал',
+  en: 'Admin portal',
+  ro: 'Portal admin',
+};
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -83,7 +89,7 @@ export default function AdminLoginPage() {
               />
             </div>
             <p className="malts-admin-panel-title mt-6 sm:mt-7 text-center text-lg sm:text-xl md:text-2xl leading-snug px-1">
-              {'Admin & Staff'}
+              {adminPortalLabel[locale] ?? adminPortalLabel.bg}
             </p>
           </div>
 
