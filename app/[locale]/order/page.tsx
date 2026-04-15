@@ -1568,7 +1568,9 @@ function OrderPageContent() {
                           <>
                             {cardsHeading?.trim() ? (
                               <div className="relative mt-10 text-center">
-                                <p className="text-xs uppercase tracking-[0.3em] malts-subtle">{cardsHeading}</p>
+                                <p className="text-2xl md:text-4xl font-semibold tracking-tight malts-display">
+                                  {cardsHeading}
+                                </p>
                               </div>
                             ) : null}
                             <div className="relative mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">

@@ -526,7 +526,9 @@ export default async function HomePage({
 
             {cardsHeading?.trim() ? (
               <div className="relative mt-10 text-center">
-                <p className="text-xs uppercase tracking-[0.3em] malts-subtle">{cardsHeading}</p>
+                <p className="text-2xl md:text-4xl font-semibold tracking-tight malts-display">
+                  {cardsHeading}
+                </p>
               </div>
             ) : null}
 
