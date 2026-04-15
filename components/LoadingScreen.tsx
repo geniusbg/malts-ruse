@@ -84,7 +84,7 @@ export default function LoadingScreen({
         <img
           src={loaderSrc}
           alt="Loading"
-          className={`${gifSizeClasses[logoSize]} object-contain`}
+          className={`${gifSizeClasses[logoSize]} object-contain block`}
           onError={() => setLoaderSrc('/beer-mug-loader.png')}
         />
       );
@@ -93,7 +93,7 @@ export default function LoadingScreen({
     if (assetType === 'video' || /\.(mp4|webm)$/i.test(url)) {
       return (
         <video
-          className={`${gifSizeClasses[logoSize]} object-contain`}
+          className={`${gifSizeClasses[logoSize]} object-contain block`}
           src={url}
           muted
           playsInline
@@ -103,15 +103,19 @@ export default function LoadingScreen({
       );
     }
 
-    return <img src={url} alt="Loading" className={`${gifSizeClasses[logoSize]} object-contain`} />;
+    return <img src={url} alt="Loading" className={`${gifSizeClasses[logoSize]} object-contain block`} />;
   })();
 
   const framedMedia = (
-    <div className="relative">
-      {/* soft gradient frame that blends with the app paper */}
-      <div className="absolute -inset-3 rounded-[2rem] bg-[radial-gradient(circle_at_top,rgba(196,30,58,0.22),rgba(234,179,8,0.14),rgba(22,101,52,0.12),transparent_70%)] blur-md opacity-90" />
-      <div className="relative rounded-[2rem] bg-[linear-gradient(135deg,rgba(196,30,58,0.35),rgba(234,179,8,0.22),rgba(22,101,52,0.18))] p-[2px] shadow-[0_18px_50px_rgba(26,24,16,0.18)]">
-        <div className="rounded-[calc(2rem-2px)] bg-[var(--malts-paper)]/85 backdrop-blur-md border border-[var(--malts-hairline)]/80 p-4">
+    <div className="relative inline-block">
+      {/* subtle glow so the border doesn't look "cut off" */}
+      <div
+        className="absolute -inset-2 rounded-[1.75rem] bg-[radial-gradient(circle_at_top,rgba(196,30,58,0.18),rgba(234,179,8,0.12),rgba(22,101,52,0.10),transparent_70%)] blur-md opacity-80"
+        aria-hidden
+      />
+      {/* thin blended border hugging the media edge */}
+      <div className="relative rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(196,30,58,0.55),rgba(234,179,8,0.28),rgba(22,101,52,0.22),rgba(255,255,255,0.08))] p-[1.5px] shadow-[0_18px_50px_rgba(26,24,16,0.18)]">
+        <div className="rounded-[calc(1.75rem-1.5px)] overflow-hidden bg-[rgba(245,240,230,0.14)] backdrop-blur-sm">
           {media}
         </div>
       </div>
