@@ -80,8 +80,12 @@ function MenuPageContent() {
     if (id) scrollToProductById(id);
   }
 
-  function applyCategorySelectionFromParam(cats: any[], categoryParam: string | null) {
-    if (categoryParam === 'promotions' && hasActivePromotions) {
+  function applyCategorySelectionFromParam(
+    cats: any[],
+    categoryParam: string | null,
+    hasPromotions: boolean
+  ) {
+    if (categoryParam === 'promotions' && hasPromotions) {
       setCategoryPath((prev) =>
         prev.length === 1 && prev[0] === PROMOTIONS_ROOT_ID ? prev : [PROMOTIONS_ROOT_ID]
       );
@@ -114,10 +118,11 @@ function MenuPageContent() {
         const categoryParam = searchParams.get('category');
         const productParam = searchParams.get('product');
         const cats = categoriesRef.current;
+        const hasPromotions = productsRef.current.some((p: any) => !!p?.isPromoted);
         const resolvedId = resolveCategoryQueryToId(cats, categoryParam);
         const currentLeaf = categoryPathLeafId(categoryPath) || null;
         const resolvedNorm =
-          categoryParam === 'promotions' && hasActivePromotions ? PROMOTIONS_ROOT_ID : resolvedId || null;
+          categoryParam === 'promotions' && hasPromotions ? PROMOTIONS_ROOT_ID : resolvedId || null;
         if (resolvedNorm === currentLeaf) {
           if (productParam) scrollToProductParam(productParam, productsRef.current);
           return;
@@ -127,7 +132,7 @@ function MenuPageContent() {
           if (productParam) scrollToProductParam(productParam, productsRef.current);
           return;
         }
-        applyCategorySelectionFromParam(cats, categoryParam);
+        applyCategorySelectionFromParam(cats, categoryParam, hasPromotions);
         if (productParam) {
           scrollToProductParam(productParam, productsRef.current);
         }
@@ -148,7 +153,8 @@ function MenuPageContent() {
 
       const cats: any[] = categoriesData.categories || [];
       setCategories(cats);
-      setProducts(productsData.products || []);
+      const loadedProducts = productsData.products || [];
+      setProducts(loadedProducts);
 
       if (settingsData.settings) {
         setMenuSettings(settingsData.settings);
@@ -166,10 +172,11 @@ function MenuPageContent() {
 
       const categoryParam = searchParams.get('category');
       const productParam = searchParams.get('product');
-      applyCategorySelectionFromParam(cats, categoryParam);
+      const hasPromotions = loadedProducts.some((p: any) => !!p?.isPromoted);
+      applyCategorySelectionFromParam(cats, categoryParam, hasPromotions);
 
       if (productParam) {
-        scrollToProductParam(productParam, productsData.products || []);
+        scrollToProductParam(productParam, loadedProducts);
       }
 
       catalogLoadedRef.current = true;
@@ -178,7 +185,7 @@ function MenuPageContent() {
     }
 
     loadData();
-  }, [searchParams, locale, categoryPath]);
+  }, [searchParams, locale]);
 
   // Sync URL: set ?category= when a leaf is selected; strip category/product when nothing selected.
   useEffect(() => {

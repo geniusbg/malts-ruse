@@ -95,7 +95,7 @@ const DEFAULT_HOMEPAGE_SETTINGS: Omit<HomepageSettings, 'id' | 'stats'> = {
   ctaPrimaryBg: 'Разгледай менюто',
   ctaPrimaryEn: 'View the menu',
   ctaPrimaryRo: 'Vezi meniul',
-  ctaSecondaryBg: 'Резервирай вечер',
+  ctaSecondaryBg: 'Резервации',
   ctaSecondaryEn: 'Book an evening',
   ctaSecondaryRo: 'Rezervă o seară',
 };

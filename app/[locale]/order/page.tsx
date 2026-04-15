@@ -1644,11 +1644,11 @@ function OrderPageContent() {
                             </svg>
                           </Link>
                           <Link
-                            href={`/${locale}/events`}
+                            href={`/${locale}/contact`}
                             className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
                           >
                             {locale === 'bg'
-                              ? homepageSettings?.ctaSecondaryBg ?? 'Резервирай вечер'
+                              ? homepageSettings?.ctaSecondaryBg ?? 'Резервации'
                               : locale === 'en'
                                 ? homepageSettings?.ctaSecondaryEn ?? 'Book an evening'
                                 : homepageSettings?.ctaSecondaryRo ?? 'Rezervă o seară'}
@@ -1710,7 +1710,7 @@ function OrderPageContent() {
                           </p>
                         </div>
                         <Link
-                          href={`/${locale}/events`}
+                          href={`/${locale}/contact`}
                           className="group px-6 py-3 malts-btn-secondary rounded-xl font-semibold border-2 transition-all flex items-center gap-2"
                         >
                           {locale === 'bg' ? 'Виж всички' : locale === 'en' ? 'View all' : 'Alle ansehen'}

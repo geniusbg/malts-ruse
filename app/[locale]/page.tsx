@@ -5,13 +5,12 @@ import { getDefaultBrandId } from '@/lib/brand';
 import { getLocationSettings } from '@/lib/location-settings';
 import { getHomepageSettings, getHomepageOfferingCards } from '@/lib/homepage-settings';
 import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
+import PromotionsCarousel from '@/components/PromotionsCarousel';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import { formatDateForLocale } from '@/lib/date-utils';
 import { eventCardImageUrl } from '@/lib/event-images';
 import { applyPromotionsToProductRow, indexActivePromotionsByProductId } from '@/lib/pricing';
-import Price from '@/components/Price';
 import { Rampart_One } from 'next/font/google';
-import { productParamForUrl } from '@/lib/product-url';
 import { getPromotionsUiSettings } from '@/lib/promotions-ui-settings';
 
 export const revalidate = 0;
@@ -168,7 +167,7 @@ export default async function HomePage({
         }
       ],
       ctaPrimary: 'Разгледай менюто',
-      ctaSecondary: 'Резервирай вечер'
+      ctaSecondary: 'Резервации'
     },
     en: {
       sectionLabel: 'Experiences',
@@ -440,89 +439,10 @@ export default async function HomePage({
               ))}
             </div>
 
-            {/* Promotions cards (only when at least one active promotion exists) */}
-            {promotedProducts.length > 0 && (
-              <div className="relative mt-12">
-                <div className="mb-6 text-center">
-                  <p
-                    className={`text-3xl md:text-4xl tracking-wide text-[#c41e3a] animate-pulse drop-shadow-[0_8px_18px_rgba(196,30,58,0.30)] ${rampartOne.className}`}
-                  >
-                    {promotionsHeading}
-                  </p>
-                  <Link
-                    href={`/${locale}/menu?category=promotions`}
-                    className="mt-2 inline-block text-sm font-semibold text-[var(--malts-accent)] hover:opacity-90"
-                  >
-                    {locale === 'bg' ? 'Виж всички →' : locale === 'en' ? 'View all →' : 'Vezi tot →'}
-                  </Link>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {promotedProducts.slice(0, 6).map((p: any) => {
-                    const name =
-                      locale === 'bg' ? p.nameBg : locale === 'en' ? p.nameEn : p.nameRo;
-                    const desc =
-                      locale === 'bg'
-                        ? p.descriptionBg
-                        : locale === 'en'
-                          ? p.descriptionEn
-                          : p.descriptionRo;
-                    return (
-                      <Link
-                        key={p.id}
-                        href={`/${locale}/menu?category=${encodeURIComponent(p.category?.slug ?? '')}&product=${productParamForUrl(p)}`}
-                        className="group malts-card rounded-2xl overflow-hidden transition-all hover:shadow-md relative"
-                      >
-                        <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
-                          {p.promotionLabel?.trim()
-                            ? p.promotionLabel
-                            : locale === 'bg'
-                              ? 'Промо'
-                              : 'Promo'}
-                        </div>
-                        {p.imageUrl ? (
-                          <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={p.imageUrl}
-                              alt={name}
-                              loading="lazy"
-                              decoding="async"
-                              className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                            />
-                          </div>
-                        ) : null}
-                        <div className="p-6">
-                          <div className="min-w-0">
-                            <p className="text-lg font-bold text-[var(--malts-ink)] truncate">{name}</p>
-                            {desc ? (
-                              <p className="mt-2 text-sm malts-muted whitespace-pre-line">{desc}</p>
-                            ) : null}
-                          </div>
-                          <div className="mt-4 flex items-end justify-between gap-3 border-t border-[var(--malts-hairline)] pt-4">
-                            <div className="min-w-0">
-                              {p.basePriceBgn != null && (
-                                <div className="text-sm text-[var(--malts-subtle)] line-through whitespace-nowrap">
-                                  <Price priceBgn={Number(p.basePriceBgn)} inline showBoth />
-                                </div>
-                              )}
-                              <div className="text-lg font-semibold text-[var(--malts-ink)] whitespace-nowrap">
-                                <Price
-                                  priceBgn={Number(p.priceBgn)}
-                                  inline
-                                  showBoth
-                                  unit={p.unit}
-                                  quantity={p.quantity}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            {/* Promotions (only when at least one active promotion exists) */}
+            {promotedProducts.length > 0 ? (
+              <PromotionsCarousel products={promotedProducts} locale={locale} title={promotionsHeading} />
+            ) : null}
 
             {cardsHeading?.trim() ? (
               <div className="relative mt-10 text-center">
@@ -593,7 +513,7 @@ export default async function HomePage({
                 </svg>
               </Link>
               <Link
-                href={`/${locale}/events`}
+                href={`/${locale}/contact`}
                 className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
               >
                 {ctaSecondary}

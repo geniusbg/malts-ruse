@@ -92,11 +92,11 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
       </div>
 
       <div className="relative">
-        {/* Left Arrow - Desktop only */}
+        {/* Left Arrow */}
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Предишни' : locale === 'en' ? 'Previous' : 'Zurück'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,11 +194,11 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
           </div>
         </div>
 
-        {/* Right Arrow - Desktop only */}
+        {/* Right Arrow */}
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Следващи' : locale === 'en' ? 'Next' : 'Weiter'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

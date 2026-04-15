@@ -21,15 +21,20 @@ function preventScrollBehindModal(e: Event) {
     try {
       const style = window.getComputedStyle(element);
       const overflowY = style.overflowY;
+      const overflowX = style.overflowX;
       const overflow = style.overflow;
 
       if (
         overflowY === 'auto' ||
         overflowY === 'scroll' ||
+        overflowX === 'auto' ||
+        overflowX === 'scroll' ||
         overflow === 'auto' ||
         overflow === 'scroll'
       ) {
-        const canScroll = element.scrollHeight > element.clientHeight;
+        const canScrollY = element.scrollHeight > element.clientHeight;
+        const canScrollX = element.scrollWidth > element.clientWidth;
+        const canScroll = canScrollY || canScrollX;
         if (canScroll) {
           return true;
         }

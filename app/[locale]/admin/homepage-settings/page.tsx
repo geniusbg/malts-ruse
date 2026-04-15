@@ -762,6 +762,54 @@ export default function HomepageSettingsPage({
                   />
                 </div>
               </div>
+
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="malts-label">Втори призив (БГ)</label>
+                  <input
+                    type="text"
+                    value={settings.ctaSecondaryBg}
+                    onChange={(e) => setSettings({ ...settings, ctaSecondaryBg: e.target.value })}
+                    className="malts-field"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center gap-2 mb-2">
+                    <label className="malts-label">Втори призив (EN)</label>
+                    <AutoTranslateButton
+                      variant="dark"
+                      sourceText={settings.ctaSecondaryBg}
+                      targetLang="en"
+                      onTranslated={(text) => setSettings({ ...settings, ctaSecondaryEn: text })}
+                      onError={setTranslateErr}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.ctaSecondaryEn}
+                    onChange={(e) => setSettings({ ...settings, ctaSecondaryEn: e.target.value })}
+                    className="malts-field"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center gap-2 mb-2">
+                    <label className="malts-label">Втори призив (RO)</label>
+                    <AutoTranslateButton
+                      variant="dark"
+                      sourceText={settings.ctaSecondaryBg}
+                      targetLang="ro"
+                      onTranslated={(text) => setSettings({ ...settings, ctaSecondaryRo: text })}
+                      onError={setTranslateErr}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.ctaSecondaryRo}
+                    onChange={(e) => setSettings({ ...settings, ctaSecondaryRo: e.target.value })}
+                    className="malts-field"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
