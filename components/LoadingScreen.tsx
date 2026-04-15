@@ -106,10 +106,22 @@ export default function LoadingScreen({
     return <img src={url} alt="Loading" className={`${gifSizeClasses[logoSize]} object-contain`} />;
   })();
 
+  const framedMedia = (
+    <div className="relative">
+      {/* soft gradient frame that blends with the app paper */}
+      <div className="absolute -inset-3 rounded-[2rem] bg-[radial-gradient(circle_at_top,rgba(196,30,58,0.22),rgba(234,179,8,0.14),rgba(22,101,52,0.12),transparent_70%)] blur-md opacity-90" />
+      <div className="relative rounded-[2rem] bg-[linear-gradient(135deg,rgba(196,30,58,0.35),rgba(234,179,8,0.22),rgba(22,101,52,0.18))] p-[2px] shadow-[0_18px_50px_rgba(26,24,16,0.18)]">
+        <div className="rounded-[calc(2rem-2px)] bg-[var(--malts-paper)]/85 backdrop-blur-md border border-[var(--malts-hairline)]/80 p-4">
+          {media}
+        </div>
+      </div>
+    </div>
+  );
+
   const inner = (
     <div className="text-center px-4">
       <div className="mx-auto mb-8 flex flex-col items-center justify-center gap-2">
-        {media}
+        {framedMedia}
         <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
         <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
           <div
@@ -128,7 +140,7 @@ export default function LoadingScreen({
     return (
       <div className="text-center">
         <div className="flex flex-col items-center justify-center gap-2">
-          {media}
+          {framedMedia}
           <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
           <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
             <div

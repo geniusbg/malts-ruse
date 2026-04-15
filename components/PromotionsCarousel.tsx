@@ -70,18 +70,10 @@ export default function PromotionsCarousel({
 
   if (products.length === 0) return null;
 
-  const subtitle =
-    locale === 'bg'
-      ? 'Виж всички активни предложения'
-      : locale === 'en'
-        ? 'See all active deals'
-        : 'Vezi toate ofertele active';
-
   return (
     <section className="mt-16 md:mt-24">
       <div className="text-center mb-10 md:mb-12">
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-3">{title}</h2>
-        <p className="malts-muted text-lg md:text-xl malts-display-secondary">{subtitle}</p>
         <Link
           href={`/${locale}/menu?category=promotions`}
           className="mt-3 inline-block text-sm font-semibold text-[var(--malts-accent)] hover:opacity-90"

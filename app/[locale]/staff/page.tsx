@@ -349,6 +349,31 @@ export default function StaffDashboard() {
   const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
+  const orderStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-[rgba(234,179,8,0.18)] text-[#713f12] border border-[rgba(234,179,8,0.38)]';
+      case 'pending_approval':
+        return 'bg-[rgba(249,115,22,0.16)] text-[#7c2d12] border border-[rgba(249,115,22,0.36)]';
+      case 'preparing':
+        return 'bg-[rgba(2,132,199,0.12)] text-[#0c4a6e] border border-[rgba(2,132,199,0.28)]';
+      case 'ready':
+        return 'bg-[rgba(22,101,52,0.12)] text-[#14532d] border border-[rgba(22,101,52,0.28)]';
+      case 'completed':
+        return 'bg-[rgba(22,101,52,0.12)] text-[#14532d] border border-[rgba(22,101,52,0.28)]';
+      default:
+        return 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]';
+    }
+  };
+
+  const waiterCallCardTone = (callType: string) =>
+    callType.includes('payment')
+      ? 'bg-[rgba(196,30,58,0.12)] border-[rgba(196,30,58,0.35)]'
+      : 'bg-[rgba(234,179,8,0.14)] border-[rgba(234,179,8,0.35)]';
+
+  const waiterCallCompletedBadgeClass =
+    'bg-[rgba(22,101,52,0.12)] text-[#14532d] border border-[rgba(22,101,52,0.28)]';
+
   const updateOrderStatus = async (orderId: string, status: string, cancellationReason?: string) => {
     setLoadingActions(prev => ({ ...prev, [orderId]: true }));
     
@@ -1021,11 +1046,7 @@ export default function StaffDashboard() {
                 .map(call => (
               <div
                 key={call.id}
-                className={`rounded-xl p-4 md:p-6 border-2 ${
-                  call.callType.includes('payment')
-                    ? 'bg-red-500/20 border-red-500'
-                    : 'bg-yellow-500/20 border-yellow-500'
-                }`}
+                className={`rounded-xl p-4 md:p-6 border-2 ${waiterCallCardTone(call.callType)}`}
               >
                 <div className="flex justify-between items-start mb-3 md:mb-4">
                   <div className="flex-1">
@@ -1127,8 +1148,10 @@ export default function StaffDashboard() {
                     {call.callType.includes('payment') ? '💰' : '🆘'}
                   </div>
                 </div>
-                <div className="text-center text-green-300 font-semibold">
-                  ✓ Завършено
+                <div className="text-center">
+                  <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold ${waiterCallCompletedBadgeClass}`}>
+                    ✓ Завършено
+                  </span>
                 </div>
                 {call.completedAt && (
                   <p className="text-sm malts-muted mt-2 text-center">
@@ -1202,12 +1225,7 @@ export default function StaffDashboard() {
                         </div>
                       )}
                     </div>
-                    <div className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap ${
-                      order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                      order.status === 'pending_approval' ? 'bg-orange-500/20 text-orange-300' :
-                      order.status === 'preparing' ? 'bg-blue-500/20 text-blue-300' :
-                      order.status === 'ready' ? 'bg-green-500/20 text-green-300' : ''
-                    }`}>
+                    <div className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap border ${orderStatusBadgeClass(order.status)}`}>
                       {order.status === 'pending' ? 'Нова' :
                        order.status === 'pending_approval' ? 'Изчаква одобрение' :
                        order.status === 'preparing' ? 'В процес' :
@@ -1331,7 +1349,7 @@ export default function StaffDashboard() {
                         Маса {order.tableNumber}
                       </div>
                     </div>
-                    <div className="px-3 py-1 rounded-full text-sm font-semibold bg-green-500/20 text-green-300">
+                    <div className={`px-3 py-1 rounded-full text-sm font-semibold border ${orderStatusBadgeClass('completed')}`}>
                       ✓ Завършена
                     </div>
                   </div>

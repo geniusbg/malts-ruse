@@ -316,7 +316,7 @@ function MenuPageContent() {
                 alt=""
                 width={240}
                 height={240}
-                className="w-[168px] h-[168px] md:w-[240px] md:h-[240px] object-contain shrink-0 drop-shadow-md mb-3 md:mb-4"
+                className="w-[124px] h-[124px] md:w-[180px] md:h-[180px] object-contain shrink-0 drop-shadow-md mb-3 md:mb-4"
                 priority
               />
               <h1 className="text-4xl md:text-6xl font-bold text-[var(--malts-ink)] malts-display">

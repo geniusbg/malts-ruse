@@ -923,7 +923,7 @@ export default function HomepageSettingsPage({
                   }}
                   className="malts-muted hover:text-[var(--malts-ink)] text-sm"
                 >
-                  + Add stat
+                  + Добави статистика
                 </button>
               </div>
 
@@ -977,7 +977,7 @@ export default function HomepageSettingsPage({
                   }}
                   className="malts-muted hover:text-[var(--malts-ink)] text-sm"
                 >
-                  + Statistik hinzufügen
+                  + Добави статистика
                 </button>
               </div>
             </div>
