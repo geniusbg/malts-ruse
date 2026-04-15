@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { formatDateForLocale } from '@/lib/date-utils';
 import { eventDetailImageUrl } from '@/lib/event-images';
+import ScrollToTopOnMount from '@/components/ScrollToTopOnMount';
 
 export const revalidate = 0;
 
@@ -36,6 +37,7 @@ export default async function EventDetailPage({
 
   return (
     <main className="min-h-screen malts-surface text-[var(--malts-ink)] pt-16 md:pt-20 pb-16">
+      <ScrollToTopOnMount />
       <div className="container mx-auto max-w-5xl px-4">
         <Link
           href={`/${locale}/events`}

@@ -115,7 +115,7 @@ export default function LoadingScreen({
       />
       {/* thin blended border hugging the media edge */}
       <div className="relative rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(196,30,58,0.55),rgba(234,179,8,0.28),rgba(22,101,52,0.22),rgba(255,255,255,0.08))] p-[1.5px] shadow-[0_18px_50px_rgba(26,24,16,0.18)]">
-        <div className="rounded-[calc(1.75rem-1.5px)] overflow-hidden bg-[rgba(245,240,230,0.14)] backdrop-blur-sm">
+        <div className="rounded-[calc(1.75rem-1.5px)] overflow-hidden bg-[rgba(245,240,230,0.14)]">
           {media}
         </div>
       </div>

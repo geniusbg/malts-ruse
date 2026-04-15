@@ -189,7 +189,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[var(--malts-hairline)] py-4 mt-2">
+          <div className="md:hidden border-t border-[var(--malts-hairline)] py-4 mt-2 max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain touch-pan-y pr-1">
             {navLinks.map((link) => (
               (() => {
                 const { icon, text } = splitEmojiLabel(link.label);
