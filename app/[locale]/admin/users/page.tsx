@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import Toast from '@/components/Toast';
 import { formatBulgarianDate } from '@/lib/date-utils';
 import { useLockScroll } from '@/lib/use-lock-scroll';
@@ -55,7 +55,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
   };
 
   if (!session) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   const userRole = (session.user as any)?.role;
@@ -119,7 +119,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
       </div>
 
       {loading ? (
-        <LoadingScreen locale={locale} />
+        <ManagedLoadingScreen locale={locale} />
       ) : (
         <>
           {/* Mobile Card View */}

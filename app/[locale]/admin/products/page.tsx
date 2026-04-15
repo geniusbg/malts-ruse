@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { displayPrice } from '@/lib/currency';
 import { getDescendantCategoryIds } from '@/lib/category-navigation';
 import Toast from '@/components/Toast';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { productParamForUrl } from '@/lib/product-url';
 
@@ -108,7 +108,7 @@ export default function AdminProductsPage() {
   };
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   const filteredProducts = products.filter((product) => {

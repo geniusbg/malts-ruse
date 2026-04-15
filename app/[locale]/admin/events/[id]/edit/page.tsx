@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import EventForm from '@/components/EventForm';
 import Toast from '@/components/Toast';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
+import { toDatetimeLocalValue } from '@/lib/datetime-local';
 
 export default function EditEventPage() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function EditEventPage() {
           description_bg: data.event.descriptionBg,
           description_en: data.event.descriptionEn,
           description_ro: data.event.descriptionRo,
-          event_date: new Date(data.event.eventDate).toISOString().slice(0, 16),
+          event_date: toDatetimeLocalValue(data.event.eventDate),
           location: data.event.location,
           location_bg: data.event.isExternal
             ? data.event.locationBg || data.event.location || ''
@@ -94,7 +95,7 @@ export default function EditEventPage() {
   }
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   if (!event) {

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Toast from '@/components/Toast';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 
 interface WorkingHour {
   dayOfWeek: number;
@@ -112,7 +112,7 @@ export default function WorkingHoursPage({
   };
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -29,6 +29,12 @@ interface HomepageSettings {
   offeringsNoteBg: string;
   offeringsNoteEn: string;
   offeringsNoteRo: string;
+  highlightsLabelBg: string;
+  highlightsLabelEn: string;
+  highlightsLabelRo: string;
+  cardsHeadingBg: string;
+  cardsHeadingEn: string;
+  cardsHeadingRo: string;
   stats: {
     bg: { label: string; value: string }[];
     en: { label: string; value: string }[];
@@ -253,32 +259,34 @@ export default function HomepageSettingsPage({
     });
   };
 
-  const addHighlightRow = (localeKey: 'bg' | 'en' | 'ro') => {
+  // Keep highlight rows aligned across languages.
+  // When adding/removing, we do it for bg/en/ro together so indexes match.
+  const addHighlightRowAll = () => {
     if (!editingCard) return;
-
     setEditingCard({
       ...editingCard,
       highlights: {
-        ...editingCard.highlights,
-        [localeKey]: [...editingCard.highlights[localeKey], '']
+        bg: [...editingCard.highlights.bg, ''],
+        en: [...editingCard.highlights.en, ''],
+        ro: [...editingCard.highlights.ro, ''],
       }
     });
   };
 
-  const removeHighlightRow = (localeKey: 'bg' | 'en' | 'ro', index: number) => {
+  const removeHighlightRowAll = (index: number) => {
     if (!editingCard) return;
-
     setEditingCard({
       ...editingCard,
       highlights: {
-        ...editingCard.highlights,
-        [localeKey]: editingCard.highlights[localeKey].filter((_, idx) => idx !== index)
+        bg: editingCard.highlights.bg.filter((_, idx) => idx !== index),
+        en: editingCard.highlights.en.filter((_, idx) => idx !== index),
+        ro: editingCard.highlights.ro.filter((_, idx) => idx !== index),
       }
     });
   };
 
   if (status === 'loading' || loading || !settings) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (
@@ -511,6 +519,56 @@ export default function HomepageSettingsPage({
                     value={settings.subtitleRo}
                     onChange={(e) => setSettings({ ...settings, subtitleRo: e.target.value })}
                     className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                  />
+                </div>
+              </div>
+
+              {/* Cards heading (shown above the cards grid) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold malts-subtle mb-2">Заглавие над картите (БГ)</label>
+                  <input
+                    type="text"
+                    value={settings.cardsHeadingBg}
+                    onChange={(e) => setSettings({ ...settings, cardsHeadingBg: e.target.value })}
+                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    placeholder="напр. Акценти"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center gap-2 mb-2">
+                    <label className="block text-sm font-semibold malts-subtle">Заглавие над картите (EN)</label>
+                    <AutoTranslateButton
+                      sourceText={settings.cardsHeadingBg}
+                      targetLang="en"
+                      onTranslated={(text) => setSettings({ ...settings, cardsHeadingEn: text })}
+                      onError={setTranslateErr}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.cardsHeadingEn}
+                    onChange={(e) => setSettings({ ...settings, cardsHeadingEn: e.target.value })}
+                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    placeholder="e.g. Highlights"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center gap-2 mb-2">
+                    <label className="block text-sm font-semibold malts-subtle">Заглавие над картите (RO)</label>
+                    <AutoTranslateButton
+                      sourceText={settings.cardsHeadingBg}
+                      targetLang="ro"
+                      onTranslated={(text) => setSettings({ ...settings, cardsHeadingRo: text })}
+                      onError={setTranslateErr}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.cardsHeadingRo}
+                    onChange={(e) => setSettings({ ...settings, cardsHeadingRo: e.target.value })}
+                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    placeholder="ex. Accente"
                   />
                 </div>
               </div>
@@ -979,6 +1037,24 @@ export default function HomepageSettingsPage({
                       className="malts-field"
                       placeholder="напр. ☕ или /nasheto-menu.webp"
                     />
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {[
+                          '🍺','🍷','🥂','🍸','🍹','🥃','☕','🍋','🥤','🍽️','🥗','🧀','🥩','🍕','🍰','🔥','⭐'
+                        ].map((ic) => (
+                          <button
+                            key={ic}
+                            type="button"
+                            onClick={() => setEditingCard({ ...editingCard, icon: ic })}
+                            className={`h-9 w-9 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-lg transition-colors hover:bg-[var(--malts-card-hover)] ${
+                              editingCard.icon === ic ? 'ring-2 ring-[var(--malts-accent-tint-border)]' : ''
+                            }`}
+                            aria-label={`Pick icon ${ic}`}
+                            title={ic}
+                          >
+                            {ic}
+                          </button>
+                        ))}
+                      </div>
                   </div>
                   <div>
                     <label className="malts-label">Позиция (подредба)</label>
@@ -1137,6 +1213,56 @@ export default function HomepageSettingsPage({
 
                 <div>
                   <label className="malts-label">Акценти (едно поле = един акцент)</label>
+                  <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="malts-label">Етикет над акцентите (BG)</label>
+                      <input
+                        type="text"
+                        value={settings?.highlightsLabelBg ?? ''}
+                        onChange={(e) => settings && setSettings({ ...settings, highlightsLabelBg: e.target.value })}
+                        className="malts-field"
+                        placeholder="Акценти"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center gap-2 mb-2">
+                        <label className="malts-label">Етикет над акцентите (EN)</label>
+                        <AutoTranslateButton
+                          variant="dark"
+                          sourceText={settings?.highlightsLabelBg ?? ''}
+                          targetLang="en"
+                          onTranslated={(text) => settings && setSettings({ ...settings, highlightsLabelEn: text })}
+                          onError={setTranslateErr}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={settings?.highlightsLabelEn ?? ''}
+                        onChange={(e) => settings && setSettings({ ...settings, highlightsLabelEn: e.target.value })}
+                        className="malts-field"
+                        placeholder="Highlights"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center gap-2 mb-2">
+                        <label className="malts-label">Етикет над акцентите (RO)</label>
+                        <AutoTranslateButton
+                          variant="dark"
+                          sourceText={settings?.highlightsLabelBg ?? ''}
+                          targetLang="ro"
+                          onTranslated={(text) => settings && setSettings({ ...settings, highlightsLabelRo: text })}
+                          onError={setTranslateErr}
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={settings?.highlightsLabelRo ?? ''}
+                        onChange={(e) => settings && setSettings({ ...settings, highlightsLabelRo: e.target.value })}
+                        className="malts-field"
+                        placeholder="Accente"
+                      />
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {(['bg', 'en', 'ro'] as Array<'bg' | 'en' | 'ro'>).map((localeKey) => (
                       <div key={localeKey}>
@@ -1166,7 +1292,7 @@ export default function HomepageSettingsPage({
                                 )}
                                 <button
                                   type="button"
-                                  onClick={() => removeHighlightRow(localeKey, idx)}
+                                  onClick={() => removeHighlightRowAll(idx)}
                                   className="flex-shrink-0 px-3 py-2 rounded-xl malts-btn-danger text-sm"
                                 >
                                   ✕
@@ -1176,7 +1302,7 @@ export default function HomepageSettingsPage({
                           </div>
                           <button
                             type="button"
-                            onClick={() => addHighlightRow(localeKey)}
+                            onClick={() => addHighlightRowAll()}
                             className="malts-muted hover:text-[var(--malts-ink)] text-sm block"
                           >
                             + Добави акцент

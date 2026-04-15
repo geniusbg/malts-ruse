@@ -41,6 +41,9 @@ export async function PUT(request: Request) {
       addressBg: data.addressBg,
       addressEn: data.addressEn,
       addressRo: data.addressRo,
+      phone: typeof data.phone === 'string' ? data.phone : undefined,
+      instagramUrl: typeof data.instagramUrl === 'string' ? data.instagramUrl : undefined,
+      facebookUrl: typeof data.facebookUrl === 'string' ? data.facebookUrl : undefined,
     });
 
     return NextResponse.json({ settings });

@@ -25,6 +25,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const body = await request.json() as {
+      order?: number;
       startsAt?: string;
       endsAt?: string;
       priceBgn?: number;
@@ -41,6 +42,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const updated = await prisma.productPromotion.update({
       where: { id },
       data: {
+        ...(typeof body.order === 'number' ? { order: body.order } : {}),
         ...(body.startsAt != null ? { startsAt: start } : {}),
         ...(body.endsAt != null ? { endsAt: end } : {}),
         ...(typeof body.priceBgn === 'number' ? { priceBgn: body.priceBgn } : {}),

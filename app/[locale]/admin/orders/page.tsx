@@ -8,7 +8,7 @@ import { getPusherClient } from '@/lib/pusher-client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import PendingApprovalsBanner from '@/components/PendingApprovalsBanner';
 import { useLockScroll } from '@/lib/use-lock-scroll';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatBulgarianDateTime, formatBulgarianDate, formatBulgarianDateRange, formatBulgarianTime } from '@/lib/date-utils';
 import { displayPrice } from '@/lib/currency';
@@ -753,7 +753,7 @@ function AdminOrdersPageContent() {
   const completedTodayOrders = orders.filter(o => o.status === 'completed');
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (
@@ -1175,7 +1175,7 @@ function AdminOrdersPageContent() {
           <div className="malts-card overflow-hidden">
             {historyLoading ? (
               <div className="min-h-[60vh] flex items-center justify-center">
-                <LoadingScreen 
+                <ManagedLoadingScreen 
                   locale={locale} 
                   inline={true}
                   message="Зареждане на история..."
@@ -1405,7 +1405,7 @@ function AdminOrdersPageContent() {
           
           {statsLoading ? (
             <div className="min-h-[60vh] flex items-center justify-center">
-              <LoadingScreen 
+              <ManagedLoadingScreen 
                 locale={locale} 
                 inline={true}
                 message="Зареждане на статистики..."
@@ -1665,7 +1665,7 @@ function AdminOrdersPageContent() {
                 
                 {qrScanStatsLoading ? (
                   <div className="text-center py-8">
-                    <LoadingScreen inline={true} message="Зареждане на статистика..." />
+                    <ManagedLoadingScreen inline={true} message="Зареждане на статистика..." />
                   </div>
                 ) : qrScanStats.length === 0 ? (
                   <div className="text-center py-8">
@@ -1952,7 +1952,7 @@ function AdminOrdersPageContent() {
 
           {approvalsLoading ? (
             <div className="min-h-[60vh] flex items-center justify-center">
-              <LoadingScreen 
+              <ManagedLoadingScreen 
                 locale={locale} 
                 inline={true}
                 message="Зареждане на одобрения..."
@@ -2142,7 +2142,7 @@ function AdminOrdersPageContent() {
 export default function AdminOrdersPage() {
   return (
     <Suspense
-      fallback={<LoadingScreen locale="bg" />}
+      fallback={<ManagedLoadingScreen locale="bg" />}
     >
       <AdminOrdersPageContent />
     </Suspense>

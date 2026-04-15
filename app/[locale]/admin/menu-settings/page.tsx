@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from '@/components/ImageUpload';
 import Toast from '@/components/Toast';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
 
 interface MenuSettings {
@@ -136,7 +136,7 @@ export default function MenuSettingsPage({
   }
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   if (!settings) {

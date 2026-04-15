@@ -16,6 +16,7 @@ function buildNavLinks(locale: string, isSuper: boolean) {
     { href: `/${locale}/admin/promotions`, label: '🏷️ Промоции' },
     { href: `/${locale}/admin/events`, label: '🎉 Събития' },
     { href: `/${locale}/admin/qr`, label: '📱 QR Кодове' },
+    { href: `/${locale}/admin/loading-screens`, label: '⏳ Loading' },
     { href: `/${locale}/admin/users`, label: '👥 Потребители' },
   ];
   if (isSuper) {

@@ -9,8 +9,14 @@ import Price from '@/components/Price';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Toast from '@/components/Toast';
 import { getPusherClient } from '@/lib/pusher-client';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import { useLockScroll } from '@/lib/use-lock-scroll';
+import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
+import OfferingCardIcon from '@/components/OfferingCardIcon';
+import { formatDateForLocale } from '@/lib/date-utils';
+import { eventCardImageUrl } from '@/lib/event-images';
+import { Rampart_One } from 'next/font/google';
+import type { PromotionsUiSettings } from '@/lib/promotions-ui-settings';
 import {
   getChildrenOf,
   categoryPathLeafId,
@@ -37,6 +43,8 @@ interface CartItem {
   productQuantity?: number;
 }
 
+const rampartOne = Rampart_One({ weight: '400', subsets: ['latin'] });
+
 function OrderPageContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -48,6 +56,10 @@ function OrderPageContent() {
 
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [homepageSettings, setHomepageSettings] = useState<any | null>(null);
+  const [homepageCards, setHomepageCards] = useState<any[]>([]);
+  const [upcomingEventsPreview, setUpcomingEventsPreview] = useState<any[]>([]);
+  const [promotionsUiSettings, setPromotionsUiSettings] = useState<PromotionsUiSettings | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   /** Мобилен bottom sheet за избор на категория (под lg). */
@@ -470,23 +482,42 @@ function OrderPageContent() {
         const categoriesRes = await fetch('/api/categories');
         setLoadProgress(45);
         const productsRes = await fetch('/api/menu');
+        const homepageRes = fetch('/api/homepage-settings');
+        const eventsRes = fetch('/api/events?published=true');
+        const promoUiRes = fetch('/api/promotions-ui-settings');
         setLoadProgress(85);
 
-        const categoriesData = await categoriesRes.json();
-        const productsData = await productsRes.json();
+        const [categoriesData, productsData, homepageData, eventsData, promoUiData] = await Promise.all([
+          categoriesRes.json(),
+          productsRes.json(),
+          homepageRes.then((r) => r.json()).catch(() => null),
+          eventsRes.then((r) => r.json()).catch(() => null),
+          promoUiRes.then((r) => r.json()).catch(() => null),
+        ]);
 
         const rawCats: any[] = categoriesData.categories || [];
         const cats = rawCats.map(normalizeCategoryRow);
         setCategories(cats);
         setProducts(productsData.products || []);
 
-        if (cats.length > 0) {
-          const roots = cats
-            .filter((c: any) => !c.parentCategoryId)
-            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
-          if (roots.length > 0) {
-            setCategoryPath([roots[0].id]);
-          }
+        // IMPORTANT: no default selected root category (user must pick).
+        setCategoryPath([]);
+
+        if (homepageData?.settings) {
+          setHomepageSettings(homepageData.settings);
+          setHomepageCards(Array.isArray(homepageData.cards) ? homepageData.cards : []);
+        }
+
+        if (eventsData?.events && Array.isArray(eventsData.events)) {
+          const now = Date.now();
+          const upcoming = eventsData.events
+            .filter((e: any) => !!e?.eventDate && new Date(e.eventDate).getTime() >= now)
+            .slice(0, 3);
+          setUpcomingEventsPreview(upcoming);
+        }
+
+        if (promoUiData?.settings) {
+          setPromotionsUiSettings(promoUiData.settings);
         }
         setLoadProgress(100);
       } catch (error) {
@@ -497,6 +528,27 @@ function OrderPageContent() {
     }
     loadMenu();
   }, []);
+
+  const highlightsLabel =
+    locale === 'bg'
+      ? homepageSettings?.highlightsLabelBg ?? 'Акценти'
+      : locale === 'en'
+        ? homepageSettings?.highlightsLabelEn ?? 'Highlights'
+        : homepageSettings?.highlightsLabelRo ?? 'Accente';
+
+  const promotionsHeading =
+    locale === 'bg'
+      ? promotionsUiSettings?.titleBg ?? 'Промоция'
+      : locale === 'en'
+        ? promotionsUiSettings?.titleEn ?? 'Promotion'
+        : promotionsUiSettings?.titleRo ?? 'Promoție';
+
+  const cardsHeading =
+    locale === 'bg'
+      ? homepageSettings?.cardsHeadingBg ?? ''
+      : locale === 'en'
+        ? homepageSettings?.cardsHeadingEn ?? ''
+        : homepageSettings?.cardsHeadingRo ?? '';
 
   const addToCart = (product: any) => {
     setCart(prev => {
@@ -547,6 +599,10 @@ function OrderPageContent() {
   const cartTotal = cart.reduce((sum, item) => sum + item.priceBgn * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const PROMOTIONS_ROOT_ID = '__promotions__';
+  const hasActivePromotions = useMemo(() => products.some((p: any) => !!p?.isPromoted), [products]);
+  const isPromotionsMode = categoryPath[0] === PROMOTIONS_ROOT_ID;
+
   const parentCategories = useMemo(
     () =>
       categories
@@ -555,9 +611,25 @@ function OrderPageContent() {
     [categories]
   );
 
-  const displayCategoryId = categoryPathLeafId(categoryPath);
-  const categoryProducts = products.filter((p: any) => p.categoryId === displayCategoryId);
-  const leafIdOrder = categoryPathLeafId(categoryPath);
+  const rootTierItems = useMemo(() => {
+    if (!hasActivePromotions) return parentCategories;
+    return [
+      ...parentCategories,
+      {
+        id: PROMOTIONS_ROOT_ID,
+        nameBg: 'Промоции',
+        nameEn: 'Promotions',
+        nameRo: 'Promoții',
+        parentCategoryId: null,
+      },
+    ];
+  }, [parentCategories, hasActivePromotions]);
+
+  const displayCategoryId = isPromotionsMode ? PROMOTIONS_ROOT_ID : categoryPathLeafId(categoryPath);
+  const categoryProducts = isPromotionsMode
+    ? products.filter((p: any) => !!p?.isPromoted)
+    : products.filter((p: any) => p.categoryId === displayCategoryId);
+  const leafIdOrder = isPromotionsMode ? null : categoryPathLeafId(categoryPath);
   const childrenOfLeafOrder = leafIdOrder ? getChildrenOf(categories, leafIdOrder) : [];
   const needsDeeperDrillOrder =
     !!leafIdOrder && childrenOfLeafOrder.length > 0 && categoryProducts.length === 0;
@@ -766,7 +838,7 @@ function OrderPageContent() {
     : (sessionMessage || getSessionMessageForReason());
 
   if (showLoadingScreen) {
-    return <LoadingScreen locale={locale} progress={loading ? loadProgress : undefined} />;
+    return <ManagedLoadingScreen locale={locale} progress={loading ? loadProgress : undefined} />;
   }
 
   return (
@@ -851,15 +923,15 @@ function OrderPageContent() {
           <div className="flex justify-between items-center gap-4">
             <Link
               href={`/${locale}`}
-              className="flex h-[5.5rem] max-h-[5.5rem] min-w-0 shrink-0 items-center overflow-hidden sm:h-16 sm:max-h-16"
+              className="flex h-[6.25rem] max-h-[6.25rem] min-w-0 shrink-0 items-center overflow-hidden sm:h-[5.75rem] sm:max-h-[5.75rem]"
             >
               <Image
                 src="/malts-logo-nav.webp"
                 alt="Malt's"
                 width={400}
                 height={331}
-                sizes="(max-width: 640px) 320px, 300px"
-                className="malts-brand-filter h-full w-auto max-h-[5.5rem] min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-16"
+                sizes="(max-width: 640px) 360px, 320px"
+                className="malts-brand-filter h-full w-auto max-h-[6.25rem] min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-[5.75rem]"
                 priority
               />
             </Link>
@@ -923,8 +995,10 @@ function OrderPageContent() {
             ) => {
               const tierItems =
                 depth === 0
-                  ? parentCategories
-                  : categoryPath[depth - 1]
+                  ? rootTierItems
+                  : isPromotionsMode
+                    ? []
+                    : categoryPath[depth - 1]
                     ? getChildrenOf(categories, categoryPath[depth - 1]!)
                     : [];
               if (tierItems.length === 0) return null;
@@ -943,7 +1017,10 @@ function OrderPageContent() {
                           key={cat.id}
                           type="button"
                           onClick={() => {
-                            const nextPath = selectCategoryAtDepth(categoryPath, depth, cat.id);
+                            const nextPath =
+                              depth === 0 && cat.id === PROMOTIONS_ROOT_ID
+                                ? [PROMOTIONS_ROOT_ID]
+                                : selectCategoryAtDepth(categoryPath, depth, cat.id);
                             setCategoryPath(nextPath);
                             if (opts?.closeCategorySheet) {
                               const leaf = categoryPathLeafId(nextPath);
@@ -953,6 +1030,8 @@ function OrderPageContent() {
                                 if (prodsHere.length > 0 || subcats.length === 0) {
                                   setCategorySheetOpen(false);
                                 }
+                              } else if (nextPath[0] === PROMOTIONS_ROOT_ID) {
+                                setCategorySheetOpen(false);
                               }
                             }
                           }}
@@ -1128,132 +1207,591 @@ function OrderPageContent() {
       {/* Menu */}
       <div className="container mx-auto px-4 py-8">
         {(() => {
-          if (categoryProducts.length === 0) {
+          const sectionLabel =
+              locale === 'bg'
+                ? homepageSettings?.sectionLabelBg ?? 'Предложения'
+                : locale === 'en'
+                  ? homepageSettings?.sectionLabelEn ?? 'Experiences'
+                  : homepageSettings?.sectionLabelRo ?? 'Experiențe';
+            const offeringsTitle =
+              locale === 'bg'
+                ? homepageSettings?.titleBg ?? 'Какво предлагаме'
+                : locale === 'en'
+                  ? homepageSettings?.titleEn ?? 'What We Offer'
+                  : homepageSettings?.titleRo ?? 'Ce oferim';
+            const offeringsSubtitle =
+              locale === 'bg'
+                ? homepageSettings?.subtitleBg ?? 'Открий нашето разнообразие'
+                : locale === 'en'
+                  ? homepageSettings?.subtitleEn ?? 'Discover our variety'
+                  : homepageSettings?.subtitleRo ?? 'Descoperă varietatea noastră';
+            const offeringsDescription =
+              locale === 'bg'
+                ? homepageSettings?.descriptionBg
+                : locale === 'en'
+                  ? homepageSettings?.descriptionEn
+                  : homepageSettings?.descriptionRo;
+            const offeringsNote =
+              locale === 'bg'
+                ? homepageSettings?.offeringsNoteBg
+                : locale === 'en'
+                  ? homepageSettings?.offeringsNoteEn
+                  : homepageSettings?.offeringsNoteRo;
+            const stats: { label: string; value: string }[] =
+              (locale === 'bg'
+                ? homepageSettings?.stats?.bg
+                : locale === 'en'
+                  ? homepageSettings?.stats?.en
+                  : homepageSettings?.stats?.ro) ?? [];
+
+            const cards =
+              homepageCards.length > 0
+                ? homepageCards.map((card: any) => ({
+                    id: card.id,
+                    icon: card.icon,
+                    title:
+                      locale === 'bg'
+                        ? card.titleBg
+                        : locale === 'en'
+                          ? card.titleEn
+                          : card.titleRo,
+                    description:
+                      locale === 'bg'
+                        ? card.descriptionBg
+                        : locale === 'en'
+                          ? card.descriptionEn
+                          : card.descriptionRo,
+                    highlights:
+                      locale === 'bg'
+                        ? card.highlights?.bg ?? []
+                        : locale === 'en'
+                          ? card.highlights?.en ?? []
+                          : card.highlights?.ro ?? [],
+                    badge:
+                      locale === 'bg'
+                        ? card.badgeBg
+                        : locale === 'en'
+                          ? card.badgeEn
+                          : card.badgeRo,
+                  }))
+                : [];
+
+            const featuredProducts = products.filter((p: any) => p?.isFeatured);
+            const promotedProducts = products.filter((p: any) => !!p?.isPromoted);
+
+            // Get category name for display (when a category with products is selected)
+            const currentCategory = isPromotionsMode ? null : categories.find((c: any) => c.id === displayCategoryId);
+            const categoryName = isPromotionsMode
+              ? (locale === 'bg' ? 'Промоции' : locale === 'en' ? 'Promotions' : 'Promoții')
+              : currentCategory
+                ? (locale === 'bg'
+                    ? currentCategory.nameBg
+                    : locale === 'en'
+                      ? currentCategory.nameEn
+                      : currentCategory.nameRo)
+                : '';
+
             return (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">🔍</div>
-                <button
-                  type="button"
-                  onClick={() => openCategoryPicker()}
-                  className="malts-muted hover:text-[var(--malts-ink)] mx-auto max-w-xl text-balance text-xl underline-offset-4 transition-colors hover:underline"
-                >
-                  {needsDeeperDrillOrder
-                    ? categoryPath.length === 1
-                      ? locale === 'bg'
-                        ? 'Избери подкатегория, за да видиш продуктите'
-                        : locale === 'en'
-                          ? 'Choose a subcategory to see products'
-                          : 'Alege o subcategorie pentru a vedea produsele'
-                      : locale === 'bg'
-                        ? 'Избери под-подкатегория, за да видиш продуктите'
-                        : locale === 'en'
-                          ? 'Choose a sub-subcategory to see products'
-                          : 'Alege sub-subcategoria pentru a vedea produsele'
-                    : locale === 'bg'
-                      ? 'Няма продукти в тази категория'
-                      : locale === 'en'
-                        ? 'No products in this category'
-                        : 'Nu există produse în această categorie'}
-                </button>
-              </div>
-            );
-          }
-          
-          // Get category name for display
-          const currentCategory = categories.find((c: any) => c.id === displayCategoryId);
-          const categoryName = currentCategory 
-            ? (locale === 'bg' ? currentCategory.nameBg : locale === 'en' ? currentCategory.nameEn : currentCategory.nameRo)
-            : '';
-          
-          return (
-            <div className="mb-8">
-              {/* Category Header */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-1 w-8 bg-[var(--malts-accent)] rounded-full"></div>
-                <h2 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">{categoryName}</h2>
-                <div className="flex-1 h-px bg-[var(--malts-hairline)]"></div>
-              </div>
-              
-              {/* Products Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {categoryProducts.map((product: any) => {
-                  const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
-                  return (
-                    <div
-                      key={product.id}
-                      className="group relative malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent-tint-border)] hover:shadow-lg transition-all duration-300"
+              <div className="pb-10">
+                {categoryProducts.length === 0 ? (
+                  <div className="text-center pt-8 pb-6 md:pt-10 md:pb-8">
+                    <div className="text-6xl mb-2">🔍</div>
+                    <button
+                      type="button"
+                      onClick={() => openCategoryPicker()}
+                      className="malts-muted hover:text-[var(--malts-ink)] mx-auto max-w-xl text-balance text-xl underline-offset-4 transition-colors hover:underline"
                     >
-                      {product.isPromoted && (
-                        <div className="absolute top-3 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
-                          {locale === 'bg' ? 'Промо' : locale === 'en' ? 'Promo' : 'Promo'}
-                        </div>
-                      )}
-                      {/* Product Image */}
-                      {product.imageUrl && (
-                        <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={product.imageUrl}
-                            alt={productName}
-                            loading="lazy"
-                            decoding="async"
-                            className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
-                      
-                      {/* Product Info */}
-                      <div
-                        className={`p-4 ${product.isPromoted && !product.imageUrl ? 'pt-11' : ''}`}
-                      >
-                        <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--malts-ink)] transition-colors group-hover:text-[var(--malts-accent)] md:text-xl">
-                          {productName}
-                        </h3>
-                        
-                        {product.descriptionBg || product.descriptionEn || product.descriptionRo ? (
-                          <p className="malts-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
-                            {locale === 'bg' && product.descriptionBg ? product.descriptionBg :
-                             locale === 'en' && product.descriptionEn ? product.descriptionEn :
-                             locale === 'ro' && product.descriptionRo ? product.descriptionRo :
-                             product.descriptionBg || product.descriptionEn || product.descriptionRo}
-                          </p>
-                        ) : null}
-                      
-                        <div className="flex justify-between items-end gap-2 border-t border-[var(--malts-hairline)] pt-4">
-                          <div className="flex min-w-0 flex-col items-start gap-0.5">
-                            {product.basePriceBgn != null && (
-                              <span className="inline-block text-xs text-[var(--malts-subtle)] line-through md:text-sm">
-                                <Price
-                                  priceBgn={Number(product.basePriceBgn)}
-                                  inline
-                                  className="text-[var(--malts-subtle)]"
-                                />
-                              </span>
-                            )}
-                            <Price
-                              priceBgn={Number(product.priceBgn)}
-                              className="text-sm font-semibold text-[var(--malts-ink)] md:text-lg lg:text-xl md:font-bold"
-                              showBoth={true}
-                              inline={true}
-                              unit={product.unit}
-                              quantity={product.quantity}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => addToCart(product)}
-                            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
+                      {categoryPath.length === 0
+                        ? locale === 'bg'
+                          ? 'Изберете раздел от менюто, за да разгледате предложенията ни.'
+                          : locale === 'en'
+                            ? 'Pick a menu section above to explore what we serve.'
+                            : 'Alege o secțiune din meniu pentru a vedea oferta noastră.'
+                        : needsDeeperDrillOrder
+                          ? categoryPath.length === 1
+                            ? locale === 'bg'
+                              ? 'Избери подкатегория, за да видиш продуктите'
+                              : locale === 'en'
+                                ? 'Choose a subcategory to see products'
+                                : 'Alege o subcategorie pentru a vedea produsele'
+                            : locale === 'bg'
+                              ? 'Избери под-подкатегория, за да видиш продуктите'
+                              : locale === 'en'
+                                ? 'Choose a sub-subcategory to see products'
+                                : 'Alege sub-subcategoria pentru a vedea produsele'
+                          : locale === 'bg'
+                            ? 'Няма продукти в тази категория'
+                            : locale === 'en'
+                              ? 'No products in this category'
+                              : 'Nu există produse în această categorie'}
+                    </button>
+                    <div className="mt-5 flex justify-center">
+                      <Image
+                        src="/malts-logo-hero.webp"
+                        alt="Malt's"
+                        width={320}
+                        height={311}
+                        className="malts-brand-filter h-auto w-[210px] max-w-[70vw] object-contain opacity-95"
+                        priority={false}
+                      />
+                    </div>
+                  </div>
+                ) : null}
+
+                {categoryProducts.length > 0 ? (
+                  <div className="mb-8">
+                    {/* Category Header */}
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="h-1 w-8 bg-[var(--malts-accent)] rounded-full"></div>
+                      <h2 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">{categoryName}</h2>
+                      <div className="flex-1 h-px bg-[var(--malts-hairline)]"></div>
+                    </div>
+
+                    {/* Products Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                      {categoryProducts.map((product: any) => {
+                        const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
+                        return (
+                          <div
+                            key={product.id}
+                            className="group relative malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent-tint-border)] hover:shadow-lg transition-all duration-300"
                           >
-                            {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
-                          </button>
+                            {product.isPromoted && (
+                              <div className="absolute top-3 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
+                                {product.promotionLabel?.trim()
+                                  ? product.promotionLabel
+                                  : locale === 'bg'
+                                    ? 'Промо'
+                                    : locale === 'en'
+                                      ? 'Promo'
+                                      : 'Promo'}
+                              </div>
+                            )}
+                            {/* Product Image */}
+                            {product.imageUrl && (
+                              <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={product.imageUrl}
+                                  alt={productName}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
+                                />
+                              </div>
+                            )}
+
+                            {/* Product Info */}
+                            <div
+                              className={`p-4 ${product.isPromoted && !product.imageUrl ? 'pt-11' : ''}`}
+                            >
+                              <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--malts-ink)] transition-colors group-hover:text-[var(--malts-accent)] md:text-xl">
+                                {productName}
+                              </h3>
+
+                              {product.descriptionBg || product.descriptionEn || product.descriptionRo ? (
+                                <p className="malts-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
+                                  {locale === 'bg' && product.descriptionBg ? product.descriptionBg :
+                                   locale === 'en' && product.descriptionEn ? product.descriptionEn :
+                                   locale === 'ro' && product.descriptionRo ? product.descriptionRo :
+                                   product.descriptionBg || product.descriptionEn || product.descriptionRo}
+                                </p>
+                              ) : null}
+
+                              <div className="flex justify-between items-end gap-2 border-t border-[var(--malts-hairline)] pt-4">
+                                <div className="flex min-w-0 flex-col items-start gap-0.5">
+                                  {product.basePriceBgn != null && (
+                                    <span className="inline-block text-xs text-[var(--malts-subtle)] line-through md:text-sm">
+                                      <Price
+                                        priceBgn={Number(product.basePriceBgn)}
+                                        inline
+                                        className="text-[var(--malts-subtle)]"
+                                      />
+                                    </span>
+                                  )}
+                                  <Price
+                                    priceBgn={Number(product.priceBgn)}
+                                    className="text-sm font-semibold text-[var(--malts-ink)] md:text-lg lg:text-xl md:font-bold"
+                                    showBoth={true}
+                                    inline={true}
+                                    unit={product.unit}
+                                    quantity={product.quantity}
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => addToCart(product)}
+                                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
+                                >
+                                  {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Homepage-like sections (1:1) shown after category picker */}
+                <div>
+                  {/* Offerings Section */}
+                  {homepageSettings && (
+                    <section className="mt-10 md:mt-14 relative">
+                      <div className="relative overflow-hidden malts-card px-6 py-10 md:px-16 md:py-14">
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--malts-accent-tint)] blur-3xl opacity-60"></div>
+                          <div className="absolute -bottom-10 left-10 w-56 h-56 bg-[rgba(22,101,52,0.10)] blur-3xl opacity-60"></div>
+                        </div>
+
+                        <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
+                          <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] malts-section-label-font">
+                            {sectionLabel}
+                          </span>
+                          <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight malts-display">
+                            {offeringsTitle}
+                          </h2>
+                          <p className="mt-4 text-lg md:text-xl malts-muted malts-display-secondary">
+                            {offeringsSubtitle}
+                          </p>
+                          {offeringsDescription ? (
+                            <p className="mt-6 text-base md:text-lg malts-muted leading-relaxed max-w-3xl whitespace-pre-line">
+                              {offeringsDescription}
+                            </p>
+                          ) : null}
+                          {offeringsNote ? (
+                            <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl malts-muted whitespace-pre-line">
+                              {offeringsNote}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {stats.length > 0 && (
+                          <div className="relative mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {stats.map((stat) => (
+                              <div
+                                key={stat.label}
+                                className="rounded-2xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-6 py-5 text-center"
+                              >
+                                <div className="text-3xl md:text-4xl font-semibold">{stat.value}</div>
+                                <div className="mt-2 text-sm uppercase tracking-[0.2em] malts-subtle">
+                                  {stat.label}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Promotions cards (only when there is at least one active promotion) */}
+                        {promotedProducts.length > 0 && (
+                          <div className="relative mt-12">
+                            <div className="mb-6 text-center">
+                              <p
+                                className={`text-3xl md:text-4xl tracking-wide text-[#c41e3a] animate-pulse drop-shadow-[0_8px_18px_rgba(196,30,58,0.30)] ${rampartOne.className}`}
+                              >
+                                {promotionsHeading}
+                              </p>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                              {promotedProducts.map((p: any) => {
+                                const name =
+                                  locale === 'bg' ? p.nameBg : locale === 'en' ? p.nameEn : p.nameRo;
+                                const desc =
+                                  locale === 'bg'
+                                    ? p.descriptionBg
+                                    : locale === 'en'
+                                      ? p.descriptionEn
+                                      : p.descriptionRo;
+                                return (
+                                  <div key={p.id} className="group malts-card rounded-2xl overflow-hidden relative">
+                                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                                      {p.promotionLabel?.trim()
+                                        ? p.promotionLabel
+                                        : locale === 'bg'
+                                          ? 'Промо'
+                                          : 'Promo'}
+                                    </div>
+                                    {p.imageUrl ? (
+                                      <div className="relative h-48 w-full overflow-hidden bg-[var(--malts-inset)]">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={p.imageUrl}
+                                          alt={name}
+                                          loading="lazy"
+                                          decoding="async"
+                                          className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                      </div>
+                                    ) : null}
+                                    <div className="p-4">
+                                      <div className="min-w-0">
+                                        <p className="font-semibold text-[var(--malts-ink)] truncate">{name}</p>
+                                        {desc ? (
+                                          <p className="mt-2 text-xs malts-muted whitespace-pre-line">{desc}</p>
+                                        ) : null}
+                                      </div>
+                                        <div className="mt-3 flex items-end justify-between gap-3">
+                                        <div className="min-w-0">
+                                          {p.basePriceBgn != null && (
+                                            <div className="text-xs text-[var(--malts-subtle)] line-through">
+                                              <Price priceBgn={Number(p.basePriceBgn)} inline />
+                                            </div>
+                                          )}
+                                            <div className="text-sm font-semibold text-[var(--malts-ink)] whitespace-nowrap">
+                                            <Price
+                                              priceBgn={Number(p.priceBgn)}
+                                              inline
+                                              showBoth
+                                              unit={p.unit}
+                                              quantity={p.quantity}
+                                            />
+                                          </div>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => addToCart(p)}
+                                          className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary"
+                                        >
+                                          {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {cards.length > 0 && (
+                          <>
+                            {cardsHeading?.trim() ? (
+                              <div className="relative mt-10 text-center">
+                                <p className="text-xs uppercase tracking-[0.3em] malts-subtle">{cardsHeading}</p>
+                              </div>
+                            ) : null}
+                            <div className="relative mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            {cards.map((card: any) => (
+                              <div
+                                key={card.id}
+                                className="group flex flex-col malts-card p-6 md:p-7 hover:-translate-y-[6px] transition-all duration-300"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="relative group/icon">
+                                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                                    <div className="relative w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] flex items-center justify-center transition-all duration-300">
+                                      <div className="flex items-center justify-center transform group-hover/icon:scale-110 transition-transform duration-300">
+                                        <OfferingCardIcon icon={card.icon} />
+                                      </div>
+                                    </div>
+                                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 opacity-0 group-hover/icon:opacity-100 pointer-events-none transition-opacity duration-300 z-10">
+                                      <div className="bg-[var(--malts-card)]/92 backdrop-blur-sm border border-[var(--malts-hairline)] rounded-lg px-4 py-2 whitespace-nowrap">
+                                        <p className="text-xs text-[var(--malts-ink)] font-medium">
+                                          {Array.isArray(card.highlights) ? card.highlights.slice(0, 3).join(' • ') : ''}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
+                                    {card.badge}
+                                  </span>
+                                </div>
+                                <h3 className="mt-6 text-2xl font-semibold transition-colors">{card.title}</h3>
+                                <p className="mt-3 malts-muted text-sm md:text-base leading-relaxed transition-colors">
+                                  {card.description}
+                                </p>
+
+                                {Array.isArray(card.highlights) && card.highlights.length > 0 ? (
+                                  <div className="mt-6">
+                                    <p className="text-xs uppercase tracking-[0.3em] malts-subtle mb-3 transition-colors">
+                                      {highlightsLabel}
+                                    </p>
+                                    <ul className="space-y-2 text-sm md:text-base text-[var(--malts-ink)]">
+                                      {card.highlights.map((item: string, index: number) => (
+                                        <li
+                                          key={`${card.id}-${index}`}
+                                          className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200"
+                                          style={{ transitionDelay: `${index * 50}ms` }}
+                                        >
+                                          <span className="inline-block h-[2px] w-6 bg-[var(--malts-hairline)] group-hover:bg-[var(--malts-accent-tint-border)] group-hover:w-8 transition-all"></span>
+                                          <span className="truncate transition-colors">{item}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ) : null}
+                              </div>
+                            ))}
+                            </div>
+                          </>
+                        )}
+
+                        <div className="relative mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+                          <Link
+                            href={`/${locale}/menu`}
+                            className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-primary px-8 py-3 font-semibold tracking-wide transition"
+                          >
+                            {locale === 'bg'
+                              ? homepageSettings?.ctaPrimaryBg ?? 'Разгледай менюто'
+                              : locale === 'en'
+                                ? homepageSettings?.ctaPrimaryEn ?? 'View the menu'
+                                : homepageSettings?.ctaPrimaryRo ?? 'Vezi meniul'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-7-7l7 7-7 7" />
+                            </svg>
+                          </Link>
+                          <Link
+                            href={`/${locale}/events`}
+                            className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
+                          >
+                            {locale === 'bg'
+                              ? homepageSettings?.ctaSecondaryBg ?? 'Резервирай вечер'
+                              : locale === 'en'
+                                ? homepageSettings?.ctaSecondaryEn ?? 'Book an evening'
+                                : homepageSettings?.ctaSecondaryRo ?? 'Rezervă o seară'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-7-7l7 7-7 7" />
+                            </svg>
+                          </Link>
                         </div>
                       </div>
+                    </section>
+                  )}
+
+                  {/* Chef's Picks Carousel */}
+                  {featuredProducts.length > 0 && (
+                    <ChefsPicksCarousel
+                      products={featuredProducts.map((p: any) => ({
+                        id: p.id,
+                        slug: p.slug,
+                        nameBg: p.nameBg,
+                        nameEn: p.nameEn,
+                        nameRo: p.nameRo,
+                        descriptionBg: p.descriptionBg,
+                        descriptionEn: p.descriptionEn,
+                        descriptionRo: p.descriptionRo,
+                        priceBgn: Number(p.priceBgn),
+                        quantity: p.quantity ?? 1,
+                        unit: p.unit ?? 'pcs',
+                        imageUrl: p.imageUrl,
+                        categoryId: p.categoryId,
+                        categorySlug: '',
+                        category: {
+                          nameBg: '',
+                          nameEn: '',
+                          nameRo: '',
+                        },
+                      }))}
+                      locale={locale}
+                    />
+                  )}
+
+                  {/* Upcoming Events Preview */}
+                  {upcomingEventsPreview.length > 0 && (
+                    <div className="mt-16 md:mt-24">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 md:mb-12 gap-4">
+                        <div>
+                          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
+                            {locale === 'bg'
+                              ? 'Предстоящи събития'
+                              : locale === 'en'
+                                ? 'Upcoming Events'
+                                : 'Evenimente viitoare'}
+                          </h2>
+                          <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
+                            {locale === 'bg'
+                              ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
+                              : locale === 'en'
+                                ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
+                                : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/${locale}/events`}
+                          className="group px-6 py-3 malts-btn-secondary rounded-xl font-semibold border-2 transition-all flex items-center gap-2"
+                        >
+                          {locale === 'bg' ? 'Виж всички' : locale === 'en' ? 'View all' : 'Alle ansehen'}
+                          <svg
+                            className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                        {upcomingEventsPreview.map((event: any) => {
+                          const eventTitle =
+                            locale === 'bg' ? event.titleBg : locale === 'en' ? event.titleEn : event.titleRo;
+                          const eventDesc =
+                            locale === 'bg'
+                              ? event.descriptionBg
+                              : locale === 'en'
+                                ? event.descriptionEn
+                                : event.descriptionRo;
+                          const eventDate = new Date(event.eventDate);
+                          const cardImageSrc = eventCardImageUrl(event);
+
+                          return (
+                            <Link
+                              key={event.id}
+                              href={`/${locale}/events/${event.id}`}
+                              className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block"
+                            >
+                              {cardImageSrc && (
+                                <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={cardImageSrc}
+                                    alt={eventTitle}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,16,0.65)] via-transparent to-transparent opacity-60"></div>
+                                </div>
+                              )}
+
+                              <div className="p-6">
+                                <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] rounded-full w-fit backdrop-blur-sm">
+                                  <svg className="w-4 h-4 text-[var(--malts-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="text-[var(--malts-ink)] text-sm font-medium">
+                                    {formatDateForLocale(eventDate, locale as 'bg' | 'en' | 'ro')}
+                                  </span>
+                                </div>
+
+                                <h3 className="text-xl md:text-2xl font-bold mb-3 transition-colors line-clamp-2">
+                                  {eventTitle}
+                                </h3>
+
+                                {eventDesc && (
+                                  <p className="malts-muted text-sm md:text-base line-clamp-2 mb-4">
+                                    {eventDesc}
+                                  </p>
+                                )}
+
+                                <div className="flex items-center text-[var(--malts-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
+                                  {locale === 'bg' ? 'Научи повече' : locale === 'en' ? 'Learn more' : 'Află mai mult'}
+                                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
-          );
+            );
         })()}
       </div>
 
@@ -1467,7 +2005,7 @@ export default function OrderPage() {
   const locale = pathname.split('/')[1] || 'bg';
   
   return (
-    <Suspense fallback={<LoadingScreen locale={locale} />}>
+    <Suspense fallback={<ManagedLoadingScreen locale={locale} />}>
       <OrderPageContent />
     </Suspense>
   );

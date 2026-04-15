@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import ProductForm from '@/components/ProductForm';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function NewProductPage() {
   };
 
   if (categories.length === 0) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (

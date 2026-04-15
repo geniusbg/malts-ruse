@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
 import CategoryModal from '@/components/CategoryModal';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 
 export default function AdminCategoriesPage() {
@@ -150,7 +150,7 @@ export default function AdminCategoriesPage() {
   };
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   const renderCategoryTree = (parentId: string | null, depth = 0) => {

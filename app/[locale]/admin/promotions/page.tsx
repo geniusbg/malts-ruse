@@ -2,13 +2,17 @@
 
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { eurToBgn } from '@/lib/currency';
+import AutoTranslateButton from '@/components/AutoTranslateButton';
+
+type PromotionsUiSettings = { id: string; titleBg: string; titleEn: string; titleRo: string };
 
 type PromoRow = {
   id: string;
   productId: string;
+  order: number;
   startsAt: string;
   endsAt: string;
   priceBgn: number;
@@ -44,22 +48,28 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
   const [promotions, setPromotions] = useState<PromoRow[]>([]);
   const [products, setProducts] = useState<ProductOpt[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [uiSettings, setUiSettings] = useState<PromotionsUiSettings | null>(null);
+  const [savingUi, setSavingUi] = useState(false);
 
   const [form, setForm] = useState({
     productId: '',
+    order: '0',
     startsAt: '',
     endsAt: '',
     priceBgn: '',
     priceEur: '',
+    discountPercent: '',
     label: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState<{
     id: string;
+    order: string;
     startsAt: string;
     endsAt: string;
     priceBgn: string;
     priceEur: string;
+    discountPercent: string;
     label: string;
   } | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -72,9 +82,10 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
   const load = useCallback(async () => {
     setErr(null);
     try {
-      const [pr, prod] = await Promise.all([
+      const [pr, prod, ui] = await Promise.all([
         fetch('/api/promotions').then((r) => r.json()),
         fetch('/api/products').then((r) => r.json()),
+        fetch('/api/promotions-ui-settings').then((r) => r.json()).catch(() => null),
       ]);
       if (pr.promotions) setPromotions(pr.promotions);
       if (prod.products) {
@@ -99,12 +110,40 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
           )
         );
       }
+      if (ui?.settings) setUiSettings(ui.settings);
     } catch {
       setErr('Грешка при зареждане');
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const saveUiSettings = async () => {
+    if (!uiSettings) return;
+    setSavingUi(true);
+    setErr(null);
+    try {
+      const res = await fetch('/api/promotions-ui-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titleBg: uiSettings.titleBg,
+          titleEn: uiSettings.titleEn,
+          titleRo: uiSettings.titleRo,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setErr(data?.error || 'Грешка при запис на настройките');
+        return;
+      }
+      if (data?.settings) setUiSettings(data.settings);
+    } catch {
+      setErr('Грешка при запис на настройките');
+    } finally {
+      setSavingUi(false);
+    }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -175,11 +214,11 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
 
   const createPromo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.productId || !form.startsAt || !form.endsAt || form.priceEur === '') {
-      setErr('Попълнете всички полета');
+    if (!form.productId || !form.startsAt || !form.endsAt || (form.priceEur === '' && form.discountPercent === '')) {
+      setErr('Попълнете продукт, период и цена или % отстъпка');
       return;
     }
-    const priceEurNum = parseFloat(form.priceEur);
+    const priceEurNum = parseFloat(form.priceEur || '0');
     if (Number.isNaN(priceEurNum) || priceEurNum < 0) {
       setErr('Въведете валидна цена в евро');
       return;
@@ -192,6 +231,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: form.productId,
+          order: Number(form.order) || 0,
           startsAt: new Date(form.startsAt).toISOString(),
           endsAt: new Date(form.endsAt).toISOString(),
           priceBgn: eurToBgn(priceEurNum),
@@ -203,10 +243,12 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
       if (!res.ok) throw new Error(data.error || 'Грешка');
       setForm({
         productId: '',
+        order: '0',
         startsAt: '',
         endsAt: '',
         priceBgn: '',
         priceEur: '',
+        discountPercent: '',
         label: '',
       });
       await load();
@@ -235,10 +277,12 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
     setErr(null);
     setEditing({
       id: p.id,
+      order: String(p.order ?? 0),
       startsAt: toDatetimeLocalValue(p.startsAt),
       endsAt: toDatetimeLocalValue(p.endsAt),
       priceBgn: String(p.priceBgn),
       priceEur: String(p.priceEur),
+      discountPercent: '',
       label: p.label ?? '',
     });
   };
@@ -263,6 +307,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          order: Number(editing.order) || 0,
           startsAt: new Date(editing.startsAt).toISOString(),
           endsAt: new Date(editing.endsAt).toISOString(),
           priceBgn: eurToBgn(priceEurNum),
@@ -282,11 +327,12 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
   };
 
   if (status === 'loading' || loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   const now = Date.now();
   const selectedProduct = products.find((p) => p.id === form.productId);
+  const selectedProductBaseEur = selectedProduct?.priceEur ?? null;
   const productTriggerLabel =
     selectedProduct != null
       ? productName(selectedProduct)
@@ -302,6 +348,74 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
       <p className="malts-muted text-sm mb-8">
         Промо цена в зададен период. На менюто се показва ефективната цена и бадж „Промо“.
       </p>
+
+      {uiSettings && (
+        <div className="malts-card p-6 md:p-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl md:text-2xl font-bold text-[var(--malts-ink)]">Заглавие над промо картите</h2>
+              <p className="malts-muted mt-1 text-sm">
+                Това е текстът „Промоция“, който се вижда над промоциите в началната страница и в `/order`.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={saveUiSettings}
+              disabled={savingUi}
+              className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+                savingUi ? 'malts-btn-secondary cursor-not-allowed opacity-50' : 'malts-btn-primary'
+              }`}
+            >
+              {savingUi ? 'Запазване...' : 'Запази'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="malts-label">Заглавие (BG)</label>
+              <input
+                className="malts-field"
+                value={uiSettings.titleBg}
+                onChange={(e) => setUiSettings({ ...uiSettings, titleBg: e.target.value })}
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center gap-2 mb-2">
+                <label className="malts-label">Заглавие (EN)</label>
+                <AutoTranslateButton
+                  variant="dark"
+                  sourceText={uiSettings.titleBg}
+                  targetLang="en"
+                  onTranslated={(text) => setUiSettings({ ...uiSettings, titleEn: text })}
+                  onError={setErr}
+                />
+              </div>
+              <input
+                className="malts-field"
+                value={uiSettings.titleEn}
+                onChange={(e) => setUiSettings({ ...uiSettings, titleEn: e.target.value })}
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center gap-2 mb-2">
+                <label className="malts-label">Заглавие (RO)</label>
+                <AutoTranslateButton
+                  variant="dark"
+                  sourceText={uiSettings.titleBg}
+                  targetLang="ro"
+                  onTranslated={(text) => setUiSettings({ ...uiSettings, titleRo: text })}
+                  onError={setErr}
+                />
+              </div>
+              <input
+                className="malts-field"
+                value={uiSettings.titleRo}
+                onChange={(e) => setUiSettings({ ...uiSettings, titleRo: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {err && <div className="mb-4 malts-alert malts-alert-error" role="alert">{err}</div>}
 
@@ -405,6 +519,16 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
             <input type="hidden" value={form.productId} required readOnly aria-hidden tabIndex={-1} />
           </div>
           <div>
+            <label className="block malts-subtle text-sm mb-1">Подредба (order)</label>
+            <input
+              type="number"
+              value={form.order}
+              onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
+              placeholder="0"
+              className="w-full malts-inset px-3 py-2"
+            />
+          </div>
+          <div>
             <label className="block malts-subtle text-sm mb-1">Етикет (по избор)</label>
             <input
               value={form.label}
@@ -434,9 +558,8 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
             />
           </div>
           <div>
-            <label className="malts-label">Цена (€) *</label>
+            <label className="malts-label">Цена (€)</label>
             <input
-              required
               type="number"
               step="0.01"
               min="0"
@@ -446,11 +569,47 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                 setForm((f) => ({
                   ...f,
                   priceEur: v,
+                  discountPercent: '',
                   priceBgn: v === '' ? '' : String(eurToBgn(parseFloat(v) || 0)),
                 }));
               }}
               className="w-full malts-inset px-3 py-2 rounded-lg"
             />
+          </div>
+          <div>
+            <label className="malts-label">% отстъпка (по избор)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="99.99"
+              value={form.discountPercent}
+              onChange={(e) => {
+                const pctRaw = e.target.value;
+                const pct = parseFloat(pctRaw);
+                if (!selectedProductBaseEur || Number.isNaN(pct)) {
+                  setForm((f) => ({ ...f, discountPercent: pctRaw }));
+                  return;
+                }
+                const nextEur = Math.max(0, selectedProductBaseEur * (1 - pct / 100));
+                const eurRounded = Math.round(nextEur * 100) / 100;
+                setForm((f) => ({
+                  ...f,
+                  discountPercent: pctRaw,
+                  priceEur: String(eurRounded),
+                  priceBgn: String(eurToBgn(eurRounded)),
+                }));
+              }}
+              placeholder="напр. 50"
+              className="w-full malts-inset px-3 py-2 rounded-lg"
+            />
+            <p className="mt-1 text-xs malts-muted">
+              {locale === 'bg'
+                ? 'Смята се от базовата цена на продукта.'
+                : locale === 'en'
+                  ? 'Calculated from the product base price.'
+                  : 'Calculat din prețul de bază al produsului.'}
+            </p>
           </div>
           <div>
             <label className="malts-label">≈ лв. (по фиксиран курс)</label>
@@ -518,10 +677,9 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                             />
                           </div>
                           <div>
-                            <label className="malts-label text-xs">Цена (€) *</label>
+                            <label className="malts-label text-xs">Цена (€)</label>
                             <input
                               type="number"
-                              required
                               step="0.01"
                               min="0"
                               value={editing.priceEur}
@@ -532,6 +690,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                                     ? {
                                         ...x,
                                         priceEur: v,
+                                        discountPercent: '',
                                         priceBgn: v === '' ? '' : String(eurToBgn(parseFloat(v) || 0)),
                                       }
                                     : x
@@ -559,6 +718,48 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                             className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
                           />
                         </div>
+                      <div>
+                        <label className="malts-label text-xs">Подредба (order)</label>
+                        <input
+                          type="number"
+                          value={editing.order}
+                          onChange={(e) => setEditing((x) => (x ? { ...x, order: e.target.value } : x))}
+                          className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="malts-label text-xs">% отстъпка (по избор)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="99.99"
+                          value={editing.discountPercent}
+                          onChange={(e) => {
+                            const pctRaw = e.target.value;
+                            const pct = parseFloat(pctRaw);
+                            const prod = products.find((pp) => pp.id === promotions.find((pr) => pr.id === editing.id)?.productId);
+                            const baseEur = prod?.priceEur ?? null;
+                            if (!baseEur || Number.isNaN(pct)) {
+                              setEditing((x) => (x ? { ...x, discountPercent: pctRaw } : x));
+                              return;
+                            }
+                            const nextEur = Math.max(0, baseEur * (1 - pct / 100));
+                            const eurRounded = Math.round(nextEur * 100) / 100;
+                            setEditing((x) =>
+                              x
+                                ? {
+                                    ...x,
+                                    discountPercent: pctRaw,
+                                    priceEur: String(eurRounded),
+                                    priceBgn: String(eurToBgn(eurRounded)),
+                                  }
+                                : x
+                            );
+                          }}
+                          className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
+                        />
+                      </div>
                         <div className="flex gap-2">
                           <button
                             type="submit"

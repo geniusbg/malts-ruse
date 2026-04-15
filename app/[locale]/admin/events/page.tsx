@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import Toast from '@/components/Toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatBulgarianDateWithMonth } from '@/lib/date-utils';
@@ -58,7 +58,7 @@ export default function AdminEventsPage() {
   };
 
   if (loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (
@@ -117,7 +117,7 @@ export default function AdminEventsPage() {
                   )}
                   
                   {event.isExternal && (
-                    <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">
+                    <span className="px-3 py-1 bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] rounded-full text-sm font-medium">
                       Партньорско
                     </span>
                   )}

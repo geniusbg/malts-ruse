@@ -19,7 +19,7 @@ export async function GET() {
     const brandId = await getDefaultBrandId();
     const list = await prisma.productPromotion.findMany({
       where: { brandId },
-      orderBy: { startsAt: 'desc' },
+      orderBy: [{ order: 'asc' }, { startsAt: 'desc' }],
       include: {
         product: {
           select: { id: true, nameBg: true, nameEn: true, nameRo: true },
@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       priceBgn,
       priceEur,
       label,
+      order,
     } = body as {
       productId?: string;
       startsAt?: string;
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
       priceBgn?: number;
       priceEur?: number;
       label?: string | null;
+      order?: number;
     };
 
     if (!productId || !startsAt || !endsAt || priceBgn == null || priceEur == null) {
@@ -87,6 +89,7 @@ export async function POST(request: Request) {
       data: {
         brandId,
         productId,
+        order: typeof order === 'number' ? order : 0,
         startsAt: start,
         endsAt: end,
         priceBgn,

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getLocationSettings } from '@/lib/location-settings';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,8 @@ export default async function ContactPage({
 }) {
   const { locale: loc } = await params;
   const locale = loc === 'en' || loc === 'ro' ? loc : 'bg';
+
+  const locationSettings = await getLocationSettings();
 
   const workingHours = await prisma.workingHours.findMany({
 
@@ -48,6 +51,18 @@ export default async function ContactPage({
 
 
   const dayNames = ['Нед', 'Пон', 'Вт', 'Ср', 'Чет', 'Пет', 'Съб'];
+
+  const address =
+    locale === 'bg'
+      ? locationSettings.addressBg
+      : locale === 'en'
+        ? locationSettings.addressEn
+        : locationSettings.addressRo;
+
+  const phone = locationSettings.phone?.trim() || '';
+  const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
+  const instagramUrl = locationSettings.instagramUrl?.trim() || '';
+  const facebookUrl = locationSettings.facebookUrl?.trim() || '';
 
 
 
@@ -128,9 +143,7 @@ export default async function ContactPage({
 
                     <p className="text-[var(--malts-ink)] font-semibold">Адрес</p>
 
-                    <p className="malts-muted">ул. &quot;Александровска&quot; 97</p>
-
-                    <p className="malts-muted">Русе, България</p>
+                    <p className="malts-muted whitespace-pre-line">{address}</p>
 
                   </div>
 
@@ -170,17 +183,16 @@ export default async function ContactPage({
 
                     <p className="text-[var(--malts-ink)] font-semibold">Телефон</p>
 
-                    <a
-
-                      href="tel:+359898536542"
-
-                      className="text-[var(--malts-ink)] hover:text-[var(--malts-accent)] transition-colors"
-
-                    >
-
-                      089 853 6542
-
-                    </a>
+                    {phone && phoneHref ? (
+                      <a
+                        href={phoneHref}
+                        className="text-[var(--malts-ink)] hover:text-[var(--malts-accent)] transition-colors"
+                      >
+                        {phone}
+                      </a>
+                    ) : (
+                      <p className="malts-muted">(очаква се телефон)</p>
+                    )}
 
                   </div>
 
@@ -201,7 +213,7 @@ export default async function ContactPage({
                     <p className="text-[var(--malts-ink)] font-semibold">Instagram</p>
 
                     <a
-                      href="https://instagram.com/"
+                      href={instagramUrl || 'https://instagram.com/'}
 
                       target="_blank"
 
@@ -211,7 +223,7 @@ export default async function ContactPage({
 
                     >
 
-                      (очаква се линк)
+                      {instagramUrl ? instagramUrl : '(очаква се линк)'}
 
                     </a>
 
@@ -234,7 +246,7 @@ export default async function ContactPage({
                     <p className="text-[var(--malts-ink)] font-semibold">Facebook</p>
 
                     <a
-                      href="https://www.facebook.com/"
+                      href={facebookUrl || 'https://www.facebook.com/'}
 
                       target="_blank"
 
@@ -244,7 +256,7 @@ export default async function ContactPage({
 
                     >
 
-                      (очаква се линк)
+                      {facebookUrl ? facebookUrl : '(очаква се линк)'}
 
                     </a>
 

@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense, useMemo, useRef, useCallback, Fragment }
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Price from '@/components/Price';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import {
   getChildrenOf,
   getCategoryName,
@@ -49,12 +49,15 @@ function MenuPageContent() {
   /** Предотвратява race: при клик пътят се обновява преди URL; старият ?category= иначе презаписва избора. */
   const skipApplyCategoryFromUrlRef = useRef(false);
 
-  const displayCategoryId = categoryPathLeafId(categoryPath);
+  const PROMOTIONS_ROOT_ID = '__promotions__';
+  const hasActivePromotions = useMemo(() => products.some((p: any) => !!p?.isPromoted), [products]);
+  const isPromotionsMode = categoryPath[0] === PROMOTIONS_ROOT_ID;
+  const displayCategoryId = isPromotionsMode ? PROMOTIONS_ROOT_ID : categoryPathLeafId(categoryPath);
 
-  const categoryProducts = useMemo(
-    () => products.filter((p: any) => p.categoryId === displayCategoryId),
-    [products, displayCategoryId]
-  );
+  const categoryProducts = useMemo(() => {
+    if (isPromotionsMode) return products.filter((p: any) => !!p?.isPromoted);
+    return products.filter((p: any) => p.categoryId === displayCategoryId);
+  }, [products, displayCategoryId, isPromotionsMode]);
 
   function scrollToProductById(productId: string) {
     setTimeout(() => {
@@ -78,6 +81,12 @@ function MenuPageContent() {
   }
 
   function applyCategorySelectionFromParam(cats: any[], categoryParam: string | null) {
+    if (categoryParam === 'promotions' && hasActivePromotions) {
+      setCategoryPath((prev) =>
+        prev.length === 1 && prev[0] === PROMOTIONS_ROOT_ID ? prev : [PROMOTIONS_ROOT_ID]
+      );
+      return;
+    }
     const resolvedId = resolveCategoryQueryToId(cats, categoryParam);
     if (resolvedId) {
       const path = resolveCategoryPath(cats, resolvedId);
@@ -107,7 +116,8 @@ function MenuPageContent() {
         const cats = categoriesRef.current;
         const resolvedId = resolveCategoryQueryToId(cats, categoryParam);
         const currentLeaf = categoryPathLeafId(categoryPath) || null;
-        const resolvedNorm = resolvedId || null;
+        const resolvedNorm =
+          categoryParam === 'promotions' && hasActivePromotions ? PROMOTIONS_ROOT_ID : resolvedId || null;
         if (resolvedNorm === currentLeaf) {
           if (productParam) scrollToProductParam(productParam, productsRef.current);
           return;
@@ -176,6 +186,21 @@ function MenuPageContent() {
     const params = new URLSearchParams(searchParams.toString());
     let changed = false;
 
+    if (isPromotionsMode) {
+      if (params.get('category') !== 'promotions') {
+        params.set('category', 'promotions');
+        changed = true;
+      }
+      if (params.has('product')) {
+        params.delete('product');
+        changed = true;
+      }
+      if (!changed) return;
+      const q = params.toString();
+      router.replace(`${pathname}${q ? `?${q}` : ''}`, { scroll: false });
+      return;
+    }
+
     if (!displayCategoryId) {
       if (params.has('category')) {
         params.delete('category');
@@ -230,17 +255,38 @@ function MenuPageContent() {
   );
 
   if (loading) {
-    return <LoadingScreen locale={locale} progress={loadProgress} />;
+    return <ManagedLoadingScreen locale={locale} progress={loadProgress} />;
   }
 
   const parentCategories = categories.filter((c: any) => !c.parentCategoryId);
+  const rootTierItems = hasActivePromotions
+    ? [
+        ...parentCategories,
+        {
+          id: PROMOTIONS_ROOT_ID,
+          nameBg: 'Промоции',
+          nameEn: 'Promotions',
+          nameRo: 'Promoții',
+          parentCategoryId: null,
+        },
+      ]
+    : parentCategories;
 
-  const breadcrumbIds = resolveCategoryPath(categories, displayCategoryId).filter(Boolean);
+  const breadcrumbIds = isPromotionsMode
+    ? []
+    : resolveCategoryPath(categories, displayCategoryId).filter(Boolean);
 
-  const leafId = categoryPathLeafId(categoryPath);
+  const leafId = isPromotionsMode ? null : categoryPathLeafId(categoryPath);
   const childrenOfLeaf = leafId ? getChildrenOf(categories, leafId) : [];
   const needsDeeperDrill =
     !!leafId && childrenOfLeaf.length > 0 && categoryProducts.length === 0;
+
+  const currentCategory = isPromotionsMode ? null : categories.find((c: any) => c.id === displayCategoryId);
+  const categoryName = isPromotionsMode
+    ? (locale === 'bg' ? 'Промоции' : locale === 'en' ? 'Promotions' : 'Promoții')
+    : currentCategory
+      ? getCategoryName(currentCategory, locale)
+      : '';
 
   return (
     <main className="min-h-screen malts-surface text-[var(--malts-ink)]">
@@ -326,12 +372,14 @@ function MenuPageContent() {
         )}
 
         {/* Category Tabs — до MALLS_MAX_CATEGORY_DEPTH нива (редове с табове) */}
-        <div className="sticky top-16 z-30 bg-[var(--malts-paper)]/95 backdrop-blur-lg border-y border-[var(--malts-hairline)] py-4 -mx-4 px-4 mb-4">
+        <div className="sticky md:static top-16 z-30 bg-[var(--malts-paper)]/95 backdrop-blur-lg border-y border-[var(--malts-hairline)] py-4 -mx-4 px-4 mb-4">
           {Array.from({ length: MALLS_MAX_CATEGORY_DEPTH }, (_, depth) => {
             const tierItems =
               depth === 0
-                ? parentCategories
-                : categoryPath[depth - 1]
+                ? rootTierItems
+                : isPromotionsMode
+                  ? []
+                  : categoryPath[depth - 1]
                   ? getChildrenOf(categories, categoryPath[depth - 1]!)
                   : [];
             if (tierItems.length === 0) return null;
@@ -372,7 +420,11 @@ function MenuPageContent() {
                           type="button"
                           onClick={() => {
                             skipApplyCategoryFromUrlRef.current = true;
-                            setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id));
+                            if (depth === 0 && cat.id === PROMOTIONS_ROOT_ID) {
+                              setCategoryPath([PROMOTIONS_ROOT_ID]);
+                            } else {
+                              setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id));
+                            }
                           }}
                           className={btnClass(isActive)}
                         >
@@ -393,7 +445,11 @@ function MenuPageContent() {
                           type="button"
                           onClick={() => {
                             skipApplyCategoryFromUrlRef.current = true;
-                            setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id));
+                            if (depth === 0 && cat.id === PROMOTIONS_ROOT_ID) {
+                              setCategoryPath([PROMOTIONS_ROOT_ID]);
+                            } else {
+                              setCategoryPath(selectCategoryAtDepth(categoryPath, depth, cat.id));
+                            }
                           }}
                           className={btnClass(isActive)}
                         >
@@ -407,6 +463,17 @@ function MenuPageContent() {
             );
           })}
         </div>
+
+        {/* Selected category title (same style as /order) */}
+        {categoryProducts.length > 0 && categoryName ? (
+          <div className="mb-8 mt-2">
+            <div className="flex items-center gap-3">
+              <div className="h-1 w-8 bg-[var(--malts-accent)] rounded-full"></div>
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">{categoryName}</h2>
+              <div className="flex-1 h-px bg-[var(--malts-hairline)]"></div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Products Grid */}
         {categoryProducts.length === 0 ? (
@@ -468,7 +535,13 @@ function MenuPageContent() {
                   )}
                   {product.isPromoted && (
                     <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
-                      {locale === 'bg' ? 'Промо' : locale === 'en' ? 'Promo' : 'Promo'}
+                      {product.promotionLabel?.trim()
+                        ? product.promotionLabel
+                        : locale === 'bg'
+                          ? 'Промо'
+                          : locale === 'en'
+                            ? 'Promo'
+                            : 'Promo'}
                     </div>
                   )}
                   {/* Unavailable Badge */}
@@ -526,13 +599,13 @@ function MenuPageContent() {
                         )}
                         <Price
                           priceBgn={Number(product.priceBgn)}
-                          className="text-2xl font-bold text-[var(--malts-ink)]"
+                          className="text-xl font-bold text-[var(--malts-ink)] whitespace-nowrap"
                           showBoth={true}
                           inline={true}
                         />
                       </div>
                       {product.unit && product.quantity && (
-                        <span className="text-sm malts-muted">
+                        <span className="text-sm malts-muted whitespace-nowrap">
                           {product.quantity} {product.unit === 'pcs' ? 'бр.' : product.unit}
                         </span>
                       )}
@@ -553,7 +626,7 @@ export default function MenuPage() {
   const locale = pathname.split('/')[1] || 'bg';
   
   return (
-    <Suspense fallback={<LoadingScreen locale={locale} />}>
+    <Suspense fallback={<ManagedLoadingScreen locale={locale} />}>
       <MenuPageContent />
     </Suspense>
   );

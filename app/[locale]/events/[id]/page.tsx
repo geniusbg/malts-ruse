@@ -35,7 +35,7 @@ export default async function EventDetailPage({
     locale === 'bg' ? 'Назад към събития' : locale === 'en' ? 'Back to events' : 'Înapoi la evenimente';
 
   return (
-    <main className="min-h-screen malts-surface text-[var(--malts-ink)] pt-24 md:pt-28 pb-16">
+    <main className="min-h-screen malts-surface text-[var(--malts-ink)] pt-16 md:pt-20 pb-16">
       <div className="container mx-auto max-w-5xl px-4">
         <Link
           href={`/${locale}/events`}
@@ -67,7 +67,7 @@ export default async function EventDetailPage({
             {/* Badge */}
             <div className="flex items-center gap-2 mb-6">
               {event.isExternal ? (
-                <span className="px-4 py-2 bg-blue-500/10 text-blue-700 border border-blue-500/20 rounded-full text-sm font-medium">
+                <span className="px-4 py-2 bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] rounded-full text-sm font-medium">
                   {locale === 'bg' ? 'Партньорско събитие' : locale === 'en' ? 'Partner Event' : 'Eveniment partener'}
                 </span>
               ) : (
@@ -119,9 +119,9 @@ export default async function EventDetailPage({
 
             {/* External Event Info */}
             {event.isExternal && (event.externalUrl || event.contactInfo) && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+              <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-xl p-6 mb-8">
                 <h3 className="text-xl font-bold text-[var(--malts-ink)] mb-4 flex items-center gap-2">
-                  <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-[var(--malts-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {locale === 'bg'
@@ -133,7 +133,7 @@ export default async function EventDetailPage({
                 
                 {event.externalUrl && (
                   <div className="mb-4 flex items-center gap-3">
-                    <svg className="w-5 h-5 text-blue-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-[var(--malts-accent)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
                     <div>
@@ -142,7 +142,7 @@ export default async function EventDetailPage({
                         href={event.externalUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-800 hover:text-blue-900 underline break-all font-medium"
+                        className="text-[var(--malts-accent)] hover:opacity-90 underline break-all font-medium"
                       >
                         {event.externalUrl}
                       </a>
@@ -171,7 +171,7 @@ export default async function EventDetailPage({
                         const email = line.replace('Email:', '').trim();
                         return (
                           <div key={idx} className="flex items-center gap-3">
-                            <svg className="w-5 h-5 text-blue-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-[var(--malts-accent)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             <div>
@@ -185,7 +185,7 @@ export default async function EventDetailPage({
                         const fb = line.replace('Facebook:', '').trim();
                         return (
                           <div key={idx} className="flex items-center gap-3">
-                            <svg className="w-5 h-5 text-blue-700 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-[var(--malts-accent)] shrink-0" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                             </svg>
                             <div>

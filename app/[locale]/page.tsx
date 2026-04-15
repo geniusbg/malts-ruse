@@ -8,9 +8,16 @@ import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import { formatDateForLocale } from '@/lib/date-utils';
 import { eventCardImageUrl } from '@/lib/event-images';
+import { applyPromotionsToProductRow, indexActivePromotionsByProductId } from '@/lib/pricing';
+import Price from '@/components/Price';
+import { Rampart_One } from 'next/font/google';
+import { productParamForUrl } from '@/lib/product-url';
+import { getPromotionsUiSettings } from '@/lib/promotions-ui-settings';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
+
+const rampartOne = Rampart_One({ weight: '400', subsets: ['latin'] });
 
 export default async function HomePage({
   params
@@ -42,10 +49,25 @@ export default async function HomePage({
   const locationSettings = await getLocationSettings();
 
   // Fetch homepage settings and cards
-  const [homepageSettings, homepageCards] = await Promise.all([
+  const [homepageSettings, homepageCards, promotionsUiSettings] = await Promise.all([
     getHomepageSettings(),
-    getHomepageOfferingCards()
+    getHomepageOfferingCards(),
+    getPromotionsUiSettings(),
   ]);
+
+  const highlightsLabel =
+    locale === 'bg'
+      ? homepageSettings.highlightsLabelBg
+      : locale === 'en'
+        ? homepageSettings.highlightsLabelEn
+        : homepageSettings.highlightsLabelRo;
+
+  const promotionsHeading =
+    locale === 'bg'
+      ? promotionsUiSettings.titleBg
+      : locale === 'en'
+        ? promotionsUiSettings.titleEn
+        : promotionsUiSettings.titleRo;
 
   // Fetch featured products for Chef's Picks
   const featuredProducts = await prisma.product.findMany({
@@ -67,6 +89,36 @@ export default async function HomePage({
     orderBy: { order: 'asc' },
     take: 8
   });
+
+  // Fetch active promotions + promoted products (only show blocks when at least one active promo exists)
+  const now = new Date();
+  const [promoRows, promoProductsBase] = await Promise.all([
+    prisma.productPromotion.findMany({
+      where: {
+        brandId,
+        startsAt: { lte: now },
+        endsAt: { gte: now },
+      },
+      orderBy: [{ startsAt: 'desc' }],
+    }),
+    prisma.product.findMany({
+      where: {
+        isHidden: false,
+        isAvailable: true,
+        category: { brandId },
+      },
+      include: {
+        category: { select: { nameBg: true, nameEn: true, nameRo: true, slug: true } },
+      },
+      orderBy: { order: 'asc' },
+      take: 60,
+    }),
+  ]);
+
+  const promoByProduct = indexActivePromotionsByProductId(promoRows, now);
+  const promotedProducts = promoProductsBase
+    .map((p) => applyPromotionsToProductRow(p as any, promoByProduct.get(p.id)))
+    .filter((p) => p.isPromoted);
 
   // Get current day
   const today = new Date();
@@ -258,6 +310,14 @@ export default async function HomePage({
         badge: locale === 'bg' ? card.badgeBg : locale === 'en' ? card.badgeEn : card.badgeRo
       }))
     : offerings.cards;
+
+  const cardsHeading = useDbSettings
+    ? (locale === 'bg'
+        ? homepageSettings.cardsHeadingBg
+        : locale === 'en'
+          ? homepageSettings.cardsHeadingEn
+          : homepageSettings.cardsHeadingRo)
+    : '';
   
   const ctaPrimary = useDbSettings
     ? (locale === 'bg' ? homepageSettings.ctaPrimaryBg : locale === 'en' ? homepageSettings.ctaPrimaryEn : homepageSettings.ctaPrimaryRo)
@@ -360,10 +420,10 @@ export default async function HomePage({
               <p className="mt-4 text-lg md:text-xl malts-muted malts-display-secondary">
                 {offeringsSubtitle}
               </p>
-              <p className="mt-6 text-base md:text-lg malts-muted leading-relaxed max-w-3xl">
+              <p className="mt-6 text-base md:text-lg malts-muted leading-relaxed max-w-3xl whitespace-pre-line">
                 {offeringsDescription}
               </p>
-              <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl malts-muted">
+              <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl malts-muted whitespace-pre-line">
                 {offeringsNote}
               </p>
             </div>
@@ -380,7 +440,97 @@ export default async function HomePage({
               ))}
             </div>
 
-            <div className="relative mt-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {/* Promotions cards (only when at least one active promotion exists) */}
+            {promotedProducts.length > 0 && (
+              <div className="relative mt-12">
+                <div className="mb-6 text-center">
+                  <p
+                    className={`text-3xl md:text-4xl tracking-wide text-[#c41e3a] animate-pulse drop-shadow-[0_8px_18px_rgba(196,30,58,0.30)] ${rampartOne.className}`}
+                  >
+                    {promotionsHeading}
+                  </p>
+                  <Link
+                    href={`/${locale}/menu?category=promotions`}
+                    className="mt-2 inline-block text-sm font-semibold text-[var(--malts-accent)] hover:opacity-90"
+                  >
+                    {locale === 'bg' ? 'Виж всички →' : locale === 'en' ? 'View all →' : 'Vezi tot →'}
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {promotedProducts.slice(0, 6).map((p: any) => {
+                    const name =
+                      locale === 'bg' ? p.nameBg : locale === 'en' ? p.nameEn : p.nameRo;
+                    const desc =
+                      locale === 'bg'
+                        ? p.descriptionBg
+                        : locale === 'en'
+                          ? p.descriptionEn
+                          : p.descriptionRo;
+                    return (
+                      <Link
+                        key={p.id}
+                        href={`/${locale}/menu?category=${encodeURIComponent(p.category?.slug ?? '')}&product=${productParamForUrl(p)}`}
+                        className="group malts-card rounded-2xl overflow-hidden transition-all hover:shadow-md relative"
+                      >
+                        <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
+                          {p.promotionLabel?.trim()
+                            ? p.promotionLabel
+                            : locale === 'bg'
+                              ? 'Промо'
+                              : 'Promo'}
+                        </div>
+                        {p.imageUrl ? (
+                          <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={p.imageUrl}
+                              alt={name}
+                              loading="lazy"
+                              decoding="async"
+                              className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        ) : null}
+                        <div className="p-6">
+                          <div className="min-w-0">
+                            <p className="text-lg font-bold text-[var(--malts-ink)] truncate">{name}</p>
+                            {desc ? (
+                              <p className="mt-2 text-sm malts-muted whitespace-pre-line">{desc}</p>
+                            ) : null}
+                          </div>
+                          <div className="mt-4 flex items-end justify-between gap-3 border-t border-[var(--malts-hairline)] pt-4">
+                            <div className="min-w-0">
+                              {p.basePriceBgn != null && (
+                                <div className="text-sm text-[var(--malts-subtle)] line-through whitespace-nowrap">
+                                  <Price priceBgn={Number(p.basePriceBgn)} inline showBoth />
+                                </div>
+                              )}
+                              <div className="text-lg font-semibold text-[var(--malts-ink)] whitespace-nowrap">
+                                <Price
+                                  priceBgn={Number(p.priceBgn)}
+                                  inline
+                                  showBoth
+                                  unit={p.unit}
+                                  quantity={p.quantity}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {cardsHeading?.trim() ? (
+              <div className="relative mt-10 text-center">
+                <p className="text-xs uppercase tracking-[0.3em] malts-subtle">{cardsHeading}</p>
+              </div>
+            ) : null}
+
+            <div className="relative mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {cards.map(card => (
                 <div
                   key={card.title}
@@ -414,7 +564,9 @@ export default async function HomePage({
                   </p>
 
                   <div className="mt-6">
-                    <p className="text-xs uppercase tracking-[0.3em] malts-subtle mb-3 transition-colors">Highlights</p>
+                    <p className="text-xs uppercase tracking-[0.3em] malts-subtle mb-3 transition-colors">
+                      {highlightsLabel}
+                    </p>
                     <ul className="space-y-2 text-sm md:text-base text-[var(--malts-ink)]">
                       {card.highlights.map((item, index) => (
                         <li key={`${card.title}-${index}`} className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200" style={{ transitionDelay: `${index * 50}ms` }}>

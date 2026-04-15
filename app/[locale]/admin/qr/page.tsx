@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import { formatBulgarianDateTime } from '@/lib/date-utils';
@@ -1026,7 +1026,7 @@ export default function QRCodesPage() {
       />
 
       {loading && !generated && (
-        <LoadingScreen locale="bg" />
+        <ManagedLoadingScreen locale="bg" />
       )}
 
       {!loading && !generated && (

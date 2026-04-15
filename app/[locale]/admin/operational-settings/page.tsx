@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 
 type AuditRow = {
   id: string;
@@ -93,7 +93,7 @@ export default function OperationalSettingsPage({
   };
 
   if (status === 'loading' || loading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   if (!isSuper) {

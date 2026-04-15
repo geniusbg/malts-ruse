@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
 
 export default function LocationSettingsPage({
@@ -42,7 +42,10 @@ export default function LocationSettingsPage({
     id: '',
     addressBg: '',
     addressEn: '',
-    addressRo: ''
+    addressRo: '',
+    phone: '',
+    instagramUrl: '',
+    facebookUrl: '',
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -62,7 +65,10 @@ export default function LocationSettingsPage({
             id: data.settings.id || '',
             addressBg: data.settings.addressBg || '',
             addressEn: data.settings.addressEn || '',
-            addressRo: data.settings.addressRo || ''
+            addressRo: data.settings.addressRo || '',
+            phone: data.settings.phone || '',
+            instagramUrl: data.settings.instagramUrl || '',
+            facebookUrl: data.settings.facebookUrl || '',
           });
         }
       })
@@ -102,7 +108,10 @@ export default function LocationSettingsPage({
         body: JSON.stringify({
           addressBg: locationSettings.addressBg,
           addressEn: locationSettings.addressEn,
-          addressRo: locationSettings.addressRo
+          addressRo: locationSettings.addressRo,
+          phone: locationSettings.phone,
+          instagramUrl: locationSettings.instagramUrl,
+          facebookUrl: locationSettings.facebookUrl,
         })
       });
 
@@ -114,7 +123,10 @@ export default function LocationSettingsPage({
           id: data.settings.id || locationSettings.id,
           addressBg: data.settings.addressBg ?? locationSettings.addressBg,
           addressEn: data.settings.addressEn ?? locationSettings.addressEn,
-          addressRo: data.settings.addressRo ?? locationSettings.addressRo
+          addressRo: data.settings.addressRo ?? locationSettings.addressRo,
+          phone: data.settings.phone ?? locationSettings.phone,
+          instagramUrl: data.settings.instagramUrl ?? locationSettings.instagramUrl,
+          facebookUrl: data.settings.facebookUrl ?? locationSettings.facebookUrl,
         });
         setTimeout(() => setSettingsMessage(null), 3000);
       } else {
@@ -128,7 +140,7 @@ export default function LocationSettingsPage({
   };
 
   if (status === 'loading' || settingsLoading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (
@@ -144,9 +156,9 @@ export default function LocationSettingsPage({
             <span aria-hidden>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="malts-admin-heading-font malts-admin-page-title">Адрес</h1>
+          <h1 className="malts-admin-heading-font malts-admin-page-title">Контакти</h1>
           <p className="mt-2 malts-muted max-w-2xl">
-            Настрой адреса на заведението за всички езици. Адресът се показва на главната страница.
+            Настрой контактите на заведението. Те се показват в страницата „Контакти“ и на началната страница.
           </p>
         </div>
 
@@ -185,17 +197,56 @@ export default function LocationSettingsPage({
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="malts-label">Телефон</label>
+                <input
+                  type="tel"
+                  value={locationSettings.phone}
+                  onChange={(e) => handleSettingsChange('phone', e.target.value)}
+                  disabled={settingsLoading}
+                  className="malts-field"
+                  placeholder="089 853 6542"
+                />
+                <p className="malts-help">Показва се като линк за набиране.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="malts-label">Instagram URL</label>
+                <input
+                  type="url"
+                  value={locationSettings.instagramUrl}
+                  onChange={(e) => handleSettingsChange('instagramUrl', e.target.value)}
+                  disabled={settingsLoading}
+                  className="malts-field"
+                  placeholder="https://instagram.com/yourpage"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="malts-label">Facebook URL</label>
+                <input
+                  type="url"
+                  value={locationSettings.facebookUrl}
+                  onChange={(e) => handleSettingsChange('facebookUrl', e.target.value)}
+                  disabled={settingsLoading}
+                  className="malts-field"
+                  placeholder="https://facebook.com/yourpage"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="malts-label">
                 Адрес (български)
               </label>
-              <input
-                type="text"
+              <textarea
                 value={locationSettings.addressBg}
                 onChange={(e) => handleSettingsChange('addressBg', e.target.value)}
                 disabled={settingsLoading}
                 className="malts-field"
+                rows={3}
                 placeholder="Русе, ул. Александровска 97"
               />
               <p className="malts-help">

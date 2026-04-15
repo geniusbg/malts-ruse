@@ -29,9 +29,17 @@ export async function POST(request: Request) {
     }
 
     // SECURITY: Validate file type strictly
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const validTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'video/mp4',
+      'video/webm',
+    ];
     if (!validTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Use JPG, PNG or WebP' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid file type. Use JPG/PNG/WebP/GIF or MP4/WebM' }, { status: 400 });
     }
 
     // Convert File to Buffer first to detect actual file type
@@ -48,17 +56,17 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Only allow image types (validated from actual file content)
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    // Only allow whitelisted types (validated from actual file content)
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
     if (!allowedMimes.includes(detectedType.mime)) {
       return NextResponse.json({ 
-        error: `Invalid file type detected: ${detectedType.mime}. Only JPEG, PNG, and WebP images are allowed.` 
+        error: `Invalid file type detected: ${detectedType.mime}. Only JPEG/PNG/WebP/GIF images and MP4/WebM videos are allowed.` 
       }, { status: 400 });
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large. Max 5MB' }, { status: 400 });
+    // Validate file size (max 30MB; needed for short loading videos)
+    if (file.size > 30 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File too large. Max 30MB' }, { status: 400 });
     }
 
     // Warn if MIME type doesn't match (client-side compression may have changed format)
@@ -73,6 +81,9 @@ export async function POST(request: Request) {
       'image/jpeg': ['jpg', 'jpeg'],
       'image/png': ['png'],
       'image/webp': ['webp'],
+      'image/gif': ['gif'],
+      'video/mp4': ['mp4'],
+      'video/webm': ['webm'],
     };
     const validExts = validExtensionMap[detectedType.mime];
     if (!validExts || !validExts.includes(detectedExt)) {

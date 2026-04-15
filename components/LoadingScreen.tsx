@@ -10,6 +10,11 @@ interface LoadingScreenProps {
   logoSize?: 'small' | 'medium' | 'large';
   /** 0-100: beer fill; omit = simulated progress. */
   progress?: number;
+  /** Optional admin-managed loading media. */
+  assetUrl?: string;
+  assetType?: 'image' | 'video';
+  /** If true, do not show built-in beer mug when no assetUrl. */
+  hideDefaultMedia?: boolean;
 }
 
 export default function LoadingScreen({ 
@@ -18,6 +23,9 @@ export default function LoadingScreen({
   message,
   logoSize = 'large',
   progress,
+  assetUrl,
+  assetType,
+  hideDefaultMedia = false,
 }: LoadingScreenProps) {
   useLockScroll(!inline);
   const [loaderSrc, setLoaderSrc] = useState('/beer-mug-loader.gif');
@@ -66,15 +74,42 @@ export default function LoadingScreen({
         : 'Se \u00eencarc\u0103...';
   const displayMessage = message || defaultMessage;
 
-  const inner = (
-    <div className="text-center px-4">
-      <div className="mx-auto mb-8 flex flex-col items-center justify-center gap-2">
+  const media = (() => {
+    const url = (assetUrl || '').trim();
+    if (!url) {
+      if (hideDefaultMedia) {
+        return <div className={`${gifSizeClasses[logoSize]}`} aria-hidden />;
+      }
+      return (
         <img
           src={loaderSrc}
           alt="Loading"
           className={`${gifSizeClasses[logoSize]} object-contain`}
           onError={() => setLoaderSrc('/beer-mug-loader.png')}
         />
+      );
+    }
+
+    if (assetType === 'video' || /\.(mp4|webm)$/i.test(url)) {
+      return (
+        <video
+          className={`${gifSizeClasses[logoSize]} object-contain`}
+          src={url}
+          muted
+          playsInline
+          autoPlay
+          loop
+        />
+      );
+    }
+
+    return <img src={url} alt="Loading" className={`${gifSizeClasses[logoSize]} object-contain`} />;
+  })();
+
+  const inner = (
+    <div className="text-center px-4">
+      <div className="mx-auto mb-8 flex flex-col items-center justify-center gap-2">
+        {media}
         <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
         <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
           <div
@@ -93,12 +128,7 @@ export default function LoadingScreen({
     return (
       <div className="text-center">
         <div className="flex flex-col items-center justify-center gap-2">
-          <img
-            src={loaderSrc}
-            alt="Loading"
-            className={`${gifSizeClasses[logoSize]} object-contain`}
-            onError={() => setLoaderSrc('/beer-mug-loader.png')}
-          />
+          {media}
           <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
           <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
             <div

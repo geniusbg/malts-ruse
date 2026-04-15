@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import { getAdminPanelHeading, getSiteDisplayName } from '@/lib/site-display-name';
 
 export default function AdminDashboard({
@@ -74,7 +74,7 @@ export default function AdminDashboard({
 
   // Show loading while checking session or initial loading
   if (status === 'loading' || initialLoading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (
@@ -179,7 +179,7 @@ export default function AdminDashboard({
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">📍</div>
-            <h3 className="text-[var(--malts-ink)] font-bold text-lg">Адрес</h3>
+            <h3 className="text-[var(--malts-ink)] font-bold text-lg">Контакти</h3>
           </a>
           <a
             href="/bg/admin/homepage-settings"

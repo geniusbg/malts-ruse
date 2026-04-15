@@ -11,7 +11,7 @@ import Toast from '@/components/Toast';
 import Price from '@/components/Price';
 import ServiceWorkerUpdater from '@/components/ServiceWorkerUpdater';
 import PendingApprovalsBanner from '@/components/PendingApprovalsBanner';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import { 
@@ -652,7 +652,7 @@ export default function StaffDashboard() {
 
   // Show loading screen
   if (status === 'loading' || initialLoading) {
-    return <LoadingScreen locale={locale} />;
+    return <ManagedLoadingScreen locale={locale} />;
   }
 
   return (

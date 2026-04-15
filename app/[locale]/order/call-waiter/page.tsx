@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
 import { useLockScroll } from '@/lib/use-lock-scroll';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 
 function CallWaiterContent() {
   const searchParams = useSearchParams();
@@ -383,35 +384,9 @@ function CallWaiterContent() {
   );
 }
 
-function LoadingScreen() {
-  const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'bg';
-  
-  return (
-    <div className="malts-surface flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="mx-auto mb-8 flex h-40 w-40 items-center justify-center sm:h-48 sm:w-48 md:mb-10 md:h-56 md:w-56">
-          <Image
-            src="/malts-logo-nav.webp"
-            alt="Malt's"
-            width={400}
-            height={331}
-            sizes="200px"
-            className="malts-brand-filter h-full w-auto max-h-full object-contain"
-            priority
-          />
-        </div>
-        <p className="text-3xl font-medium">
-          {locale === 'bg' ? 'Зареждане...' : locale === 'en' ? 'Loading...' : 'Se încarcă...'}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export default function CallWaiterPage() {
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<ManagedLoadingScreen />}>
       <CallWaiterContent />
     </Suspense>
   );

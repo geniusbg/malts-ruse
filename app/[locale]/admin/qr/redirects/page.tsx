@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Toast from '@/components/Toast';
-import LoadingScreen from '@/components/LoadingScreen';
+import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import { formatBulgarianDateTime } from '@/lib/date-utils';
 
 interface QRTable {
@@ -106,7 +106,7 @@ export default function QRRedirectsPage() {
   const formatDate = formatBulgarianDateTime;
 
   if (loading) {
-    return <LoadingScreen locale="bg" />;
+    return <ManagedLoadingScreen locale="bg" />;
   }
 
   return (

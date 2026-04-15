@@ -49,6 +49,12 @@ export interface HomepageSettings {
   offeringsNoteBg: string;
   offeringsNoteEn: string;
   offeringsNoteRo: string;
+  highlightsLabelBg: string;
+  highlightsLabelEn: string;
+  highlightsLabelRo: string;
+  cardsHeadingBg: string;
+  cardsHeadingEn: string;
+  cardsHeadingRo: string;
   stats: HomepageStats;
   ctaPrimaryBg: string;
   ctaPrimaryEn: string;
@@ -69,17 +75,23 @@ const DEFAULT_HOMEPAGE_SETTINGS: Omit<HomepageSettings, 'id' | 'stats'> = {
   subtitleEn: 'Discover our variety',
   subtitleRo: 'Descoperă varietatea noastră',
   descriptionBg:
-    'От сутрешно specialty кафе до вечерни авторски коктейли, вкусни сандвичи и ароматни шиши – създаваме настроение през целия ден.',
+    'Бирария-ресторант с обедни предложения и сезонни ястия, изискани вечери и авторски коктейли — вкус и уют за всеки повод.',
   descriptionEn:
-    'From specialty coffee mornings to signature cocktail nights, delicious sandwiches and aromatic shisha – we craft moods for every hour.',
+    'From seasonal dishes and lunch specials to elegant dinners and signature cocktails — taste and comfort for every occasion.',
   descriptionRo:
-    'De la cafea de dimineață până la cocktailuri seara, sandvișuri și shisha – creăm atmosfera potrivită oricând.',
+    'De la preparate de sezon și meniuri de prânz la cine elegante și cocktailuri signature — gust și confort pentru orice ocazie.',
   moodTextBg: 'Ястия • Напитки • Craft бира • Добро настроение',
   moodTextEn: 'Food • Drinks • Craft Beer • Good Times',
   moodTextRo: 'Food • Băuturi • Craft beer • Clipe faine',
   offeringsNoteBg: 'Заповядай за класика или открий нещо ново — при нас денят и вечерта имат вкус.',
   offeringsNoteEn: 'Come for the classics or discover something new — here, every hour has its own flavor.',
   offeringsNoteRo: 'Vino pentru clasice sau descoperă ceva nou — aici, fiecare oră are gustul ei.',
+  highlightsLabelBg: 'Акценти',
+  highlightsLabelEn: 'Highlights',
+  highlightsLabelRo: 'Accente',
+  cardsHeadingBg: '',
+  cardsHeadingEn: '',
+  cardsHeadingRo: '',
   ctaPrimaryBg: 'Разгледай менюто',
   ctaPrimaryEn: 'View the menu',
   ctaPrimaryRo: 'Vezi meniul',
@@ -147,6 +159,18 @@ export async function getHomepageSettings(): Promise<HomepageSettings> {
         offeringsNoteBg: settings.offeringsNoteBg || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteBg,
         offeringsNoteEn: settings.offeringsNoteEn || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteEn,
         offeringsNoteRo: settings.offeringsNoteRo || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteRo,
+        highlightsLabelBg:
+          (settings as any).highlightsLabelBg || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelBg,
+        highlightsLabelEn:
+          (settings as any).highlightsLabelEn || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelEn,
+        highlightsLabelRo:
+          (settings as any).highlightsLabelRo || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelRo,
+        cardsHeadingBg:
+          (settings as any).cardsHeadingBg || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingBg,
+        cardsHeadingEn:
+          (settings as any).cardsHeadingEn || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingEn,
+        cardsHeadingRo:
+          (settings as any).cardsHeadingRo || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingRo,
         stats: normalizeStats(settings.stats),
         ctaPrimaryBg: settings.ctaPrimaryBg || DEFAULT_HOMEPAGE_SETTINGS.ctaPrimaryBg,
         ctaPrimaryEn: settings.ctaPrimaryEn || DEFAULT_HOMEPAGE_SETTINGS.ctaPrimaryEn,
@@ -247,6 +271,12 @@ export async function updateHomepageSettings(data: Partial<HomepageSettings>): P
           offeringsNoteBg: data.offeringsNoteBg ?? existing.offeringsNoteBg,
           offeringsNoteEn: data.offeringsNoteEn ?? existing.offeringsNoteEn,
           offeringsNoteRo: data.offeringsNoteRo ?? existing.offeringsNoteRo,
+          highlightsLabelBg: (data as any).highlightsLabelBg ?? (existing as any).highlightsLabelBg,
+          highlightsLabelEn: (data as any).highlightsLabelEn ?? (existing as any).highlightsLabelEn,
+          highlightsLabelRo: (data as any).highlightsLabelRo ?? (existing as any).highlightsLabelRo,
+          cardsHeadingBg: (data as any).cardsHeadingBg ?? (existing as any).cardsHeadingBg,
+          cardsHeadingEn: (data as any).cardsHeadingEn ?? (existing as any).cardsHeadingEn,
+          cardsHeadingRo: (data as any).cardsHeadingRo ?? (existing as any).cardsHeadingRo,
           stats: data.stats
             ? (data.stats as unknown as Prisma.InputJsonValue)
             : (existing.stats as Prisma.InputJsonValue),
@@ -279,6 +309,18 @@ export async function updateHomepageSettings(data: Partial<HomepageSettings>): P
         offeringsNoteBg: updated.offeringsNoteBg || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteBg,
         offeringsNoteEn: updated.offeringsNoteEn || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteEn,
         offeringsNoteRo: updated.offeringsNoteRo || DEFAULT_HOMEPAGE_SETTINGS.offeringsNoteRo,
+        highlightsLabelBg:
+          (updated as any).highlightsLabelBg || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelBg,
+        highlightsLabelEn:
+          (updated as any).highlightsLabelEn || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelEn,
+        highlightsLabelRo:
+          (updated as any).highlightsLabelRo || DEFAULT_HOMEPAGE_SETTINGS.highlightsLabelRo,
+        cardsHeadingBg:
+          (updated as any).cardsHeadingBg || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingBg,
+        cardsHeadingEn:
+          (updated as any).cardsHeadingEn || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingEn,
+        cardsHeadingRo:
+          (updated as any).cardsHeadingRo || DEFAULT_HOMEPAGE_SETTINGS.cardsHeadingRo,
         stats: normalizeStats(updated.stats),
         ctaPrimaryBg: updated.ctaPrimaryBg,
         ctaPrimaryEn: updated.ctaPrimaryEn,
