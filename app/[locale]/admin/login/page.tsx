@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 const backToSiteLabel: Record<string, string> = {
   bg: 'Назад към сайта',
   en: 'Back to site',
@@ -71,10 +72,14 @@ export default function AdminLoginPage() {
         <div className="malts-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center">
-              <img
-                src="/malts.svg"
+              <Image
+                src="/malts-logo-hero.webp"
                 alt="Malt's"
-                className="h-[220px] sm:h-[260px] md:h-[292px] w-auto max-w-full object-contain"
+                width={834}
+                height={812}
+                sizes="(max-width: 768px) 90vw, 380px"
+                className="malts-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[360px]"
+                priority
               />
             </div>
             <p className="malts-admin-panel-title mt-6 sm:mt-7 text-center text-lg sm:text-xl md:text-2xl leading-snug px-1">

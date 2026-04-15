@@ -3,6 +3,7 @@
 import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -61,8 +62,20 @@ export default function StaffLoginPage() {
       <div className="w-full max-w-md">
         <div className="malts-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Malts</h1>
-            <p className="malts-muted text-sm sm:text-base">Staff панел</p>
+            <div className="flex items-center justify-center">
+              <Image
+                src="/malts-logo-hero.webp"
+                alt="Malt's"
+                width={834}
+                height={812}
+                sizes="(max-width: 768px) 90vw, 340px"
+                className="malts-hero-logo h-auto w-full max-w-[min(100%,260px)] md:max-w-[320px]"
+                priority
+              />
+            </div>
+            <p className="malts-admin-panel-title mt-5 text-center text-lg sm:text-xl leading-snug px-1">
+              Staff панел
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
