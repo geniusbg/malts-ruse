@@ -76,18 +76,13 @@ export default async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(`/${locale}/admin/login`, baseUrl));
     }
     
-    // Must match the cookie name NextAuth set for *this* request (http vs https).
-    // If NEXTAUTH_URL is https://prod while dev runs on http://localhost, default
-    // secureCookie from NEXTAUTH_URL would look for __Secure-… and miss next-auth.session-token.
-    const forwardedProto = request.headers.get('x-forwarded-proto');
-    const requestIsHttps =
-      forwardedProto === 'https' ||
-      (!forwardedProto && request.nextUrl.protocol === 'https:');
-    const token = await getToken({
-      req: request,
-      secret,
-      secureCookie: requestIsHttps,
-    });
+    // Robust token lookup:
+    // In some deployments (reverse proxies / mixed headers), the request may appear http/https inconsistently.
+    // NextAuth may set either secure or non-secure cookie names. Try both to avoid login redirect "bounce"
+    // that resolves only after a manual refresh.
+    const token =
+      (await getToken({ req: request, secret, secureCookie: true })) ||
+      (await getToken({ req: request, secret, secureCookie: false }));
     
     if (!token) {
       // No token, redirect to appropriate login

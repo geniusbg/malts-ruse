@@ -47,6 +47,7 @@ function resolveRuleForPath(ruleIndex: Map<string, LoadingRule>, raw: string, ca
 export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<typeof LoadingScreen>, 'assetUrl' | 'assetType'>) {
   const pathname = usePathname() || '/';
   const [settings, setSettings] = useState<LoadingUiSettings | null>(null);
+  const [settingsStatus, setSettingsStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
   useEffect(() => {
     let cancelled = false;
@@ -55,10 +56,12 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
       .then((data) => {
         if (cancelled) return;
         setSettings((data?.settings ?? null) as LoadingUiSettings | null);
+        setSettingsStatus('ready');
       })
       .catch(() => {
         if (cancelled) return;
         setSettings(null);
+        setSettingsStatus('error');
       });
     return () => {
       cancelled = true;
@@ -101,7 +104,13 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
       {...props}
       assetUrl={asset?.url}
       assetType={asset?.type}
-      hideDefaultMedia={Boolean(settings?.enabled && rule?.enabled)}
+      // Avoid "flash" of the default beer mug before admin settings load.
+      // While settings are loading, hide default media; once loaded, show it only when no custom rule applies.
+      hideDefaultMedia={
+        settingsStatus === 'loading'
+          ? true
+          : Boolean(settings?.enabled && rule?.enabled)
+      }
     />
   );
 }

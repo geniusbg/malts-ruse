@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense, useMemo, useRef, useCallback, Fragment }
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Price from '@/components/Price';
-import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import {
   getChildrenOf,
   getCategoryName,
@@ -261,9 +260,7 @@ function MenuPageContent() {
     [categories, displayCategoryId, pathname, router, searchParams]
   );
 
-  if (loading) {
-    return <ManagedLoadingScreen locale={locale} progress={loadProgress} />;
-  }
+  if (loading) return null;
 
   const parentCategories = categories.filter((c: any) => !c.parentCategoryId);
   const rootTierItems = hasActivePromotions
@@ -633,7 +630,7 @@ export default function MenuPage() {
   const locale = pathname.split('/')[1] || 'bg';
   
   return (
-    <Suspense fallback={<ManagedLoadingScreen locale={locale} />}>
+    <Suspense fallback={null}>
       <MenuPageContent />
     </Suspense>
   );

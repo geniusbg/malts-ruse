@@ -32,6 +32,11 @@ export default function AdminLoginPage() {
     if (session) {
       // Get locale from URL or default to 'bg'
       const pathLocale = window.location.pathname.split('/')[1] || 'bg';
+      const role = (session.user as any)?.role as string | undefined;
+      if (role === 'STAFF') {
+        window.location.assign(`/${pathLocale}/staff`);
+        return;
+      }
       router.push(`/${pathLocale}/admin`);
       router.refresh();
     }
@@ -62,8 +67,20 @@ export default function AdminLoginPage() {
           setError('Невалидни данни за вход');
         }
       } else if (result?.ok) {
-        // Full navigation so the session cookie is always sent on the next request (middleware JWT + soft nav race).
-        window.location.assign(`/${pathLocale}/admin`);
+        // Full navigation so the session cookie is always sent on the next request.
+        // If staff logged in via /admin, send them directly to /staff (avoid the /admin -> middleware redirect hop).
+        try {
+          const sRes = await fetch('/api/auth/session', { cache: 'no-store' });
+          const sJson = (await sRes.json().catch(() => null)) as any;
+          const role = sJson?.user?.role as string | undefined;
+          if (role === 'STAFF') {
+            window.location.assign(`/${pathLocale}/staff`);
+          } else {
+            window.location.assign(`/${pathLocale}/admin`);
+          }
+        } catch {
+          window.location.assign(`/${pathLocale}/admin`);
+        }
       }
     } catch (error) {
       setError('Грешка при вход');

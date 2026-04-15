@@ -66,6 +66,18 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
 
   const canCreateAdmin = userRole === 'SUPER_ADMIN';
 
+  const roleBadgeClass = (role: User['role']) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-[rgba(196,30,58,0.14)] text-[#8b0a1a] border border-[rgba(196,30,58,0.32)]';
+      case 'ADMIN':
+        return 'bg-[rgba(88,28,135,0.12)] text-[#3b0764] border border-[rgba(88,28,135,0.30)]';
+      case 'STAFF':
+      default:
+        return 'bg-[rgba(2,132,199,0.12)] text-[#0c4a6e] border border-[rgba(2,132,199,0.28)]';
+    }
+  };
+
   const handleEdit = (user: User) => {
     setSelectedUser(user);
     setShowEditForm(true);
@@ -134,13 +146,9 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                      user.role === 'SUPER_ADMIN' 
-                        ? 'bg-red-500/20 text-red-300'
-                        : user.role === 'ADMIN'
-                        ? 'bg-purple-500/20 text-purple-300'
-                        : 'bg-blue-500/20 text-blue-300'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${roleBadgeClass(user.role)}`}
+                    >
                       {user.role}
                     </span>
                     <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
@@ -193,13 +201,9 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                       <td className="px-4 py-4 text-sm">{user.name}</td>
                       <td className="px-4 py-4 malts-muted text-sm">{user.email}</td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                          user.role === 'SUPER_ADMIN' 
-                            ? 'bg-red-500/20 text-red-300'
-                            : user.role === 'ADMIN'
-                            ? 'bg-purple-500/20 text-purple-300'
-                            : 'bg-blue-500/20 text-blue-300'
-                        }`}>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${roleBadgeClass(user.role)}`}
+                        >
                           {user.role}
                         </span>
                       </td>
