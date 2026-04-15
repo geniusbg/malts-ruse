@@ -140,6 +140,18 @@ export default function LocationSettingsPage({
           addressBg: data.settings.addressBg ?? locationSettings.addressBg,
           addressEn: data.settings.addressEn ?? locationSettings.addressEn,
           addressRo: data.settings.addressRo ?? locationSettings.addressRo,
+          latitude:
+            typeof data.settings.latitude === 'number'
+              ? String(data.settings.latitude)
+              : typeof data.settings.latitude === 'string'
+                ? data.settings.latitude
+                : locationSettings.latitude,
+          longitude:
+            typeof data.settings.longitude === 'number'
+              ? String(data.settings.longitude)
+              : typeof data.settings.longitude === 'string'
+                ? data.settings.longitude
+                : locationSettings.longitude,
           phone: data.settings.phone ?? locationSettings.phone,
           instagramUrl: data.settings.instagramUrl ?? locationSettings.instagramUrl,
           facebookUrl: data.settings.facebookUrl ?? locationSettings.facebookUrl,

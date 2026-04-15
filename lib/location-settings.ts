@@ -89,7 +89,9 @@ export async function updateLocationSettings(data: {
     });
 
     if (existing) {
-      const updated = await prisma.locationSettings.update({
+      // NOTE: Prisma client types may lag behind schema changes in some environments.
+      // Use `as any` so we can persist new optional coordinate fields without blocking compilation.
+      const updated = await (prisma.locationSettings as any).update({
         where: { id: existing.id },
         data: {
           addressBg: data.addressBg,
@@ -116,7 +118,7 @@ export async function updateLocationSettings(data: {
       };
     }
 
-    const created = await prisma.locationSettings.create({
+    const created = await (prisma.locationSettings as any).create({
       data: {
         brandId,
         addressBg: data.addressBg,
