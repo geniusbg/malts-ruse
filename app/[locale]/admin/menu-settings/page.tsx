@@ -13,9 +13,11 @@ interface MenuSettings {
   titleBg: string;
   titleEn: string;
   titleRo: string;
+  titleColor?: string | null;
   subtitleBg: string;
   subtitleEn: string;
   subtitleRo: string;
+  subtitleColor?: string | null;
   backgroundImageUrl: string | null;
 }
 
@@ -75,9 +77,11 @@ export default function MenuSettingsPage({
           titleBg: 'Нашето Меню',
           titleEn: 'Our Menu',
           titleRo: 'Meniul nostru',
+            titleColor: null,
           subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
           subtitleEn: 'Discover our selection of drinks and delicacies',
           subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
+            subtitleColor: null,
           backgroundImageUrl: null
         };
         setSettings(defaultSettings);
@@ -91,9 +95,11 @@ export default function MenuSettingsPage({
         titleBg: 'Нашето Меню',
         titleEn: 'Our Menu',
         titleRo: 'Meniul nostru',
+        titleColor: null,
         subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
         subtitleEn: 'Discover our selection of drinks and delicacies',
         subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
+        subtitleColor: null,
         backgroundImageUrl: null
       };
       setSettings(defaultSettings);
@@ -114,9 +120,11 @@ export default function MenuSettingsPage({
           titleBg: settings.titleBg,
           titleEn: settings.titleEn,
           titleRo: settings.titleRo,
+          titleColor: settings.titleColor ?? null,
           subtitleBg: settings.subtitleBg,
           subtitleEn: settings.subtitleEn,
           subtitleRo: settings.subtitleRo,
+          subtitleColor: settings.subtitleColor ?? null,
           backgroundImageUrl: settings.backgroundImageUrl
         })
       });
@@ -194,6 +202,27 @@ export default function MenuSettingsPage({
           <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Заглавие</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
+              <label className="malts-label">Цвят на заглавие</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={settings.titleColor || '#1f2937'}
+                  onChange={(e) => setSettings({ ...settings!, titleColor: e.target.value })}
+                  className="h-10 w-14 rounded-md border border-black/10 bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={settings.titleColor || ''}
+                  onChange={(e) => setSettings({ ...settings!, titleColor: e.target.value || null })}
+                  placeholder="напр. #b91c1c или празно за default"
+                  className="malts-field"
+                />
+              </div>
+              <p className="malts-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
               <label className="malts-label">Заглавие (БГ) *</label>
               <input
                 type="text"
@@ -247,6 +276,27 @@ export default function MenuSettingsPage({
         {/* Subtitles */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Подзаглавие</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="malts-label">Цвят на подзаглавие</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={settings.subtitleColor || '#6b7280'}
+                  onChange={(e) => setSettings({ ...settings!, subtitleColor: e.target.value })}
+                  className="h-10 w-14 rounded-md border border-black/10 bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={settings.subtitleColor || ''}
+                  onChange={(e) => setSettings({ ...settings!, subtitleColor: e.target.value || null })}
+                  placeholder="напр. #6b7280 или празно за default"
+                  className="malts-field"
+                />
+              </div>
+              <p className="malts-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="malts-label">Подзаглавие (БГ) *</label>

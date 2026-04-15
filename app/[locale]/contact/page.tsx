@@ -64,6 +64,22 @@ export default async function ContactPage({
   const instagramUrl = locationSettings.instagramUrl?.trim() || '';
   const facebookUrl = locationSettings.facebookUrl?.trim() || '';
 
+  const latitude = (locationSettings as any).latitude as number | null | undefined;
+  const longitude = (locationSettings as any).longitude as number | null | undefined;
+
+  const hasCoords =
+    typeof latitude === 'number' &&
+    Number.isFinite(latitude) &&
+    typeof longitude === 'number' &&
+    Number.isFinite(longitude);
+
+  const mapQueryAddress = address?.trim() || '';
+  const mapSrc = hasCoords
+    ? `https://www.google.com/maps?q=${encodeURIComponent(`${latitude},${longitude}`)}&z=17&output=embed`
+    : mapQueryAddress
+      ? `https://www.google.com/maps?q=${encodeURIComponent(mapQueryAddress)}&output=embed`
+    : 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2889.8!2d25.95!3d43.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUxJzAwLjAiTiAyNcKwNTcnMDAuMCJF!5e0!3m2!1sen!2sbg!4v1234567890';
+
 
 
   return (
@@ -274,7 +290,7 @@ export default async function ContactPage({
 
               <iframe
 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2889.8!2d25.95!3d43.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUxJzAwLjAiTiAyNcKwNTcnMDAuMCJF!5e0!3m2!1sen!2sbg!4v1234567890"
+                src={mapSrc}
 
                 width="100%"
 

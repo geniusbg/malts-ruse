@@ -296,7 +296,9 @@ function MenuPageContent() {
     <main className="min-h-screen malts-surface text-[var(--malts-ink)]">
       {/* Hero Header with gradient */}
       <div 
-        className="relative overflow-hidden bg-gradient-to-br from-[#ebe4dc] via-[#e4dcd0] to-[#dcd4c8] py-12 md:py-16 border-b-4 border-[#c41e3a]/35"
+        className={`relative overflow-hidden bg-gradient-to-br from-[#ebe4dc] via-[#e4dcd0] to-[#dcd4c8] py-12 md:py-16 ${
+          menuSettings?.backgroundImageUrl ? 'border-b-0' : 'border-b-4 border-[#c41e3a]/35'
+        }`}
         style={{
           backgroundImage: menuSettings?.backgroundImageUrl 
             ? `linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${menuSettings.backgroundImageUrl})`
@@ -307,6 +309,13 @@ function MenuPageContent() {
         }}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/40 via-transparent to-transparent"></div>
+        {menuSettings?.backgroundImageUrl && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ boxShadow: 'inset 0 -10px 18px rgba(0,0,0,0.35)' }}
+            aria-hidden
+          />
+        )}
         
         <div className="relative container mx-auto px-4">
           <div className="text-center">
@@ -319,7 +328,10 @@ function MenuPageContent() {
                 className="w-[124px] h-[124px] md:w-[180px] md:h-[180px] object-contain shrink-0 drop-shadow-md mb-3 md:mb-4"
                 priority
               />
-              <h1 className="text-4xl md:text-6xl font-bold text-[var(--malts-ink)] malts-display">
+              <h1
+                className="text-4xl md:text-6xl font-bold malts-display"
+                style={{ color: (menuSettings as any)?.titleColor || 'var(--malts-ink)' }}
+              >
                 {menuSettings
                   ? stripLeadingEmoji(
                       locale === 'bg'
@@ -335,7 +347,10 @@ function MenuPageContent() {
                       : 'Meniul nostru'}
               </h1>
             </div>
-            <p className="text-lg md:text-xl malts-muted mb-6">
+            <p
+              className="text-lg md:text-xl mb-6"
+              style={{ color: (menuSettings as any)?.subtitleColor || 'var(--malts-muted)' }}
+            >
               {menuSettings
                 ? (locale === 'bg' ? menuSettings.subtitleBg : locale === 'en' ? menuSettings.subtitleEn : menuSettings.subtitleRo)
                 : (locale === 'bg' ? 'Открийте селекцията ни от напитки и деликатеси' : 

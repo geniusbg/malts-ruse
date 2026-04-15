@@ -43,6 +43,8 @@ export default function LocationSettingsPage({
     addressBg: '',
     addressEn: '',
     addressRo: '',
+    latitude: '',
+    longitude: '',
     phone: '',
     instagramUrl: '',
     facebookUrl: '',
@@ -66,6 +68,18 @@ export default function LocationSettingsPage({
             addressBg: data.settings.addressBg || '',
             addressEn: data.settings.addressEn || '',
             addressRo: data.settings.addressRo || '',
+            latitude:
+              typeof data.settings.latitude === 'number'
+                ? String(data.settings.latitude)
+                : typeof data.settings.latitude === 'string'
+                  ? data.settings.latitude
+                  : '',
+            longitude:
+              typeof data.settings.longitude === 'number'
+                ? String(data.settings.longitude)
+                : typeof data.settings.longitude === 'string'
+                  ? data.settings.longitude
+                  : '',
             phone: data.settings.phone || '',
             instagramUrl: data.settings.instagramUrl || '',
             facebookUrl: data.settings.facebookUrl || '',
@@ -109,6 +123,8 @@ export default function LocationSettingsPage({
           addressBg: locationSettings.addressBg,
           addressEn: locationSettings.addressEn,
           addressRo: locationSettings.addressRo,
+          latitude: locationSettings.latitude.trim() ? Number(locationSettings.latitude) : null,
+          longitude: locationSettings.longitude.trim() ? Number(locationSettings.longitude) : null,
           phone: locationSettings.phone,
           instagramUrl: locationSettings.instagramUrl,
           facebookUrl: locationSettings.facebookUrl,
@@ -198,6 +214,42 @@ export default function LocationSettingsPage({
           )}
 
           <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="malts-label">Latitude</label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={locationSettings.latitude}
+                  onChange={(e) => handleSettingsChange('latitude' as any, e.target.value)}
+                  disabled={settingsLoading}
+                  className="malts-field"
+                  placeholder="43.851234"
+                />
+                <p className="malts-help">Диапазон: -90..90</p>
+              </div>
+              <div className="space-y-2">
+                <label className="malts-label">Longitude</label>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={locationSettings.longitude}
+                  onChange={(e) => handleSettingsChange('longitude' as any, e.target.value)}
+                  disabled={settingsLoading}
+                  className="malts-field"
+                  placeholder="25.954321"
+                />
+                <p className="malts-help">Диапазон: -180..180</p>
+              </div>
+              <div className="space-y-2">
+                <div className="malts-label">Карта</div>
+                <p className="malts-help">
+                  Ако попълниш и двете координати, Google Maps в „Контакти“ ще ползва точна локация (по-точно от адрес).
+                </p>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="malts-label">Телефон</label>

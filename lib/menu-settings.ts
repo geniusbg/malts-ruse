@@ -6,9 +6,11 @@ export interface MenuSettings {
   titleBg: string;
   titleEn: string;
   titleRo: string;
+  titleColor?: string | null;
   subtitleBg: string;
   subtitleEn: string;
   subtitleRo: string;
+  subtitleColor?: string | null;
   backgroundImageUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -18,9 +20,11 @@ const DEFAULT_SETTINGS = {
   titleBg: 'Нашето Меню',
   titleEn: 'Our Menu',
   titleRo: 'Meniul nostru',
+  titleColor: null as string | null,
   subtitleBg: 'Открийте селекцията ни от напитки и деликатеси',
   subtitleEn: 'Discover our selection of drinks and delicacies',
   subtitleRo: 'Descoperă selecția noastră de băuturi și delicatese',
+  subtitleColor: null as string | null,
   backgroundImageUrl: null as string | null,
 };
 
@@ -41,9 +45,11 @@ export async function updateMenuSettings(data: {
   titleBg?: string;
   titleEn?: string;
   titleRo?: string;
+  titleColor?: string | null;
   subtitleBg?: string;
   subtitleEn?: string;
   subtitleRo?: string;
+  subtitleColor?: string | null;
   backgroundImageUrl?: string | null;
 }): Promise<MenuSettings> {
   const brandId = await getDefaultBrandId();
@@ -52,30 +58,37 @@ export async function updateMenuSettings(data: {
   });
 
   if (existing) {
-    return await prisma.menuSettings.update({
+    // NOTE: Prisma client types may lag behind schema changes in some environments.
+    // Use `as any` so we can persist new optional color fields without blocking compilation.
+    return await (prisma.menuSettings as any).update({
       where: { id: existing.id },
       data: {
         titleBg: data.titleBg ?? existing.titleBg,
         titleEn: data.titleEn ?? existing.titleEn,
         titleRo: data.titleRo ?? existing.titleRo,
+        titleColor: data.titleColor !== undefined ? data.titleColor : (existing as any).titleColor ?? DEFAULT_SETTINGS.titleColor,
         subtitleBg: data.subtitleBg ?? existing.subtitleBg,
         subtitleEn: data.subtitleEn ?? existing.subtitleEn,
         subtitleRo: data.subtitleRo ?? existing.subtitleRo,
+        subtitleColor:
+          data.subtitleColor !== undefined ? data.subtitleColor : (existing as any).subtitleColor ?? DEFAULT_SETTINGS.subtitleColor,
         backgroundImageUrl:
           data.backgroundImageUrl !== undefined ? data.backgroundImageUrl : existing.backgroundImageUrl,
       },
-    });
+    }) as MenuSettings;
   }
-  return await prisma.menuSettings.create({
+  return await (prisma.menuSettings as any).create({
     data: {
       brandId,
       titleBg: data.titleBg ?? DEFAULT_SETTINGS.titleBg,
       titleEn: data.titleEn ?? DEFAULT_SETTINGS.titleEn,
       titleRo: data.titleRo ?? DEFAULT_SETTINGS.titleRo,
+      titleColor: data.titleColor ?? DEFAULT_SETTINGS.titleColor,
       subtitleBg: data.subtitleBg ?? DEFAULT_SETTINGS.subtitleBg,
       subtitleEn: data.subtitleEn ?? DEFAULT_SETTINGS.subtitleEn,
       subtitleRo: data.subtitleRo ?? DEFAULT_SETTINGS.subtitleRo,
+      subtitleColor: data.subtitleColor ?? DEFAULT_SETTINGS.subtitleColor,
       backgroundImageUrl: data.backgroundImageUrl ?? DEFAULT_SETTINGS.backgroundImageUrl,
     },
-  });
+  }) as MenuSettings;
 }

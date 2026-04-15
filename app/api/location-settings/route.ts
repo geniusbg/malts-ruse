@@ -37,10 +37,47 @@ export async function PUT(request: Request) {
       );
     }
 
+    const latitudeRaw = data.latitude;
+    const longitudeRaw = data.longitude;
+
+    const latitude =
+      latitudeRaw === null || latitudeRaw === undefined || latitudeRaw === ''
+        ? null
+        : typeof latitudeRaw === 'number'
+          ? latitudeRaw
+          : typeof latitudeRaw === 'string'
+            ? Number(latitudeRaw)
+            : NaN;
+
+    const longitude =
+      longitudeRaw === null || longitudeRaw === undefined || longitudeRaw === ''
+        ? null
+        : typeof longitudeRaw === 'number'
+          ? longitudeRaw
+          : typeof longitudeRaw === 'string'
+            ? Number(longitudeRaw)
+            : NaN;
+
+    const isLatitudeOk = latitude === null || (Number.isFinite(latitude) && latitude >= -90 && latitude <= 90);
+    const isLongitudeOk = longitude === null || (Number.isFinite(longitude) && longitude >= -180 && longitude <= 180);
+    const bothOrNone = (latitude === null && longitude === null) || (latitude !== null && longitude !== null);
+
+    if (!isLatitudeOk || !isLongitudeOk || !bothOrNone) {
+      return NextResponse.json(
+        {
+          error:
+            'Невалидни координати. Въведи и двете (latitude/longitude) или остави и двете празни. Latitude [-90..90], Longitude [-180..180].',
+        },
+        { status: 400 }
+      );
+    }
+
     const settings = await updateLocationSettings({
       addressBg: data.addressBg,
       addressEn: data.addressEn,
       addressRo: data.addressRo,
+      latitude,
+      longitude,
       phone: typeof data.phone === 'string' ? data.phone : undefined,
       instagramUrl: typeof data.instagramUrl === 'string' ? data.instagramUrl : undefined,
       facebookUrl: typeof data.facebookUrl === 'string' ? data.facebookUrl : undefined,

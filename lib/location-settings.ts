@@ -6,6 +6,8 @@ export interface LocationSettings {
   addressBg: string;
   addressEn: string;
   addressRo: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phone: string;
   instagramUrl: string;
   facebookUrl: string;
@@ -33,6 +35,8 @@ export async function getLocationSettings(): Promise<LocationSettings> {
         addressBg: settings.addressBg || DEFAULT_ADDRESS.addressBg,
         addressEn: settings.addressEn || DEFAULT_ADDRESS.addressEn,
         addressRo: settings.addressRo || DEFAULT_ADDRESS.addressRo,
+        latitude: (settings as any).latitude ?? null,
+        longitude: (settings as any).longitude ?? null,
         phone: (settings as any).phone || DEFAULT_ADDRESS.phone,
         instagramUrl: (settings as any).instagramUrl || DEFAULT_ADDRESS.instagramUrl,
         facebookUrl: (settings as any).facebookUrl || DEFAULT_ADDRESS.facebookUrl,
@@ -51,6 +55,8 @@ export async function getLocationSettings(): Promise<LocationSettings> {
       addressBg: newSettings.addressBg,
       addressEn: newSettings.addressEn,
       addressRo: newSettings.addressRo,
+      latitude: (newSettings as any).latitude ?? null,
+      longitude: (newSettings as any).longitude ?? null,
       phone: (newSettings as any).phone || DEFAULT_ADDRESS.phone,
       instagramUrl: (newSettings as any).instagramUrl || DEFAULT_ADDRESS.instagramUrl,
       facebookUrl: (newSettings as any).facebookUrl || DEFAULT_ADDRESS.facebookUrl,
@@ -60,6 +66,8 @@ export async function getLocationSettings(): Promise<LocationSettings> {
     return {
       id: '',
       ...DEFAULT_ADDRESS,
+      latitude: null,
+      longitude: null,
     };
   }
 }
@@ -68,6 +76,8 @@ export async function updateLocationSettings(data: {
   addressBg: string;
   addressEn: string;
   addressRo: string;
+  latitude?: number | null;
+  longitude?: number | null;
   phone?: string;
   instagramUrl?: string;
   facebookUrl?: string;
@@ -85,6 +95,8 @@ export async function updateLocationSettings(data: {
           addressBg: data.addressBg,
           addressEn: data.addressEn,
           addressRo: data.addressRo,
+          latitude: data.latitude ?? (existing as any).latitude ?? null,
+          longitude: data.longitude ?? (existing as any).longitude ?? null,
           phone: data.phone ?? (existing as any).phone ?? DEFAULT_ADDRESS.phone,
           instagramUrl: data.instagramUrl ?? (existing as any).instagramUrl ?? DEFAULT_ADDRESS.instagramUrl,
           facebookUrl: data.facebookUrl ?? (existing as any).facebookUrl ?? DEFAULT_ADDRESS.facebookUrl,
@@ -96,6 +108,8 @@ export async function updateLocationSettings(data: {
         addressBg: updated.addressBg,
         addressEn: updated.addressEn,
         addressRo: updated.addressRo,
+        latitude: (updated as any).latitude ?? null,
+        longitude: (updated as any).longitude ?? null,
         phone: (updated as any).phone || DEFAULT_ADDRESS.phone,
         instagramUrl: (updated as any).instagramUrl || DEFAULT_ADDRESS.instagramUrl,
         facebookUrl: (updated as any).facebookUrl || DEFAULT_ADDRESS.facebookUrl,
@@ -108,6 +122,8 @@ export async function updateLocationSettings(data: {
         addressBg: data.addressBg,
         addressEn: data.addressEn,
         addressRo: data.addressRo,
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
         phone: data.phone ?? DEFAULT_ADDRESS.phone,
         instagramUrl: data.instagramUrl ?? DEFAULT_ADDRESS.instagramUrl,
         facebookUrl: data.facebookUrl ?? DEFAULT_ADDRESS.facebookUrl,
@@ -119,6 +135,8 @@ export async function updateLocationSettings(data: {
       addressBg: created.addressBg,
       addressEn: created.addressEn,
       addressRo: created.addressRo,
+      latitude: (created as any).latitude ?? null,
+      longitude: (created as any).longitude ?? null,
       phone: (created as any).phone || DEFAULT_ADDRESS.phone,
       instagramUrl: (created as any).instagramUrl || DEFAULT_ADDRESS.instagramUrl,
       facebookUrl: (created as any).facebookUrl || DEFAULT_ADDRESS.facebookUrl,

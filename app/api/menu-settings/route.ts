@@ -29,7 +29,17 @@ export async function PUT(request: Request) {
     }
 
     const data = await request.json();
-    const updated = await updateMenuSettings(data);
+    const updated = await updateMenuSettings({
+      titleBg: data?.titleBg,
+      titleEn: data?.titleEn,
+      titleRo: data?.titleRo,
+      titleColor: data?.titleColor ?? null,
+      subtitleBg: data?.subtitleBg,
+      subtitleEn: data?.subtitleEn,
+      subtitleRo: data?.subtitleRo,
+      subtitleColor: data?.subtitleColor ?? null,
+      backgroundImageUrl: data?.backgroundImageUrl,
+    });
 
     return NextResponse.json({ settings: updated }, { status: 200 });
   } catch (error) {
