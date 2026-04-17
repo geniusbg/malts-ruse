@@ -14,7 +14,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const product = await prisma.product.update({
+    // NOTE: Prisma client types may lag behind schema changes in some environments.
+    const product = await (prisma.product as any).update({
       where: { id },
       data: {
         categoryId: data.category_id,
@@ -24,6 +25,9 @@ export async function PUT(
         descriptionBg: data.description_bg || null,
         descriptionEn: data.description_en || null,
         descriptionRo: data.description_ro || null,
+        allergensBg: data.allergens_bg || null,
+        allergensEn: data.allergens_en || null,
+        allergensRo: data.allergens_ro || null,
         priceBgn: data.price_bgn,
         priceEur: data.price_eur,
         imageUrl: data.image_url || null,
@@ -33,7 +37,6 @@ export async function PUT(
         isHidden: data.is_hidden !== undefined ? data.is_hidden : false,
         isFeatured: data.is_featured !== undefined ? data.is_featured : false,
         order: data.order || 0,
-        allergens: data.allergens || [],
       },
     });
 

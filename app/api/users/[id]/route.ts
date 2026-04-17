@@ -34,6 +34,7 @@ export async function GET(
         name: true,
         role: true,
         isActive: true,
+        canSeeAllTables: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -122,6 +123,7 @@ export async function PATCH(
       updateData.role = validation.data.role;
     }
     if (validation.data.isActive !== undefined) updateData.isActive = validation.data.isActive;
+    if (validation.data.canSeeAllTables !== undefined) updateData.canSeeAllTables = validation.data.canSeeAllTables;
     
     // Handle password update separately
     if (validation.data.password) {
@@ -137,6 +139,7 @@ export async function PATCH(
         name: true,
         role: true,
         isActive: true,
+        canSeeAllTables: true,
         createdAt: true,
         updatedAt: true,
       },

@@ -19,10 +19,14 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
     }
   }, [onClose, duration, persistent]);
 
+  /* Opaque surfaces — floating toast must read clearly over any page bg (malts-alert-* tints are too transparent). */
   const colors = {
-    success: 'bg-green-50 border-green-300 text-green-900',
-    error: 'bg-red-50 border-red-300 text-red-900',
-    info: 'bg-blue-50 border-blue-300 text-blue-900',
+    success:
+      'border border-[rgba(22,101,52,0.38)] bg-[#cde8d8] text-[#05210f] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
+    error:
+      'border border-[rgba(153,27,27,0.42)] bg-[#f0d9d9] text-[#3b0a0a] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
+    info:
+      'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
   };
 
   const icons = {
@@ -32,21 +36,22 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
   };
 
   return (
-    <div className="fixed top-24 right-8 z-[100] animate-slide-in">
-      <div className={`${colors[type]} border rounded-2xl p-6 shadow-2xl min-w-[300px] max-w-md`}>
+    <div className="fixed top-24 right-8 z-[100] animate-slide-in max-md:left-4 max-md:right-4 max-md:top-20">
+      <div className={`${colors[type]} rounded-2xl p-6 min-w-[min(100%,300px)] max-w-md`}>
         <div className="flex items-center gap-4">
-          <div className="text-4xl font-bold">
+          <div className="shrink-0 text-4xl font-bold leading-none opacity-90">
             {icons[type]}
           </div>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="text-xl font-semibold whitespace-pre-line leading-relaxed">{message}</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className={`font-bold transition-colors ${
-              persistent 
-                ? 'px-4 py-2 bg-black/5 hover:bg-black/10 rounded-lg text-base' 
-                : 'text-2xl'
+            className={`shrink-0 font-semibold transition-colors ${
+              persistent
+                ? 'rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-paper)] px-4 py-2 text-base text-[var(--malts-ink)] shadow-sm hover:bg-[var(--malts-card-hover)]'
+                : 'text-3xl leading-none text-[var(--malts-ink)] hover:opacity-75'
             }`}
           >
             {persistent 
@@ -57,9 +62,9 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
         
         {/* Progress bar - only show if not persistent */}
         {!persistent && (
-          <div className="mt-3 h-1 bg-black/10 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-black/25 animate-progress"
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--malts-ink)]/12">
+            <div
+              className="h-full animate-progress bg-[var(--malts-ink)]/35"
               style={{ animationDuration: `${duration}ms` }}
             />
           </div>

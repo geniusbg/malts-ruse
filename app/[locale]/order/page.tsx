@@ -10,6 +10,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Toast from '@/components/Toast';
 import { getPusherClient } from '@/lib/pusher-client';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
@@ -90,6 +91,30 @@ function OrderPageContent() {
   const approvalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const approvalStatusRef = useRef<'pending' | 'approved' | 'rejected' | 'auto-rejected' | null>(null);
   const orderIdRef = useRef<string | null>(null);
+
+  const [publicOps, setPublicOps] = useState<{
+    ordersEnabled: boolean;
+    waiterCallEnabled: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/operational-settings/public', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) =>
+        setPublicOps({
+          ordersEnabled: d.ordersEnabled !== false,
+          waiterCallEnabled: d.waiterCallEnabled !== false,
+        })
+      )
+      .catch(() => setPublicOps({ ordersEnabled: true, waiterCallEnabled: true }));
+  }, []);
+
+  useEffect(() => {
+    if (publicOps && !publicOps.ordersEnabled) {
+      setCart([]);
+      setShowCart(false);
+    }
+  }, [publicOps]);
 
   useEffect(() => {
     let hideTimer: NodeJS.Timeout | null = null;
@@ -551,6 +576,7 @@ function OrderPageContent() {
         : homepageSettings?.cardsHeadingRo ?? '';
 
   const addToCart = (product: any) => {
+    if (publicOps && !publicOps.ordersEnabled) return;
     setCart(prev => {
       const existing = prev.find(item => item.productId === product.id);
       if (existing) {
@@ -837,13 +863,18 @@ function OrderPageContent() {
         : 'Vă rugăm așteptați în timp ce verificăm conexiunea.')
     : (sessionMessage || getSessionMessageForReason());
 
+  const ordersEnabled = !publicOps || publicOps.ordersEnabled;
+  const waiterCallEnabled = !publicOps || publicOps.waiterCallEnabled;
+
   if (showLoadingScreen) {
     return <ManagedLoadingScreen locale={locale} progress={loading ? loadProgress : undefined} />;
   }
 
   return (
     <main
-      className={`min-h-screen malts-surface ${tableNumber ? 'pb-16 max-md:pb-24 md:pb-8' : 'pb-8'}`}
+      className={`min-h-screen malts-surface ${
+        tableNumber && waiterCallEnabled ? 'pb-16 max-md:pb-24 md:pb-8' : 'pb-8'
+      }`}
     >
       {/* Toast Notifications - hidden when server is offline */}
       {toast && !isOffline && (
@@ -876,40 +907,40 @@ function OrderPageContent() {
                     : `Au fost plasate ${approvalThresholdValue} comenzi în ultimele ${approvalWindowValue} minute. Din motive de securitate și ca măsură preventivă împotriva acțiunilor neautorizate și a atacurilor, această comandă necesită aprobare.`}
                 </p>
                 {approvalStatus === 'pending' && (
-                  <p className="text-sm font-medium">
-                    {locale === 'bg' 
+                  <MaltsInlineFeedback tone="warning" className="mt-2" role="status">
+                    {locale === 'bg'
                       ? '⏳ Очакване на одобрение от администратор...'
                       : locale === 'en'
-                      ? '⏳ Waiting for admin approval...'
-                      : '⏳ Se așteaptă aprobarea administratorului...'}
-                  </p>
+                        ? '⏳ Waiting for admin approval...'
+                        : '⏳ Se așteaptă aprobarea administratorului...'}
+                  </MaltsInlineFeedback>
                 )}
                 {approvalStatus === 'approved' && (
-                  <p className="text-sm font-medium text-green-700">
-                    {locale === 'bg' 
+                  <MaltsInlineFeedback tone="success" className="mt-2" role="status">
+                    {locale === 'bg'
                       ? '✅ Поръчката е одобрена!'
                       : locale === 'en'
-                      ? '✅ Order approved!'
-                      : '✅ Comanda a fost aprobată!'}
-                  </p>
+                        ? '✅ Order approved!'
+                        : '✅ Comanda a fost aprobată!'}
+                  </MaltsInlineFeedback>
                 )}
                 {approvalStatus === 'rejected' && (
-                  <p className="text-sm font-medium text-red-700">
-                    {locale === 'bg' 
+                  <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+                    {locale === 'bg'
                       ? '❌ Поръчката е отхвърлена'
                       : locale === 'en'
-                      ? '❌ Order rejected'
-                      : '❌ Comanda a fost respinsă'}
-                  </p>
+                        ? '❌ Order rejected'
+                        : '❌ Comanda a fost respinsă'}
+                  </MaltsInlineFeedback>
                 )}
                 {approvalStatus === 'auto-rejected' && (
-                  <p className="text-sm font-medium text-red-600">
+                  <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
                     {locale === 'bg'
                       ? `⏱️ Поръчката беше автоматично отхвърлена след ${autoRejectMinutesValue} минути`
                       : locale === 'en'
-                      ? `⏱️ Order was automatically rejected after ${autoRejectMinutesValue} minutes`
-                      : `⏱️ Comanda a fost respinsă automat după ${autoRejectMinutesValue} minute`}
-                  </p>
+                        ? `⏱️ Order was automatically rejected after ${autoRejectMinutesValue} minutes`
+                        : `⏱️ Comanda a fost respinsă automat după ${autoRejectMinutesValue} minute`}
+                  </MaltsInlineFeedback>
                 )}
               </div>
             </div>
@@ -947,17 +978,20 @@ function OrderPageContent() {
                 )}
                 
                 {/* Cart Button */}
-                <button
-                  onClick={() => setShowCart(!showCart)}
-                  className="relative px-4 py-2.5 malts-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
-                >
-                  🛒 {locale === 'bg' ? 'Количка' : locale === 'en' ? 'Cart' : 'Coș'}
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-[var(--malts-danger)] text-[#f5f0e6] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
+                {ordersEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCart(!showCart)}
+                    className="relative px-4 py-2.5 malts-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
+                  >
+                    🛒 {locale === 'bg' ? 'Количка' : locale === 'en' ? 'Cart' : 'Coș'}
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-[var(--malts-danger)] text-[#f5f0e6] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
+                        {cartCount}
+                      </span>
+                    )}
+                  </button>
+                )}
               </div>
               
               {/* Language Switcher */}
@@ -1398,6 +1432,24 @@ function OrderPageContent() {
                                 </p>
                               ) : null}
 
+                              {(
+                                (locale === 'bg' ? product.allergensBg : locale === 'en' ? product.allergensEn : product.allergensRo) ||
+                                ''
+                              ).trim() ? (
+                                <div className="mb-4">
+                                  <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                                    {locale === 'bg' ? 'Алергени' : locale === 'en' ? 'Allergens' : 'Alergeni'}
+                                  </div>
+                                  <p className="text-sm text-[var(--malts-ink)]/85 leading-relaxed whitespace-pre-line break-words">
+                                    {locale === 'bg'
+                                      ? product.allergensBg
+                                      : locale === 'en'
+                                        ? product.allergensEn
+                                        : product.allergensRo}
+                                  </p>
+                                </div>
+                              ) : null}
+
                               <div className="flex justify-between items-end gap-2 border-t border-[var(--malts-hairline)] pt-4">
                                 <div className="flex min-w-0 flex-col items-start gap-0.5">
                                   {product.basePriceBgn != null && (
@@ -1418,13 +1470,15 @@ function OrderPageContent() {
                                     quantity={product.quantity}
                                   />
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => addToCart(product)}
-                                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
-                                >
-                                  {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
-                                </button>
+                                {ordersEnabled ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => addToCart(product)}
+                                    className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
+                                  >
+                                    {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
+                                  </button>
+                                ) : null}
                               </div>
                             </div>
                           </div>
@@ -1548,13 +1602,15 @@ function OrderPageContent() {
                                             />
                                           </div>
                                         </div>
-                                        <button
-                                          type="button"
-                                          onClick={() => addToCart(p)}
-                                          className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary"
-                                        >
-                                          {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
-                                        </button>
+                                        {ordersEnabled ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => addToCart(p)}
+                                            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary"
+                                          >
+                                            {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
+                                          </button>
+                                        ) : null}
                                       </div>
                                     </div>
                                   </div>
@@ -1798,7 +1854,7 @@ function OrderPageContent() {
       </div>
 
       {/* Cart Modal */}
-      {showCart && (
+      {showCart && ordersEnabled && (
         <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
           <div className="malts-card rounded-t-3xl md:rounded-3xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-[var(--malts-hairline)] flex justify-between items-center sticky top-0 bg-[var(--malts-card)]/95 backdrop-blur-sm">
@@ -1839,31 +1895,31 @@ function OrderPageContent() {
                               : `Au fost plasate ${approvalThresholdValue} comenzi în ultimele ${approvalWindowValue} minute. Din motive de securitate și ca măsură preventivă împotriva acțiunilor neautorizate și a atacurilor, această comandă necesită aprobare.`}
                           </p>
                           {approvalStatus === 'pending' && (
-                            <p className="text-sm font-medium text-yellow-200">
-                              {locale === 'bg' 
+                            <MaltsInlineFeedback tone="warning" className="mt-2" role="status">
+                              {locale === 'bg'
                                 ? '⏳ Очакване на одобрение от администратор...'
                                 : locale === 'en'
-                                ? '⏳ Waiting for admin approval...'
-                                : '⏳ Se așteaptă aprobarea administratorului...'}
-                            </p>
+                                  ? '⏳ Waiting for admin approval...'
+                                  : '⏳ Se așteaptă aprobarea administratorului...'}
+                            </MaltsInlineFeedback>
                           )}
                           {approvalStatus === 'approved' && (
-                            <p className="text-sm font-medium text-green-300">
-                              {locale === 'bg' 
+                            <MaltsInlineFeedback tone="success" className="mt-2" role="status">
+                              {locale === 'bg'
                                 ? '✅ Поръчката е одобрена!'
                                 : locale === 'en'
-                                ? '✅ Order approved!'
-                                : '✅ Comanda a fost aprobată!'}
-                            </p>
+                                  ? '✅ Order approved!'
+                                  : '✅ Comanda a fost aprobată!'}
+                            </MaltsInlineFeedback>
                           )}
                           {approvalStatus === 'rejected' && (
-                            <p className="text-sm font-medium text-red-300">
-                              {locale === 'bg' 
+                            <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+                              {locale === 'bg'
                                 ? '❌ Поръчката е отхвърлена'
                                 : locale === 'en'
-                                ? '❌ Order rejected'
-                                : '❌ Comanda a fost respinsă'}
-                            </p>
+                                  ? '❌ Order rejected'
+                                  : '❌ Comanda a fost respinsă'}
+                            </MaltsInlineFeedback>
                           )}
                         </div>
                       </div>
@@ -1951,7 +2007,7 @@ function OrderPageContent() {
       )}
 
       {/* Call Waiter Button */}
-      {tableNumber && (
+      {tableNumber && waiterCallEnabled && (
         <div className="fixed bottom-4 left-4 right-4 z-40 max-md:bottom-[max(1rem,env(safe-area-inset-bottom))] md:left-auto md:right-4">
           <a
             href={`/${locale}/order/call-waiter?table=${tableNumber}`}

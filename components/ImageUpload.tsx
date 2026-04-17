@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 import imageCompression from 'browser-image-compression';
 
 interface ImageUploadProps {
@@ -92,9 +93,9 @@ export default function ImageUpload({
       <label className="malts-label">{label}</label>
 
       {uploadError && (
-        <div className="malts-alert malts-alert-error">
-          <p className="text-sm">{uploadError}</p>
-        </div>
+        <MaltsInlineFeedback tone="error" role="alert">
+          {uploadError}
+        </MaltsInlineFeedback>
       )}
       
       {preview && (

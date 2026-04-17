@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getPusherClient } from '@/lib/pusher-client';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface PendingApprovalsBannerProps {
   locale?: string;
@@ -68,7 +69,7 @@ export default function PendingApprovalsBanner({
   return (
     <div className={`px-4 md:px-8 pt-2 pb-2 ${className}`}>
       <div className="max-w-7xl mx-auto">
-        <div className="malts-alert malts-alert-warning rounded-xl p-4 md:p-6">
+        <MaltsInlineFeedback tone="warning" className="rounded-xl p-4 md:p-6" role="status">
           <div className="flex items-start gap-4">
             <div className="text-2xl md:text-3xl">⚠️</div>
             <div className="flex-1">
@@ -105,7 +106,7 @@ export default function PendingApprovalsBanner({
               )}
             </div>
           </div>
-        </div>
+        </MaltsInlineFeedback>
       </div>
     </div>
   );

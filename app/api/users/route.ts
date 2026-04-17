@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         name: true,
         role: true,
         isActive: true,
+        canSeeAllTables: true,
         createdAt: true,
         updatedAt: true,
         _count: {

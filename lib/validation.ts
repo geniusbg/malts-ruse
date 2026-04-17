@@ -15,6 +15,7 @@ export const updateUserSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   role: z.enum(['SUPER_ADMIN', 'ADMIN', 'STAFF']).optional(),
   isActive: z.boolean().optional(),
+  canSeeAllTables: z.boolean().optional(),
 });
 
 // Helper to validate with custom error handling

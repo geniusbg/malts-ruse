@@ -38,6 +38,7 @@ model Brand {
   loadingUiSettings     LoadingUiSettings?
   operationalSettings   OperationalSettings?
   operationalAuditLogs  OperationalSettingsAuditLog[]
+  staffTableAssignments StaffTableAssignment[]
 
   @@map("brands")
 }
@@ -79,6 +80,9 @@ model Product {
   descriptionBg String?             @map("description_bg")
   descriptionEn String?             @map("description_en")
   descriptionRo String?             @map("description_ro")
+  allergensBg   String?             @map("allergens_bg") @db.Text
+  allergensEn   String?             @map("allergens_en") @db.Text
+  allergensRo   String?             @map("allergens_ro") @db.Text
   priceBgn      Decimal             @map("price_bgn") @db.Decimal(10, 2)
   priceEur      Decimal             @map("price_eur") @db.Decimal(10, 2)
   imageUrl      String?             @map("image_url")
@@ -178,6 +182,7 @@ model BarTable {
   orders        Order[]
   waiterCalls   WaiterCall[]
   qrScans       QrScan[]
+  assignments   StaffTableAssignment[]
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
 
@@ -307,17 +312,37 @@ model User {
   passwordHash      String             @map("password_hash")
   name              String
   role              UserRole           @default(STAFF)
+  canSeeAllTables   Boolean            @default(false) @map("can_see_all_tables")
   isActive          Boolean            @default(true) @map("is_active")
   createdBy         String?            @map("created_by")
   creator           User?              @relation("UserCreator", fields: [createdBy], references: [id])
   createdUsers      User[]             @relation("UserCreator")
   pushSubscriptions PushSubscription[]
+  tableAssignments  StaffTableAssignment[]
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
 
   @@index([role])
   @@index([isActive])
   @@map("users")
+}
+
+/// Assign specific tables to STAFF users (many-to-many).
+model StaffTableAssignment {
+  id        String   @id @default(uuid())
+  brandId   String   @map("brand_id")
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tableId   String   @map("table_id")
+  table     BarTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, tableId])
+  @@index([brandId])
+  @@index([userId])
+  @@index([tableId])
+  @@map("staff_table_assignments")
 }
 
 model Staff {

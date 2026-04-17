@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLockScroll } from '@/lib/use-lock-scroll';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -254,7 +255,9 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
             </div>
 
             {translationError && (
-              <p className="text-sm text-red-400">{translationError}</p>
+              <MaltsInlineFeedback tone="error" role="alert">
+                {translationError}
+              </MaltsInlineFeedback>
             )}
 
             <div>

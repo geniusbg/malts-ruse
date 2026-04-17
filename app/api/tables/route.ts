@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getDefaultBrandId } from '@/lib/brand';
 
 export async function GET() {
   try {
+    const brandId = await getDefaultBrandId();
     const tables = await prisma.barTable.findMany({
+      where: { brandId },
       orderBy: { tableNumber: 'asc' }
     });
 

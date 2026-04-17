@@ -55,6 +55,9 @@ export default function EditProductPage({
           description_bg: p.descriptionBg || '',
           description_en: p.descriptionEn || '',
           description_ro: p.descriptionRo || '',
+          allergens_bg: p.allergensBg || '',
+          allergens_en: p.allergensEn || '',
+          allergens_ro: p.allergensRo || '',
           price_eur: Number(p.priceEur),
           image_url: p.imageUrl || '',
           unit: p.unit || 'pcs',
@@ -63,7 +66,6 @@ export default function EditProductPage({
           is_hidden: p.isHidden,
           is_featured: p.isFeatured,
           order: p.order,
-          allergens: p.allergens || [],
         });
       }
 

@@ -126,7 +126,9 @@ export async function PUT(request: Request) {
       updateData.isActive = isActive;
     }
     if (tableName !== undefined) {
-      updateData.tableName = tableName || null;
+      const nextName = String(tableName || '').trim();
+      // keep labels short so they don't break QR card/layouts
+      updateData.tableName = nextName ? nextName.slice(0, 18) : null;
     }
 
     const table = await prisma.barTable.update({

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { webpush } from '@/lib/web-push';
+import { getDefaultBrandId } from '@/lib/brand';
 
 export async function POST(request: Request) {
   try {
-    const { title, body, url, staffId, role } = await request.json();
+    const { title, body, url, staffId, role, tableId, tableNumber } = await request.json();
 
     // Build where clause
     const whereClause: any = {
@@ -40,6 +41,56 @@ export async function POST(request: Request) {
         }
         return sub.user.role === role;
       });
+    }
+
+    // If this notification is tied to a specific table, further filter by staff assignments
+    if (!staffId && (tableId || tableNumber) && filteredSubscriptions.length) {
+      const brandId = await getDefaultBrandId();
+
+      let resolvedTableId: string | null = null;
+      if (typeof tableId === 'string' && tableId.trim()) {
+        resolvedTableId = tableId.trim();
+      } else if (tableNumber != null) {
+        const n = Number(tableNumber);
+        if (Number.isFinite(n)) {
+          const t = await prisma.barTable.findFirst({
+            where: { brandId, tableNumber: n },
+            select: { id: true },
+          });
+          resolvedTableId = t?.id ?? null;
+        }
+      }
+
+      if (resolvedTableId) {
+        const userIds = filteredSubscriptions
+          .map((s) => s.userId)
+          .filter((id: any): id is string => typeof id === 'string' && id.length > 0);
+
+        const users = await prisma.user.findMany({
+          where: { id: { in: userIds } },
+          select: { id: true, canSeeAllTables: true, role: true },
+        });
+        const allTableUsers = new Set(
+          users
+            .filter((u) => u.canSeeAllTables || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN')
+            .map((u) => u.id)
+        );
+
+        const assigned = await prisma.staffTableAssignment.findMany({
+          where: { brandId, tableId: resolvedTableId, userId: { in: userIds } },
+          select: { userId: true },
+        });
+        const assignedUsers = new Set(assigned.map((a) => a.userId));
+
+        filteredSubscriptions = filteredSubscriptions.filter((sub) => {
+          const uid = sub.userId;
+          if (!uid) return false;
+          return allTableUsers.has(uid) || assignedUsers.has(uid);
+        });
+      } else {
+        // No table found => do not send to avoid leaking/over-notifying
+        filteredSubscriptions = [];
+      }
     }
 
     if (filteredSubscriptions.length === 0) {

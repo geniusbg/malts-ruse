@@ -6,6 +6,7 @@ import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { eurToBgn } from '@/lib/currency';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 type PromotionsUiSettings = { id: string; titleBg: string; titleEn: string; titleRo: string };
 
@@ -417,7 +418,11 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
         </div>
       )}
 
-      {err && <div className="mb-4 malts-alert malts-alert-error" role="alert">{err}</div>}
+      {err && (
+        <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+          {err}
+        </MaltsInlineFeedback>
+      )}
 
       <form
         onSubmit={createPromo}

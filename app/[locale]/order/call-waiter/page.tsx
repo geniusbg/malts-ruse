@@ -6,6 +6,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 function CallWaiterContent() {
   const searchParams = useSearchParams();
@@ -22,6 +23,22 @@ function CallWaiterContent() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'checking' | 'valid' | 'invalid'>('checking');
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
+  const [publicOps, setPublicOps] = useState<{
+    ordersEnabled: boolean;
+    waiterCallEnabled: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/operational-settings/public', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) =>
+        setPublicOps({
+          ordersEnabled: d.ordersEnabled !== false,
+          waiterCallEnabled: d.waiterCallEnabled !== false,
+        })
+      )
+      .catch(() => setPublicOps({ ordersEnabled: true, waiterCallEnabled: true }));
+  }, []);
 
   useLockScroll(sessionStatus !== 'valid');
 
@@ -118,6 +135,9 @@ function CallWaiterContent() {
     : (sessionMessage || getSessionMessageForReason());
   
   const callWaiter = async (callType: string) => {
+    if (publicOps && !publicOps.waiterCallEnabled) {
+      return;
+    }
     if (calling || sessionStatus !== 'valid') {
       setToast({
         message: sessionMessage || getSessionMessageForReason(),
@@ -199,6 +219,10 @@ function CallWaiterContent() {
     }
   };
 
+  if (sessionStatus === 'valid' && publicOps === null) {
+    return <ManagedLoadingScreen locale={locale} />;
+  }
+
   if (called) {
     return (
       <div className="min-h-screen malts-surface flex items-center justify-center">
@@ -241,6 +265,28 @@ function CallWaiterContent() {
             </p>
           </div>
 
+          {publicOps && !publicOps.waiterCallEnabled ? (
+            <div className="space-y-8">
+              <MaltsInlineFeedback tone="warning" className="text-left" role="status">
+                {locale === 'bg'
+                  ? 'Повикването на сервитьор е временно изключено.'
+                  : locale === 'en'
+                    ? 'Waiter call is temporarily disabled.'
+                    : 'Apelarea chelnerului este temporar dezactivată.'}
+              </MaltsInlineFeedback>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="px-8 py-3 malts-btn-secondary rounded-lg font-semibold transition-all"
+                >
+                  ← {locale === 'bg' ? 'Назад към менюто' : 
+                       locale === 'en' ? 'Back to Menu' : 
+                       'Înapoi la meniu'}
+                </button>
+              </div>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Payment Cash */}
             <button
@@ -332,9 +378,12 @@ function CallWaiterContent() {
               )}
             </button>
           </div>
+          )}
 
+          {publicOps?.waiterCallEnabled !== false && (
           <div className="text-center mt-12">
             <button
+              type="button"
               onClick={() => router.back()}
               className="px-8 py-3 malts-btn-secondary rounded-lg font-semibold transition-all"
             >
@@ -343,6 +392,7 @@ function CallWaiterContent() {
                    'Zurück zum Menü'}
             </button>
           </div>
+          )}
         </div>
       </div>
 

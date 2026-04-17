@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 type AuditRow = {
   id: string;
@@ -113,8 +114,16 @@ export default function OperationalSettingsPage({
         Лимит на маси за QR, активиране на поръчки и повикване на сервитьор (сървърна проверка).
       </p>
 
-      {msg && <p className="text-green-400 mb-4">{msg}</p>}
-      {err && <p className="text-red-400 mb-4">{err}</p>}
+      {msg && (
+        <MaltsInlineFeedback tone="success" className="mb-4">
+          {msg}
+        </MaltsInlineFeedback>
+      )}
+      {err && (
+        <MaltsInlineFeedback tone="error" className="mb-4">
+          {err}
+        </MaltsInlineFeedback>
+      )}
 
       <div className="space-y-6 malts-card p-6">
         <div>
@@ -171,7 +180,11 @@ export default function OperationalSettingsPage({
           </button>
         </div>
 
-        {auditErr && <p className="text-red-400 mb-3">{auditErr}</p>}
+        {auditErr && (
+          <MaltsInlineFeedback tone="error" className="mb-3">
+            {auditErr}
+          </MaltsInlineFeedback>
+        )}
 
         <div className="overflow-x-auto border border-[var(--malts-hairline)] rounded-xl">
           <table className="w-full text-sm">

@@ -7,6 +7,7 @@ import ImageUpload from '@/components/ImageUpload';
 import Toast from '@/components/Toast';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface MenuSettings {
   id: string;
@@ -190,9 +191,9 @@ export default function MenuSettingsPage({
       </div>
 
         {translationError && (
-          <p className="text-sm malts-alert malts-alert-error mb-4" role="alert">
+          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
             {translationError}
-          </p>
+          </MaltsInlineFeedback>
         )}
 
         {/* Settings Form */}

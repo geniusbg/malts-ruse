@@ -52,10 +52,6 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    const maxTables = ops?.maxQrTables ?? 30;
-    if (tableNumber < 1 || tableNumber > maxTables) {
-      return NextResponse.json({ error: 'Невалидна маса' }, { status: 400 });
-    }
 
     const barTable = await prisma.barTable.findFirst({
       where: { brandId, tableNumber, isActive: true },
@@ -104,7 +100,9 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           title: `${icon} Повикване от Маса ${tableNumber}`,
           body: typeText,
-          url: '/bg/staff'
+          url: '/bg/staff',
+          tableId: barTable.id,
+          tableNumber
         })
       });
       console.log('✅ Web push sent for waiter call');

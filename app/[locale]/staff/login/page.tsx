@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 export default function StaffLoginPage() {
   const router = useRouter();
@@ -80,9 +81,9 @@ export default function StaffLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             {error && (
-              <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm">
+              <MaltsInlineFeedback tone="error" role="alert">
                 {error}
-              </div>
+              </MaltsInlineFeedback>
             )}
 
             <div>

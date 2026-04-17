@@ -12,6 +12,7 @@ import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatBulgarianDateTime, formatBulgarianDate, formatBulgarianDateRange, formatBulgarianTime } from '@/lib/date-utils';
 import { displayPrice } from '@/lib/currency';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 type OrderTab = 'active' | 'history' | 'stats' | 'approvals';
 
@@ -1913,9 +1914,9 @@ function AdminOrdersPageContent() {
                   {selectedOrder.status === 'cancelled' && selectedOrder.cancellationReason && (
                     <div className="mt-3 pt-3 border-t border-[var(--malts-hairline)]">
                       <p className="malts-muted text-sm font-semibold mb-1">Причина за отказ:</p>
-                      <p className="malts-alert malts-alert-error text-sm">
+                      <MaltsInlineFeedback tone="error" className="text-sm" role="alert">
                         {selectedOrder.cancellationReason}
-                      </p>
+                      </MaltsInlineFeedback>
                     </div>
                   )}
                 </div>

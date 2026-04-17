@@ -8,6 +8,7 @@ import AutoTranslateButton from '@/components/AutoTranslateButton';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface HomepageSettings {
   id: string;
@@ -342,25 +343,19 @@ export default function HomepageSettingsPage({
         </div>
 
         {message && (
-          <div
-            className="mb-4 malts-alert malts-alert-success"
-            role="status"
-          >
+          <MaltsInlineFeedback tone="success" className="mb-4" role="status">
             {message}
-          </div>
+          </MaltsInlineFeedback>
         )}
         {error && (
-          <div
-            className="mb-4 malts-alert malts-alert-error"
-            role="alert"
-          >
+          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
             {error}
-          </div>
+          </MaltsInlineFeedback>
         )}
         {translateErr && (
-          <div className="mb-4 malts-alert malts-alert-error text-sm" role="alert">
+          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
             {translateErr}
-          </div>
+          </MaltsInlineFeedback>
         )}
 
         {/* General Settings Tab */}

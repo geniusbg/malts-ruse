@@ -14,6 +14,7 @@ interface User {
   name: string;
   role: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF';
   isActive: boolean;
+  canSeeAllTables?: boolean;
   createdAt: string;
 }
 
@@ -28,8 +29,9 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [tablesModalUser, setTablesModalUser] = useState<User | null>(null);
 
-  useLockScroll(showAddForm || showEditForm || showDeleteConfirm);
+  useLockScroll(showAddForm || showEditForm || showDeleteConfirm || Boolean(tablesModalUser));
 
   useEffect(() => {
     params.then(p => setLocale(p.locale));
@@ -86,6 +88,10 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
   const handleDelete = (user: User) => {
     setSelectedUser(user);
     setShowDeleteConfirm(true);
+  };
+
+  const handleTables = (user: User) => {
+    setTablesModalUser(user);
   };
 
   const confirmDelete = async () => {
@@ -170,6 +176,12 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                       Редактирай
                     </button>
                     <button
+                      onClick={() => handleTables(user)}
+                      className="text-[var(--malts-ink)] text-sm"
+                    >
+                      Маси
+                    </button>
+                    <button
                       onClick={() => handleDelete(user)}
                       className="text-[var(--malts-danger)] text-sm"
                     >
@@ -206,6 +218,11 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                         >
                           {user.role}
                         </span>
+                        {user.canSeeAllTables ? (
+                          <span className="ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]">
+                            Всички маси
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-4 py-4">
                         <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
@@ -225,6 +242,12 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                           className="text-[var(--malts-info)] text-sm"
                         >
                           Редактирай
+                        </button>
+                        <button
+                          onClick={() => handleTables(user)}
+                          className="text-[var(--malts-ink)] text-sm"
+                        >
+                          Маси
                         </button>
                         <button
                           onClick={() => handleDelete(user)}
@@ -281,6 +304,166 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
           onConfirm={confirmDelete}
         />
       )}
+
+      {tablesModalUser && (
+        <TablesAccessModal
+          user={tablesModalUser}
+          onClose={() => setTablesModalUser(null)}
+          onSaved={async () => {
+            setTablesModalUser(null);
+            await fetchUsers();
+          }}
+          onError={(message) => setToast({ message, type: 'error' })}
+        />
+      )}
+    </div>
+  );
+}
+
+function TablesAccessModal({
+  user,
+  onClose,
+  onSaved,
+  onError,
+}: {
+  user: User;
+  onClose: () => void;
+  onSaved: () => void;
+  onError: (message: string) => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [canSeeAllTables, setCanSeeAllTables] = useState(Boolean(user.canSeeAllTables));
+  const [tables, setTables] = useState<Array<{ id: string; tableNumber: number; tableName: string | null; isActive: boolean }>>([]);
+  const [selectedTableIds, setSelectedTableIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/staff-table-assignments?userId=${encodeURIComponent(user.id)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        setCanSeeAllTables(Boolean(data?.canSeeAllTables));
+        setTables(Array.isArray(data?.tables) ? data.tables : []);
+        setSelectedTableIds(new Set(Array.isArray(data?.tableIds) ? data.tableIds : []));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        onError('Грешка при зареждане на масите');
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.id, onError]);
+
+  const toggle = (tableId: string) => {
+    setSelectedTableIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(tableId)) next.delete(tableId);
+      else next.add(tableId);
+      return next;
+    });
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/staff-table-assignments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          canSeeAllTables,
+          tableIds: Array.from(selectedTableIds),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || 'Грешка при запазване');
+      }
+      await onSaved();
+    } catch (e: any) {
+      onError(e?.message || 'Грешка при запазване');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="malts-card p-6 md:p-8 max-w-2xl w-full">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl font-bold text-[var(--malts-ink)]">Маси — {user.name}</h2>
+            <p className="malts-muted mt-1 text-sm">
+              Ако е включено „Всички маси“, потребителят вижда/получава известия за всички маси.
+            </p>
+          </div>
+          <button onClick={onClose} className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold">
+            ✕
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="malts-muted">Зареждане...</div>
+        ) : (
+          <>
+            <label className="flex items-center gap-2 text-sm font-medium text-[var(--malts-ink)] mb-4">
+              <input
+                type="checkbox"
+                checked={canSeeAllTables}
+                onChange={(e) => setCanSeeAllTables(e.target.checked)}
+                className="rounded"
+              />
+              Всички маси
+            </label>
+
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[50vh] overflow-y-auto pr-1 ${canSeeAllTables ? 'opacity-50 pointer-events-none' : ''}`}>
+              {tables.map((t) => (
+                <label
+                  key={t.id}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTableIds.has(t.id)}
+                    onChange={() => toggle(t.id)}
+                    className="rounded"
+                  />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[var(--malts-ink)]">Маса {t.tableNumber}</div>
+                    {t.tableName ? <div className="text-sm malts-muted truncate">{t.tableName}</div> : null}
+                    {!t.isActive ? <div className="text-xs text-[var(--malts-danger)]">Неактивна</div> : null}
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex gap-4 pt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+              >
+                Отказ
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
+                {saving ? 'Запазване...' : 'Запази'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

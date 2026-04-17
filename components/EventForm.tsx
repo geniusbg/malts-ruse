@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ImageUpload from '@/components/ImageUpload';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface EventFormProps {
   initialData?: Partial<EventFormData>;
@@ -393,9 +394,9 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       )}
 
       {translationError && (
-        <div className="malts-alert malts-alert-error text-sm">
+        <MaltsInlineFeedback tone="error" role="alert">
           {translationError}
-        </div>
+        </MaltsInlineFeedback>
       )}
 
       {/* Images: card (list) vs detail page — upload is compressed client-side before /api/upload */}

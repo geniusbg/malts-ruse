@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 export default function SecuritySettingsPage({
   params
@@ -167,20 +168,14 @@ export default function SecuritySettingsPage({
           </div>
 
           {settingsMessage && (
-            <div
-              className="mb-4 malts-alert malts-alert-success"
-              role="status"
-            >
+            <MaltsInlineFeedback tone="success" className="mb-4" role="status">
               {settingsMessage}
-            </div>
+            </MaltsInlineFeedback>
           )}
           {settingsError && (
-            <div
-              className="mb-4 malts-alert malts-alert-error"
-              role="alert"
-            >
+            <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
               {settingsError}
-            </div>
+            </MaltsInlineFeedback>
           )}
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -531,6 +531,12 @@ function MenuPageContent() {
             {categoryProducts.map((product: any) => {
               const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
               const productDesc = locale === 'bg' ? product.descriptionBg : locale === 'en' ? product.descriptionEn : product.descriptionRo;
+              const productAllergens =
+                locale === 'bg'
+                  ? product.allergensBg
+                  : locale === 'en'
+                    ? product.allergensEn
+                    : product.allergensRo;
 
               return (
                 <div
@@ -603,6 +609,17 @@ function MenuPageContent() {
                         {productDesc}
                       </p>
                     )}
+
+                    {productAllergens && String(productAllergens).trim() !== '' ? (
+                      <div className="mb-4">
+                        <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                          {locale === 'bg' ? 'Алергени' : locale === 'en' ? 'Allergens' : 'Alergeni'}
+                        </div>
+                        <p className="text-sm text-[var(--malts-ink)]/85 leading-relaxed whitespace-pre-line break-words">
+                          {productAllergens}
+                        </p>
+                      </div>
+                    ) : null}
                     
                     {/* Price and Unit */}
                     <div className="pt-4 border-t border-[var(--malts-hairline)] flex justify-between items-center gap-2">

@@ -5,6 +5,7 @@ import { Category } from '@/lib/types';
 import { bgnToEur, eurToBgn } from '@/lib/currency';
 import ImageUpload from './ImageUpload';
 import CategorySelectCombobox from './CategorySelectCombobox';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 interface ProductFormProps {
   categories: Category[];
@@ -22,6 +23,9 @@ type ProductFormData = {
   description_bg: string;
   description_en: string;
   description_ro: string;
+  allergens_bg: string;
+  allergens_en: string;
+  allergens_ro: string;
   category_id: string;
   price_eur: number | '';
   unit: string;
@@ -40,6 +44,9 @@ const defaultProductFormData = (categories: Category[]): ProductFormData => ({
   description_bg: '',
   description_en: '',
   description_ro: '',
+  allergens_bg: '',
+  allergens_en: '',
+  allergens_ro: '',
   category_id: categories[0]?.id || '',
   price_eur: 0,
   unit: 'pcs',
@@ -91,9 +98,16 @@ export default function ProductForm({
     }
   };
 
-  const handleTranslate = async (field: 'name_en' | 'name_ro' | 'description_en' | 'description_ro', targetLang: 'en' | 'ro') => {
+  const handleTranslate = async (
+    field: 'name_en' | 'name_ro' | 'description_en' | 'description_ro' | 'allergens_en' | 'allergens_ro',
+    targetLang: 'en' | 'ro'
+  ) => {
     // Determine source field based on target
-    const sourceField = field.includes('name') ? 'name_bg' : 'description_bg';
+    const sourceField = field.includes('name')
+      ? 'name_bg'
+      : field.includes('allergens')
+        ? 'allergens_bg'
+        : 'description_bg';
     const source = formData[sourceField]?.trim() || '';
     
     if (!source) {
@@ -282,11 +296,69 @@ export default function ProductForm({
           />
         </div>
       </div>
+
+      {/* Allergens */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="malts-label">Алергени (БГ)</label>
+          <textarea
+            name="allergens_bg"
+            value={formData.allergens_bg}
+            onChange={handleChange}
+            rows={2}
+            className="malts-field"
+            placeholder="напр. Глутен, мляко, яйца"
+          />
+          <p className="malts-help mt-1">Свободен текст. Показва се само ако е попълнено.</p>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="malts-label mb-0">Allergens (EN)</label>
+            <button
+              type="button"
+              onClick={() => handleTranslate('allergens_en', 'en')}
+              disabled={!formData.allergens_bg || translatingField === 'allergens_en'}
+              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+            >
+              {translatingField === 'allergens_en' ? 'Превеждам...' : 'Авто превод'}
+            </button>
+          </div>
+          <textarea
+            name="allergens_en"
+            value={formData.allergens_en}
+            onChange={handleChange}
+            rows={2}
+            className="malts-field"
+            placeholder="e.g. Gluten, milk, eggs"
+          />
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="malts-label mb-0">Alergeni (RO)</label>
+            <button
+              type="button"
+              onClick={() => handleTranslate('allergens_ro', 'ro')}
+              disabled={!formData.allergens_bg || translatingField === 'allergens_ro'}
+              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+            >
+              {translatingField === 'allergens_ro' ? 'Превеждам...' : 'Авто превод'}
+            </button>
+          </div>
+          <textarea
+            name="allergens_ro"
+            value={formData.allergens_ro}
+            onChange={handleChange}
+            rows={2}
+            className="malts-field"
+            placeholder="ex. Gluten, lapte, ouă"
+          />
+        </div>
+      </div>
       
       {translationError && (
-        <div className="malts-alert malts-alert-error text-sm">
+        <MaltsInlineFeedback tone="error" role="alert">
           {translationError}
-        </div>
+        </MaltsInlineFeedback>
       )}
 
       {/* Price and Order */}

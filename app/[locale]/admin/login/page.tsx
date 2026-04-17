@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 const backToSiteLabel: Record<string, string> = {
   bg: 'Назад към сайта',
   en: 'Back to site',
@@ -112,9 +113,9 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             {error && (
-              <div className="malts-alert malts-alert-error text-sm">
+              <MaltsInlineFeedback tone="error" role="alert">
                 {error}
-              </div>
+              </MaltsInlineFeedback>
             )}
 
             <div>

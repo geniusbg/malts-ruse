@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
+import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 export default function LocationSettingsPage({
   params
@@ -209,20 +210,14 @@ export default function LocationSettingsPage({
           </div>
 
           {settingsMessage && (
-            <div
-              className="mb-4 malts-alert malts-alert-success"
-              role="status"
-            >
+            <MaltsInlineFeedback tone="success" className="mb-4" role="status">
               {settingsMessage}
-            </div>
+            </MaltsInlineFeedback>
           )}
           {settingsError && (
-            <div
-              className="mb-4 malts-alert malts-alert-error"
-              role="alert"
-            >
+            <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
               {settingsError}
-            </div>
+            </MaltsInlineFeedback>
           )}
 
           <div className="grid grid-cols-1 gap-8">
@@ -372,7 +367,9 @@ export default function LocationSettingsPage({
           </div>
 
           {translationError && (
-            <div className="mt-2 malts-alert malts-alert-error" role="alert">{translationError}</div>
+            <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+              {translationError}
+            </MaltsInlineFeedback>
           )}
         </div>
       </div>
