@@ -24,8 +24,8 @@ export async function GET() {
 
     const canSeeAllTables = Boolean(user?.canSeeAllTables || role === 'ADMIN' || role === 'SUPER_ADMIN');
 
-    const assignedTableIds = canSeeAllTables
-      ? null
+    const assignedTableIds: string[] = canSeeAllTables
+      ? []
       : (
           await prisma.staffTableAssignment.findMany({
             where: { brandId, userId },
