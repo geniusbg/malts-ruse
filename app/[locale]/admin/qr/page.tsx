@@ -52,6 +52,16 @@ const DEFAULT_SETTINGS: QRCodeSettings = {
   cardHeight: 5.5 // cm
 };
 
+/** 1 cm in CSS px (96 DPI) — еднакъв мащаб за екран, PDF и принт. */
+function cmToPx(cm: number): number {
+  return Math.round(((cm * 96) / 2.54) * 100) / 100;
+}
+
+/** iOS: предпочитана формулировка вместо „натисни“ при бутон Share */
+function scanLineDisplay(text: string): string {
+  return text.replace(/натисни/gi, 'избери');
+}
+
 // Logo Section Component with Collapsible functionality
 function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setSettings: (s: QRCodeSettings) => void }) {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -254,14 +264,24 @@ export default function QRCodesPage() {
   const [addingTable, setAddingTable] = useState(false);
   const [togglingTableId, setTogglingTableId] = useState<string | null>(null);
   const [deactivateTableConfirm, setDeactivateTableConfirm] = useState<QRTable | null>(null);
+  const [deleteTableConfirm, setDeleteTableConfirm] = useState<QRTable | null>(null);
   
   // Filter and sort state
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [sortBy, setSortBy] = useState<'tableNumber' | 'scanCount' | 'lastScanned'>('tableNumber');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  const cardWidthPx = cmToPx(settings.cardWidth);
+  const cardHeightPx = cmToPx(settings.cardHeight);
+  /** Мащаб за принт върху A4 с ~1 cm поля (полезно поле ≈ 19×27.7 cm) */
+  const printFit = Math.min(1, 19 / settings.cardWidth, 27.7 / settings.cardHeight);
+
   useLockScroll(
-    showConfirmModal || showRedirectsModal || showUnsavedGenerateModal || !!deactivateTableConfirm
+    showConfirmModal ||
+      showRedirectsModal ||
+      showUnsavedGenerateModal ||
+      !!deactivateTableConfirm ||
+      !!deleteTableConfirm
   );
 
   // Load settings from API on mount
@@ -561,6 +581,30 @@ export default function QRCodesPage() {
     void performTableActiveChange(table, true);
   };
 
+  const deleteTable = async (table: QRTable) => {
+    setTogglingTableId(table.id);
+    try {
+      const res = await fetch(`/api/qr/tables?id=${encodeURIComponent(table.id)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRedirectsToast({ message: data?.error || 'Грешка при изтриване', type: 'error' });
+        setTimeout(() => setRedirectsToast(null), 5000);
+        return;
+      }
+      setRedirectsToast({ message: data?.message || '✅ Готово', type: 'success' });
+      await loadRedirectTables();
+      await loadExistingQRCodes({ silent: true });
+      setTimeout(() => setRedirectsToast(null), 3500);
+    } catch {
+      setRedirectsToast({ message: 'Грешка при изтриване', type: 'error' });
+      setTimeout(() => setRedirectsToast(null), 5000);
+    } finally {
+      setTogglingTableId(null);
+    }
+  };
+
   // Use global date formatter from lib/date-utils
   const formatDate = formatBulgarianDateTime;
 
@@ -601,49 +645,59 @@ export default function QRCodesPage() {
     try {
       const { default: html2canvas } = await import('html2canvas');
       const { jsPDF } = await import('jspdf');
-      
+
       setLoading(true);
-      
+
       const cards = document.querySelectorAll('.qr-card');
       if (cards.length === 0) return;
-      
-      // Temporarily remove borders for PDF generation
-      const originalBorders: string[] = [];
-      cards.forEach((card, index) => {
-        const htmlCard = card as HTMLElement;
-        originalBorders[index] = htmlCard.style.border || '';
-        htmlCard.style.border = 'none';
-        // Also remove border-4 class styling
-        htmlCard.style.borderWidth = '0';
-        htmlCard.style.borderStyle = 'none';
-      });
-      
+
       const pdf = new jsPDF({
         orientation: settings.orientation === 'portrait' ? 'portrait' : 'landscape',
         unit: 'cm',
-        format: 'a4'
+        format: 'a4',
       });
-      
-      const pageWidth = pdf.internal.pageSize.getWidth(); // в cm
-      const pageHeight = pdf.internal.pageSize.getHeight(); // в cm
-      
-      // Конвертираме cm в px за html2canvas (1cm ≈ 37.8px при 96 DPI)
-      const cardWidthPx = settings.cardWidth * 37.8;
-      const cardHeightPx = settings.cardHeight * 37.8;
-      
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      /** ~10 mm margins @page — остава полезна ширина/височина за мащаб */
+      const marginCm = 1;
+      const innerW = pageWidth - marginCm * 2;
+      const innerH = pageHeight - marginCm * 2;
+
+      const cardWidthPx = cmToPx(settings.cardWidth);
+      const cardHeightPx = cmToPx(settings.cardHeight);
+      const qrSize = settings.qrCodeSize;
+
       for (let i = 0; i < cards.length; i++) {
         const card = cards[i] as HTMLElement;
-        
-        // Запазваме оригиналния размер
+
+        const originalBorders = card.style.border;
         const originalWidth = card.style.width;
         const originalHeight = card.style.height;
+        const originalMinHeight = card.style.minHeight;
         const originalBoxSizing = card.style.boxSizing;
-        
-        // Задаваме точния размер за изтегляне
+        const originalOverflow = card.style.overflow;
+
+        card.style.border = 'none';
+        card.style.borderWidth = '0';
+        card.style.borderStyle = 'none';
+        card.style.boxSizing = 'border-box';
+        card.style.overflow = 'hidden';
         card.style.width = `${cardWidthPx}px`;
         card.style.height = `${cardHeightPx}px`;
-        card.style.boxSizing = 'border-box';
-        
+        card.style.minHeight = `${cardHeightPx}px`;
+
+        const matrixImgs = card.querySelectorAll<HTMLImageElement>('img[data-qr-matrix="1"]');
+        const imgPrev: { w: string; h: string; maxW: string }[] = [];
+        matrixImgs.forEach((img) => {
+          imgPrev.push({ w: img.style.width, h: img.style.height, maxW: img.style.maxWidth });
+          img.style.width = `${qrSize}px`;
+          img.style.height = `${qrSize}px`;
+          img.style.maxWidth = 'none';
+        });
+
+        await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
         const canvas = await html2canvas(card, {
           backgroundColor: settings.backgroundColor,
           scale: 2,
@@ -651,45 +705,43 @@ export default function QRCodesPage() {
           useCORS: true,
           width: cardWidthPx,
           height: cardHeightPx,
-          ignoreElements: (element) => {
-            return element.classList.contains('no-print');
-          }
+          windowWidth: cardWidthPx,
+          windowHeight: cardHeightPx,
+          ignoreElements: (element) => element.classList.contains('no-print'),
         });
-        
-        // Възстановяваме оригиналния размер
+
+        card.style.border = originalBorders;
         card.style.width = originalWidth;
         card.style.height = originalHeight;
+        card.style.minHeight = originalMinHeight;
         card.style.boxSizing = originalBoxSizing;
-        
+        card.style.overflow = originalOverflow;
+        matrixImgs.forEach((img, idx) => {
+          const p = imgPrev[idx];
+          img.style.width = p.w;
+          img.style.height = p.h;
+          img.style.maxWidth = p.maxW;
+        });
+
         const imgData = canvas.toDataURL('image/png');
-        
-        // Центрираме картата на страницата
-        const x = (pageWidth - settings.cardWidth) / 2;
-        const y = (pageHeight - settings.cardHeight) / 2;
-        
-        if (i > 0) {
-          pdf.addPage();
+
+        let drawW = settings.cardWidth;
+        let drawH = settings.cardHeight;
+        const fit = Math.min(innerW / drawW, innerH / drawH, 1);
+        if (fit < 1) {
+          drawW *= fit;
+          drawH *= fit;
         }
-        
-        pdf.addImage(imgData, 'PNG', x, y, settings.cardWidth, settings.cardHeight);
+        const x = marginCm + (innerW - drawW) / 2;
+        const y = marginCm + (innerH - drawH) / 2;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', x, y, drawW, drawH);
       }
-      
-      // Restore original borders
-      cards.forEach((card, index) => {
-        const htmlCard = card as HTMLElement;
-        if (originalBorders[index]) {
-          htmlCard.style.border = originalBorders[index];
-        } else {
-          htmlCard.style.border = '';
-          htmlCard.style.borderWidth = '';
-          htmlCard.style.borderStyle = '';
-        }
-      });
-      
+
       pdf.save(`qr-codes-${new Date().toISOString().split('T')[0]}.pdf`);
       setLoading(false);
     } catch (error) {
-      // Error downloading QR codes
       setLoading(false);
     }
   };
@@ -724,7 +776,7 @@ export default function QRCodesPage() {
           <button
             onClick={() => generateQRCodes(false)}
             disabled={loading}
-            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50"
+            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
           >
             {loading ? 'Генериране...' : generated ? '🔄 Регенерирай' : '✨ Генерирай'}
           </button>
@@ -733,13 +785,14 @@ export default function QRCodesPage() {
               <button
                 onClick={downloadAllQRCodes}
                 disabled={loading}
-                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50"
+                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
               >
                 {loading ? 'Изтегляне...' : '⬇️ Изтегли PDF'}
               </button>
               <button
                 onClick={printAllQRCodes}
-                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold transition-all"
+                type="button"
+                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
               >
                 🖨️ Принтирай
               </button>
@@ -1025,6 +1078,9 @@ export default function QRCodesPage() {
                     placeholder="Scan for menu & order"
                   />
                 </div>
+                <p className="malts-help text-xs">
+                  За iPhone/iPad: при инструкции за бутона Share използвайте „избери“, не „натисни“.
+                </p>
               </div>
             </div>
 
@@ -1070,7 +1126,7 @@ export default function QRCodesPage() {
 
       {/* Confirm Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 no-print">
+        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[110] no-print">
           <div className="malts-card p-6 max-w-md mx-4">
             <h3 className="text-xl font-bold mb-4">⚠️ Потвърждение</h3>
             <p className="malts-muted mb-6">
@@ -1130,6 +1186,27 @@ export default function QRCodesPage() {
         }}
       />
 
+      <ConfirmModal
+        open={!!deleteTableConfirm}
+        title="Изтриване на маса"
+        message={
+          deleteTableConfirm
+            ? `Сигурни ли сте, че искате да изтриете маса ${deleteTableConfirm.tableNumber}${
+                deleteTableConfirm.tableName ? ` („${deleteTableConfirm.tableName}“)` : ''
+              }?\n\nАко масата има история (поръчки/повиквания), тя няма да може да бъде изтрита перманентно и ще бъде само деактивирана.`
+            : ''
+        }
+        confirmLabel="Изтрий"
+        cancelLabel="Отказ"
+        tone="danger"
+        onCancel={() => setDeleteTableConfirm(null)}
+        onConfirm={() => {
+          const t = deleteTableConfirm;
+          setDeleteTableConfirm(null);
+          if (t) void deleteTable(t);
+        }}
+      />
+
       {loading && !generated && (
         <ManagedLoadingScreen locale="bg" />
       )}
@@ -1152,42 +1229,42 @@ export default function QRCodesPage() {
       {generated && (
         <>
           <style jsx global>{`
-            /* Safari / mobile: QR matrix scales down inside card (fixed px was clipping) */
+            /* Екран: картата и QR са по зададените размери (настройки), не се „смачкват“ в мобилен изглед */
             @media screen {
+              .qr-cards-scroll {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 0.5rem;
+              }
               .qr-card .qr-code-container {
-                min-width: 0;
-                max-width: 100%;
+                flex-shrink: 0;
               }
               .qr-card .qr-code-container img[data-qr-matrix="1"] {
-                width: min(100%, ${settings.qrCodeSize || 400}px) !important;
-                height: auto !important;
-                max-width: 100% !important;
-                aspect-ratio: 1 / 1;
+                width: ${settings.qrCodeSize}px !important;
+                height: ${settings.qrCodeSize}px !important;
+                max-width: none !important;
                 object-fit: contain;
                 -webkit-user-select: none;
                 user-select: none;
               }
             }
-            @media (max-width: 640px) {
-              .qr-card {
-                max-width: calc(100vw - 2rem) !important;
-                width: auto !important;
-                height: auto !important;
-                aspect-ratio: ${settings.cardWidth} / ${settings.cardHeight} !important;
-              }
-            }
-            
+
             @media print {
               * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+              }
+              html,
+              body {
+                height: auto !important;
+                min-height: 0 !important;
+                margin: 0 !important;
               }
               body * {
                 visibility: hidden !important;
               }
               body {
                 background: white !important;
-                margin: 0 !important;
                 padding: 0 !important;
               }
               .no-print,
@@ -1195,22 +1272,29 @@ export default function QRCodesPage() {
                 display: none !important;
                 visibility: hidden !important;
               }
+              .qr-cards-scroll,
+              .qr-cards-scroll * {
+                visibility: visible !important;
+              }
               .qr-card,
               .qr-card * {
                 visibility: visible !important;
               }
+              .qr-cards-scroll {
+                overflow: visible !important;
+                display: block !important;
+                width: 100% !important;
+              }
               .grid {
-                display: grid !important;
-                grid-template-columns: ${settings.orientation === 'portrait' ? 'repeat(1, 1fr)' : 'repeat(1, 1fr)'} !important;
-                gap: 1rem !important;
+                display: block !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                max-width: 100% !important;
               }
-              .qr-card { 
+              .qr-card {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                page-break-after: auto !important;
+                page-break-after: always !important;
+                break-after: page !important;
                 margin: 0 auto !important;
                 width: ${settings.cardWidth}cm !important;
                 height: ${settings.cardHeight}cm !important;
@@ -1222,6 +1306,11 @@ export default function QRCodesPage() {
                 border: none !important;
                 box-shadow: none !important;
                 overflow: hidden !important;
+                zoom: ${printFit} !important;
+              }
+              .qr-card:last-child {
+                page-break-after: auto !important;
+                break-after: auto !important;
               }
               .qr-card .flex-shrink-0 {
                 flex-shrink: 0 !important;
@@ -1232,9 +1321,10 @@ export default function QRCodesPage() {
               .qr-card * {
                 color: ${settings.textColor} !important;
               }
-              .qr-card img {
-                max-width: 100% !important;
-                height: auto !important;
+              .qr-card .qr-code-container img[data-qr-matrix="1"] {
+                width: ${settings.qrCodeSize}px !important;
+                height: ${settings.qrCodeSize}px !important;
+                max-width: none !important;
                 border: none !important;
               }
               .qr-card p {
@@ -1271,21 +1361,22 @@ export default function QRCodesPage() {
             }
           `}</style>
 
-          <div className={`grid grid-cols-1 ${settings.orientation === 'portrait' ? 'sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3' : 'sm:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3'} gap-6 md:gap-8`}>
+          <div
+            className={`qr-cards-scroll grid grid-cols-1 ${settings.orientation === 'portrait' ? 'sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3' : 'sm:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3'} gap-6 md:gap-8`}
+          >
             {tables.map((table) => (
               <div
                 key={`${table.tableNumber}-${settings.qrCodeSize}-${settings.orientation}-${settings.qrCodeBackgroundColor}-${settings.qrCodeColor}`}
                 className="qr-card"
-                style={{ 
+                style={{
                   backgroundColor: settings.backgroundColor,
                   color: settings.textColor,
                   border: '2px dashed #9ca3af',
                   boxShadow: 'none',
                   margin: '0 auto',
-                  width: `${settings.cardWidth}cm`,
-                  height: `${settings.cardHeight}cm`,
-                  maxWidth: `${settings.cardWidth}cm`,
-                  maxHeight: `${settings.cardHeight}cm`,
+                  width: `${cardWidthPx}px`,
+                  minWidth: `${cardWidthPx}px`,
+                  minHeight: `${cardHeightPx}px`,
                   padding: '1rem 1.5rem',
                   boxSizing: 'border-box',
                   display: settings.orientation === 'portrait' ? 'flex' : 'flex',
@@ -1294,7 +1385,7 @@ export default function QRCodesPage() {
                   textAlign: settings.orientation === 'portrait' ? 'center' : 'left',
                   gap: settings.orientation === 'landscape' ? '1.5rem' : '0',
                   position: 'relative',
-                  overflow: 'hidden'
+                  overflow: 'visible',
                 }}
               >
                 {settings.orientation === 'portrait' ? (
@@ -1347,12 +1438,15 @@ export default function QRCodesPage() {
                         data-qr-matrix="1"
                         src={table.qrCodeDataUrl}
                         alt={`QR Code Маса ${table.tableNumber}`}
-                        style={{ 
+                        style={{
                           border: 'none',
                           display: 'block',
                           margin: '0 auto',
                           backgroundColor: 'transparent',
-                          borderRadius: '0'
+                          borderRadius: '0',
+                          width: `${settings.qrCodeSize}px`,
+                          height: `${settings.qrCodeSize}px`,
+                          maxWidth: 'none',
                         }}
                       />
                     </div>
@@ -1394,7 +1488,7 @@ export default function QRCodesPage() {
                             padding: '0',
                             lineHeight: '1.3'
                           }} className="font-semibold mb-1">
-                            {settings.scanTextBg}
+                            {scanLineDisplay(settings.scanTextBg)}
                           </p>
                           <p style={{ 
                             color: settings.textColor, 
@@ -1429,12 +1523,15 @@ export default function QRCodesPage() {
                           data-qr-matrix="1"
                           src={table.qrCodeDataUrl}
                           alt={`QR Code Маса ${table.tableNumber}`}
-                          style={{ 
-                            border: 'none', 
+                          style={{
+                            border: 'none',
                             display: 'block',
                             margin: '0',
                             backgroundColor: 'transparent',
-                            borderRadius: '0'
+                            borderRadius: '0',
+                            width: `${settings.qrCodeSize}px`,
+                            height: `${settings.qrCodeSize}px`,
+                            maxWidth: 'none',
                           }}
                         />
                       </div>
@@ -1512,7 +1609,7 @@ export default function QRCodesPage() {
                             padding: '0',
                             lineHeight: '1.3'
                           }} className="font-semibold mb-1">
-                            {settings.scanTextBg}
+                            {scanLineDisplay(settings.scanTextBg)}
                           </p>
                           <p style={{ 
                             color: settings.textColor, 
@@ -1861,6 +1958,14 @@ export default function QRCodesPage() {
                                     </button>
                                     <button
                                       type="button"
+                                      onClick={() => setDeleteTableConfirm(table)}
+                                      disabled={togglingTableId === table.id}
+                                      className="px-3 py-1 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)] hover:bg-[rgba(153,27,27,0.14)]"
+                                    >
+                                      🗑 Изтрий
+                                    </button>
+                                    <button
+                                      type="button"
                                       onClick={() => toggleTableActive(table)}
                                       disabled={togglingTableId === table.id}
                                       className={`px-3 py-1 text-sm rounded transition-colors disabled:opacity-50 ${
@@ -2005,6 +2110,14 @@ export default function QRCodesPage() {
                                   className="flex-1 px-4 py-2 malts-btn-secondary text-sm rounded transition-colors font-semibold disabled:opacity-50"
                                 >
                                   ✎ Редактирай
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteTableConfirm(table)}
+                                  disabled={togglingTableId === table.id}
+                                  className="flex-1 px-4 py-2 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)]"
+                                >
+                                  🗑 Изтрий
                                 </button>
                                 <button
                                   type="button"

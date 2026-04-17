@@ -32,7 +32,7 @@ export default function ConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain"
+      className="fixed inset-0 z-[110] overflow-y-auto overflow-x-hidden overscroll-contain"
       role="presentation"
     >
       <div

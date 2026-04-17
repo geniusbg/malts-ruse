@@ -598,3 +598,96 @@ model OperationalSettingsAuditLog {
   @@index([brandId, createdAt(sort: Desc)])
   @@map("operational_settings_audit_log")
 }
+
+// ============================================
+// BACKUPS (SUPER_ADMIN only)
+// ============================================
+
+/// Singleton row (id = "default") for Google Drive OAuth app credentials when not using env vars.
+model BackupSettings {
+  id                      String   @id @default("default")
+  googleDriveClientId     String?  @map("google_drive_client_id")
+  googleDriveClientSecret String?  @map("google_drive_client_secret")
+  googleDriveRedirectUri  String?  @map("google_drive_redirect_uri")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@map("backup_settings")
+}
+
+model BackupDestination {
+  id              String   @id @default(uuid())
+  name            String
+  type            String
+  config          Json
+  active          Boolean  @default(true)
+  createdByUserId String?  @map("created_by_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  artifacts       BackupArtifact[]
+
+  @@index([active])
+  @@index([type])
+  @@map("backup_destinations")
+}
+
+model BackupPolicy {
+  id              String    @id @default(uuid())
+  name            String
+  intervalMinutes Int       @map("interval_minutes")
+  retentionDays   Int       @default(30) @map("retention_days")
+  destinationIds  Json      @map("destination_ids")
+  enabled         Boolean   @default(true)
+  lastRunAt       DateTime? @map("last_run_at")
+  createdByUserId String?   @map("created_by_user_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  jobs            BackupJob[]
+
+  @@index([enabled])
+  @@map("backup_policies")
+}
+
+model BackupJob {
+  id               String    @id @default(uuid())
+  triggerType       String    @map("trigger_type")
+  status            String    @default("PENDING")
+  policyId          String?   @map("policy_id")
+  requestedByUserId String?   @map("requested_by_user_id")
+  note              String?
+  targetDatabaseUrl String?   @map("target_database_url")
+  startedAt         DateTime? @map("started_at")
+  finishedAt        DateTime? @map("finished_at")
+  error             String?
+  metadata          Json?
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  policy            BackupPolicy? @relation(fields: [policyId], references: [id], onDelete: SetNull)
+  artifacts         BackupArtifact[]
+
+  @@index([status, createdAt])
+  @@index([policyId])
+  @@map("backup_jobs")
+}
+
+model BackupArtifact {
+  id             String   @id @default(uuid())
+  jobId          String   @map("job_id")
+  destinationId  String   @map("destination_id")
+  status         String   @default("PENDING")
+  filePath       String?  @map("file_path")
+  checksumSha256 String?  @map("checksum_sha256")
+  fileSizeBytes  BigInt?  @map("file_size_bytes")
+  error          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  job            BackupJob         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  destination    BackupDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([destinationId])
+  @@map("backup_artifacts")
+}
