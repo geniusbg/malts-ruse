@@ -108,11 +108,47 @@ export async function POST(request: NextRequest) {
 
     const promoMap = indexActivePromotionsByProductId(activePromos, priceCheckNow);
     let serverTotalBgn = 0;
-    for (const item of items as { productId: string; priceBgn: number; quantity: number }[]) {
+    for (const item of items as { productId: string; priceBgn: number; quantity: number; variantLabel?: string | null }[]) {
       const prod = dbProducts.find((p) => p.id === item.productId);
       if (!prod) {
         return NextResponse.json({ error: 'Невалидни продукти' }, { status: 400 });
       }
+
+      const requestedVariant = String(item.variantLabel || '').trim();
+      const allowedVariantsRaw = (prod as any).variants;
+      const variantOptions = Array.isArray(allowedVariantsRaw) ? allowedVariantsRaw : [];
+      const enabledVariantLabels = variantOptions
+        .map((v: any) => {
+          if (typeof v === 'string') return String(v || '').trim() ? { label: String(v || '').trim(), enabled: true } : null;
+          const label = String(v?.label ?? v?.name ?? '').trim();
+          if (!label) return null;
+          const enabled = v?.enabled !== false;
+          return { label, enabled };
+        })
+        .filter(Boolean)
+        .filter((v: any) => v.enabled)
+        .map((v: any) => v.label) as string[];
+
+      if (variantOptions.length > 0 && enabledVariantLabels.length === 0) {
+        return NextResponse.json(
+          { error: 'Продуктът е временно неналичен.' },
+          { status: 400 }
+        );
+      }
+
+      if (!requestedVariant && enabledVariantLabels.length > 0) {
+        return NextResponse.json(
+          { error: 'Моля, изберете вариант.' },
+          { status: 400 }
+        );
+      }
+      if (requestedVariant && enabledVariantLabels.length > 0 && !enabledVariantLabels.includes(requestedVariant)) {
+        return NextResponse.json(
+          { error: 'Невалиден вариант. Моля, презаредете менюто.' },
+          { status: 400 }
+        );
+      }
+
       const expected = expectedUnitPriceBgn(prod, promoMap.get(item.productId));
       const got = Number(item.priceBgn);
       if (!Number.isFinite(got) || Math.abs(got - expected) > 0.02) {
@@ -231,15 +267,19 @@ export async function POST(request: NextRequest) {
 
     // Create order items (server-side unit prices)
     try {
-      for (const item of items as { productId: string; productName?: string; name?: string; quantity: number; priceBgn: number }[]) {
+      for (const item of items as { productId: string; productName?: string; name?: string; quantity: number; priceBgn: number; variantLabel?: string | null }[]) {
         const prod = dbProducts.find((p) => p.id === item.productId)!;
         const unitBgn = expectedUnitPriceBgn(prod, promoMap.get(item.productId));
         const qty = Math.max(1, Math.floor(Number(item.quantity) || 1));
+        const variantLabel = String(item.variantLabel || '').trim() || null;
+        const baseName = (item.productName || item.name || '').trim();
+        const displayName = variantLabel ? `${baseName} (${variantLabel})` : baseName;
         await prisma.orderItem.create({
           data: {
             orderId: order.id,
             productId: item.productId,
-            productName: item.productName || item.name || '',
+            productName: displayName,
+            variantLabel,
             quantity: qty,
             priceBgn: unitBgn,
             priceEur: bgnToEur(unitBgn),

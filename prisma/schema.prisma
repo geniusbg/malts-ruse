@@ -88,6 +88,8 @@ model Product {
   imageUrl      String?             @map("image_url")
   unit          String              @default("pcs") @map("unit")
   quantity      Int                 @default(1) @map("quantity")
+  /// JSON array of variant options (simple strings or objects). For now we store strings like ["портокал","кайсия"].
+  variants      Json                @default("[]") @map("variants")
   isAvailable   Boolean             @default(true) @map("is_available")
   isHidden      Boolean             @default(false) @map("is_hidden")
   isFeatured    Boolean             @default(false) @map("is_featured")
@@ -258,6 +260,8 @@ model OrderItem {
   productId   String   @map("product_id")
   product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   productName String   @map("product_name")
+  /// Optional variant label chosen by the customer (e.g. "портокал").
+  variantLabel String? @map("variant_label")
   quantity    Int      @default(1)
   priceBgn    Decimal  @map("price_bgn") @db.Decimal(10, 2)
   priceEur    Decimal  @map("price_eur") @db.Decimal(10, 2)

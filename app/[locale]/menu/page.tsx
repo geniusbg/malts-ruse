@@ -537,6 +537,21 @@ function MenuPageContent() {
                   : locale === 'en'
                     ? product.allergensEn
                     : product.allergensRo;
+              const variantsRaw = Array.isArray(product?.variants) ? product.variants : [];
+              const variants = variantsRaw
+                .map((v: any) => {
+                  if (typeof v === 'string') {
+                    const label = String(v || '').trim();
+                    return label ? { label, enabled: true } : null;
+                  }
+                  const label = String(v?.label ?? v?.name ?? '').trim();
+                  if (!label) return null;
+                  const enabled = v?.enabled !== false;
+                  return { label, enabled };
+                })
+                .filter(Boolean)
+                .filter((v: any) => v.enabled)
+                .map((v: any) => v.label) as string[];
 
               return (
                 <div
@@ -609,6 +624,24 @@ function MenuPageContent() {
                         {productDesc}
                       </p>
                     )}
+
+                    {variants.length > 0 ? (
+                      <div className="mb-4">
+                        <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                          {locale === 'bg' ? 'Варианти' : locale === 'en' ? 'Variants' : 'Variante'}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {variants.map((v: string) => (
+                            <span
+                              key={v}
+                              className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                            >
+                              {v}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
 
                     {productAllergens && String(productAllergens).trim() !== '' ? (
                       <div className="mb-4">

@@ -26,6 +26,7 @@ type ProductFormData = {
   allergens_bg: string;
   allergens_en: string;
   allergens_ro: string;
+  variants: { label: string; enabled: boolean }[];
   category_id: string;
   price_eur: number | '';
   unit: string;
@@ -47,6 +48,7 @@ const defaultProductFormData = (categories: Category[]): ProductFormData => ({
   allergens_bg: '',
   allergens_en: '',
   allergens_ro: '',
+  variants: [],
   category_id: categories[0]?.id || '',
   price_eur: 0,
   unit: 'pcs',
@@ -75,6 +77,23 @@ export default function ProductForm({
       merged.price_eur = bgnToEur(merged.price_bgn);
     }
     delete (merged as { price_bgn?: number }).price_bgn;
+
+    // Normalize variants (trim + dedupe by label) to avoid UI key warnings
+    const rawVariants = Array.isArray((merged as any).variants) ? (merged as any).variants : [];
+    const normalized = rawVariants
+      .map((v: any) => {
+        const label = String(v?.label ?? v?.name ?? v ?? '').trim();
+        if (!label) return null;
+        const enabled = typeof v === 'object' ? v?.enabled !== false : true;
+        return { label, enabled };
+      })
+      .filter(Boolean) as { label: string; enabled: boolean }[];
+    const uniq: { label: string; enabled: boolean }[] = [];
+    for (const v of normalized) {
+      if (uniq.some((x) => x.label === v.label)) continue;
+      uniq.push(v);
+    }
+    (merged as any).variants = uniq;
     return merged;
   });
 
@@ -84,6 +103,37 @@ export default function ProductForm({
   const [loading, setLoading] = useState(false);
   const [translatingField, setTranslatingField] = useState<string | null>(null);
   const [translationError, setTranslationError] = useState<string | null>(null);
+  const [newVariant, setNewVariant] = useState<string>('');
+
+  const addVariant = (label: string) => {
+    const next = String(label || '').trim();
+    if (!next) return;
+    setFormData((prev) => {
+      const existing = Array.isArray(prev.variants) ? prev.variants : [];
+      if (existing.some((v) => v?.label === next)) return prev;
+      return { ...prev, variants: [...existing, { label: next, enabled: true }] };
+    });
+    setNewVariant('');
+  };
+
+  const removeVariant = (label: string) => {
+    setFormData((prev) => {
+      const existing = Array.isArray(prev.variants) ? prev.variants : [];
+      return { ...prev, variants: existing.filter((v) => v?.label !== label) };
+    });
+  };
+
+  const toggleVariantEnabled = (label: string) => {
+    setFormData((prev) => {
+      const existing = Array.isArray(prev.variants) ? prev.variants : [];
+      return {
+        ...prev,
+        variants: existing.map((v) =>
+          v?.label === label ? { ...v, enabled: !v.enabled } : v
+        ),
+      };
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -353,6 +403,78 @@ export default function ProductForm({
             placeholder="ex. Gluten, lapte, ouă"
           />
         </div>
+      </div>
+
+      {/* Variants */}
+      <div className="malts-card p-6">
+        <h3 className="text-[var(--malts-ink)] font-semibold mb-2">
+          Варианти (по избор)
+        </h3>
+        <p className="malts-help mb-4">
+          Добави варианти като отделни опции. Пример за “Сок Cappy”: портокал, кайсия, праскова.
+        </p>
+
+        <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+          <input
+            type="text"
+            value={newVariant}
+            onChange={(e) => setNewVariant(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault(); // don't submit form
+                addVariant(newVariant);
+              }
+            }}
+            className="malts-field"
+            placeholder="напр. портокал"
+          />
+          <button
+            type="button"
+            onClick={() => addVariant(newVariant)}
+            className="malts-btn-primary malts-btn-admin-compact whitespace-nowrap font-semibold"
+          >
+            + Добави
+          </button>
+        </div>
+
+        {(formData.variants || []).length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(formData.variants || []).map((v, i) => (
+              <span
+                key={`${String(v?.label ?? '')}::${i}`}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
+                  v.enabled
+                    ? 'border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-[var(--malts-ink)]'
+                    : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] text-[var(--malts-subtle)]'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleVariantEnabled(v.label)}
+                  className={`rounded-full px-1.5 py-0.5 text-xs font-bold border ${
+                    v.enabled
+                      ? 'border-[rgba(22,101,52,0.25)] text-[var(--malts-success)] hover:bg-[rgba(22,101,52,0.08)]'
+                      : 'border-[rgba(146,64,14,0.25)] text-[var(--malts-warning)] hover:bg-[rgba(146,64,14,0.08)]'
+                  }`}
+                  aria-label={`${v.enabled ? 'Маркирай като неналичен' : 'Маркирай като наличен'}: ${v.label}`}
+                  title={v.enabled ? 'Налично' : 'Временно неналично'}
+                >
+                  {v.enabled ? '✓' : '✕'}
+                </button>
+                <span>{v.label}</span>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(v.label)}
+                  className="rounded-full px-1.5 py-0.5 text-xs font-bold text-[var(--malts-danger)] hover:bg-[rgba(127,29,29,0.08)]"
+                  aria-label={`Премахни вариант ${v.label}`}
+                  title="Премахни"
+                >
+                  −
+                </button>
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
       
       {translationError && (

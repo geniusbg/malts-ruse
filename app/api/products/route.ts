@@ -38,6 +38,7 @@ export async function POST(request: Request) {
         imageUrl: data.image_url || null,
         unit: data.unit || 'pcs',
         quantity: data.quantity || 1,
+        variants: Array.isArray(data.variants) ? data.variants : [],
         isAvailable: data.is_available !== undefined ? data.is_available : true,
         isHidden: data.is_hidden !== undefined ? data.is_hidden : false,
         isFeatured: data.is_featured !== undefined ? data.is_featured : false,
@@ -59,9 +60,10 @@ export async function GET(request: Request) {
     const categoryId = searchParams.get('category_id');
     const brandId = await getDefaultBrandId();
 
-    // Check if user is SUPER_ADMIN
-    const userRole = (session?.user as any)?.role;
-    const showHidden = userRole === 'SUPER_ADMIN';
+    // In admin UI we must still list hidden items so they can be managed.
+    // Public/menu clients typically have no session, so they still won't see hidden items.
+    const userRole = (session?.user as any)?.role as string | undefined;
+    const showHidden = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
 
     const where: import('@prisma/client').Prisma.ProductWhereInput = {
       category: { brandId },

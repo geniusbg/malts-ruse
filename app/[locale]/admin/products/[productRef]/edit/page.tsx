@@ -46,6 +46,20 @@ export default function EditProductPage({
 
       if (productData.product) {
         const p = productData.product;
+        const variants =
+          Array.isArray((p as any).variants) ? ((p as any).variants as any[]) : [];
+        const variantOptions = variants
+          .map((v) => {
+            if (typeof v === 'string') {
+              const label = String(v || '').trim();
+              return label ? { label, enabled: true } : null;
+            }
+            const label = String(v?.label ?? v?.name ?? '').trim();
+            if (!label) return null;
+            const enabled = v?.enabled !== false;
+            return { label, enabled };
+          })
+          .filter(Boolean) as { label: string; enabled: boolean }[];
         setProductName(p.nameBg || '');
         setProduct({
           category_id: p.categoryId,
@@ -58,6 +72,7 @@ export default function EditProductPage({
           allergens_bg: p.allergensBg || '',
           allergens_en: p.allergensEn || '',
           allergens_ro: p.allergensRo || '',
+          variants: variantOptions,
           price_eur: Number(p.priceEur),
           image_url: p.imageUrl || '',
           unit: p.unit || 'pcs',

@@ -82,14 +82,14 @@ export async function POST(request: NextRequest) {
 
     const { email, password, name, role } = validation.data;
 
-    // Only SUPER_ADMIN can create SUPER_ADMIN or ADMIN
-    if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
-      if (currentUser.role !== 'SUPER_ADMIN') {
-        return NextResponse.json(
-          { error: 'Only SUPER_ADMIN can create ADMIN or SUPER_ADMIN users' },
-          { status: 403 }
-        );
-      }
+    // Role creation rules:
+    // - SUPER_ADMIN can create any role
+    // - ADMIN can create ADMIN and STAFF (but not SUPER_ADMIN)
+    if (role === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'Only SUPER_ADMIN can create SUPER_ADMIN users' },
+        { status: 403 }
+      );
     }
 
     // Check if email already exists

@@ -5,7 +5,12 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { displayPrice } from '@/lib/currency';
-import { getDescendantCategoryIds } from '@/lib/category-navigation';
+import {
+  getChildrenOf,
+  categoryPathLeafId,
+  selectCategoryAtDepth,
+  MALLS_MAX_CATEGORY_DEPTH,
+} from '@/lib/category-navigation';
 import Toast from '@/components/Toast';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -17,7 +22,9 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  /** [root, child, grandchild, ...] — до MALLS_MAX_CATEGORY_DEPTH нива */
+  const [categoryPath, setCategoryPath] = useState<string[]>([]);
+  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'hidden'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
@@ -55,19 +62,13 @@ export default function AdminProductsPage() {
     p.nameEn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.nameRo?.toLowerCase().includes(searchQuery.toLowerCase());
 
-  /** За всеки възел: той + всички подкатегории (за бързо броене и филтър) */
-  const descendantIdsByCategory = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    for (const c of categoryRefs) {
-      map.set(c.id, getDescendantCategoryIds(categoryRefs, c.id));
-    }
-    return map;
-  }, [categoryRefs]);
+  const matchesVisibility = (p: any) => {
+    if (visibilityFilter === 'hidden') return Boolean(p.isHidden);
+    if (visibilityFilter === 'visible') return !p.isHidden;
+    return true;
+  };
 
-  const selectedCategoryIds = useMemo(() => {
-    if (selectedCategory === 'all') return null;
-    return descendantIdsByCategory.get(selectedCategory) ?? new Set<string>();
-  }, [selectedCategory, descendantIdsByCategory]);
+  const leafCategoryId = categoryPathLeafId(categoryPath);
 
   /** Пълен път за йерархия (напр. „Бир → Наливна бира“) */
   const getCategoryPathLabel = (categoryId: string) => {
@@ -83,6 +84,20 @@ export default function AdminProductsPage() {
     }
     return parts.join(' → ');
   };
+
+  const parentCategories = useMemo(
+    () =>
+      categories
+        .filter((c: any) => !(c.parentCategoryId ?? c.parent_category_id))
+        .slice()
+        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)),
+    [categories]
+  );
+
+  const categoryProducts = useMemo(() => {
+    if (!leafCategoryId) return products;
+    return products.filter((p: any) => p.categoryId === leafCategoryId);
+  }, [products, leafCategoryId]);
 
   const executeDeleteProduct = async () => {
     if (!deleteTarget) return;
@@ -111,13 +126,13 @@ export default function AdminProductsPage() {
     return <ManagedLoadingScreen locale={locale} />;
   }
 
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      selectedCategoryIds === null || selectedCategoryIds.has(product.categoryId);
-    return matchesCategory && matchesSearchQuery(product);
-  });
+  const filteredProducts = categoryProducts.filter(
+    (product) => matchesSearchQuery(product) && matchesVisibility(product)
+  );
 
-  const totalMatchingSearch = products.filter(matchesSearchQuery).length;
+  const totalMatchingSearch = categoryProducts.filter(
+    (p) => matchesSearchQuery(p) && matchesVisibility(p)
+  ).length;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -139,39 +154,140 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      {/* Category Filter */}
-      <div className="mb-4 overflow-x-auto">
-        <div className="flex gap-2 min-w-max pb-2">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-              selectedCategory === 'all'
-                ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
-                : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
-            }`}
-          >
-            Всички ({totalMatchingSearch})
-          </button>
-          {categories.map((category: any) => {
-            const inTree = descendantIdsByCategory.get(category.id) ?? new Set();
-            const count = products.filter(
-              (p) => inTree.has(p.categoryId) && matchesSearchQuery(p)
-            ).length;
-            return (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                  selectedCategory === category.id
+      {/* Category Filter (menu-like tiers) */}
+      <div className="mb-4 space-y-2">
+        {(() => {
+          const tierBtnClass = (depth: number, isActive: boolean) =>
+            depth === 0
+              ? `rounded-lg px-3 py-2 text-sm font-bold transition-all whitespace-nowrap ${
+                  isActive
                     ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
-                    : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
-                }`}
-              >
-                {category.nameBg} ({count})
-              </button>
+                    : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                }`
+              : `rounded-lg px-3 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
+                    : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                }`;
+
+          const renderTierRow = (depth: number) => {
+            const tierItemsRaw =
+              depth === 0
+                ? parentCategories
+                : categoryPath[depth - 1]
+                  ? getChildrenOf(categories, categoryPath[depth - 1]!)
+                  : [];
+            const tierItems = tierItemsRaw
+              .slice()
+              .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+            if (tierItems.length === 0) return null;
+            return (
+              <div className="overflow-x-auto pb-1">
+                <div className="flex gap-2 min-w-max">
+                  {depth === 0 ? (
+                    <button
+                      key="__all_products__"
+                      type="button"
+                      className={tierBtnClass(0, categoryPath.length === 0)}
+                      onClick={() => setCategoryPath([])}
+                    >
+                      Всички продукти
+                    </button>
+                  ) : null}
+                  {tierItems.map((cat: any) => {
+                    const isActive = categoryPath[depth] === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        className={tierBtnClass(depth, isActive)}
+                        onClick={() => {
+                          const nextPath = selectCategoryAtDepth(categoryPath, depth, cat.id);
+                          setCategoryPath(nextPath);
+                        }}
+                      >
+                        {cat.nameBg ?? cat.name_bg ?? '?'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             );
-          })}
+          };
+
+          const tiersToRender = MALLS_MAX_CATEGORY_DEPTH;
+          return (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-semibold text-[var(--malts-ink)]">Категории</div>
+                {categoryPath.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setCategoryPath([])}
+                    className="malts-btn-secondary rounded-lg px-3 py-2 text-sm font-semibold transition-all"
+                  >
+                    Изчисти филтър
+                  </button>
+                ) : null}
+              </div>
+              {Array.from({ length: tiersToRender }).map((_, i) => {
+                const row = renderTierRow(i);
+                return row ? <div key={`tier-${i}`}>{row}</div> : null;
+              })}
+              {leafCategoryId ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs malts-muted">Избрано:</span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1 text-xs font-semibold text-[var(--malts-ink)]">
+                    {getCategoryPathLabel(leafCategoryId)}
+                  </span>
+                </div>
+              ) : null}
+            </>
+          );
+        })()}
+      </div>
+
+      {/* Visibility Filter */}
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-[var(--malts-ink)]">Показвай:</span>
+          <div className="inline-flex overflow-hidden rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)]">
+            <button
+              type="button"
+              onClick={() => setVisibilityFilter('all')}
+              className={`px-3 py-2 text-sm font-semibold transition-colors ${
+                visibilityFilter === 'all'
+                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+              }`}
+            >
+              Всички
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibilityFilter('visible')}
+              className={`px-3 py-2 text-sm font-semibold transition-colors ${
+                visibilityFilter === 'visible'
+                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+              }`}
+            >
+              Видими
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibilityFilter('hidden')}
+              className={`px-3 py-2 text-sm font-semibold transition-colors ${
+                visibilityFilter === 'hidden'
+                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+              }`}
+            >
+              Скрити
+            </button>
+          </div>
         </div>
+        <div className="text-sm malts-muted"> </div>
       </div>
 
       {/* Search Bar */}
@@ -271,6 +387,45 @@ export default function AdminProductsPage() {
                     </p>
                   </div>
                 ) : null;
+              })()}
+
+              {/* Variants */}
+              {(() => {
+                const variantsRaw = Array.isArray((product as any)?.variants) ? (product as any).variants : [];
+                const variants = variantsRaw
+                  .map((v: any) => {
+                    if (typeof v === 'string') {
+                      const label = String(v || '').trim();
+                      return label ? { label, enabled: true } : null;
+                    }
+                    const label = String(v?.label ?? v?.name ?? '').trim();
+                    if (!label) return null;
+                    const enabled = v?.enabled !== false;
+                    return { label, enabled };
+                  })
+                  .filter(Boolean) as { label: string; enabled: boolean }[];
+                if (variants.length === 0) return null;
+                return (
+                  <div className="mb-3">
+                    <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                      Варианти
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {variants.map((v) => (
+                        <span
+                          key={v.label}
+                          className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                            v.enabled
+                              ? 'border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-[var(--malts-ink)]'
+                              : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] text-[var(--malts-subtle)]'
+                          }`}
+                        >
+                          {v.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
               })()}
 
               {/* Actions */}

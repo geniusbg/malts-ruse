@@ -66,7 +66,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
     return <div>Access denied</div>;
   }
 
-  const canCreateAdmin = userRole === 'SUPER_ADMIN';
+  const canCreateUsers = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
 
   const roleBadgeClass = (role: User['role']) => {
     switch (role) {
@@ -126,7 +126,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <h1 className="malts-admin-heading-font malts-admin-page-title">👥 Потребители</h1>
-        {canCreateAdmin && (
+        {canCreateUsers && (
           <button
             onClick={() => setShowAddForm(true)}
             className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap transition-colors"
@@ -265,7 +265,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
         </>
       )}
 
-      {showAddForm && canCreateAdmin && (
+      {showAddForm && canCreateUsers && (
         <AddUserForm
           locale={locale}
           onClose={() => setShowAddForm(false)}
@@ -481,6 +481,9 @@ function EditUserForm({
   onSuccess: () => void;
   onError: (message: string) => void;
 }) {
+  const { data: session } = useSession();
+  const currentRole = (session?.user as any)?.role as User['role'] | undefined;
+  const canAssignSuperAdmin = currentRole === 'SUPER_ADMIN';
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
   const [name, setName] = useState(user.name);
@@ -562,7 +565,7 @@ function EditUserForm({
             >
               <option value="STAFF">STAFF</option>
               <option value="ADMIN">ADMIN</option>
-              <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+              {canAssignSuperAdmin ? <option value="SUPER_ADMIN">SUPER_ADMIN</option> : null}
             </select>
           </div>
 

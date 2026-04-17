@@ -35,6 +35,7 @@ function normalizeCategoryRow(c: any) {
 
 interface CartItem {
   productId: string;
+  variantLabel?: string | null;
   nameBg: string;
   nameEn: string;
   nameRo: string;
@@ -62,6 +63,12 @@ function OrderPageContent() {
   const [upcomingEventsPreview, setUpcomingEventsPreview] = useState<any[]>([]);
   const [promotionsUiSettings, setPromotionsUiSettings] = useState<PromotionsUiSettings | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [variantPicker, setVariantPicker] = useState<{
+    open: boolean;
+    product: any | null;
+    options: string[];
+    selected: string | null;
+  }>({ open: false, product: null, options: [], selected: null });
   const [showCart, setShowCart] = useState(false);
   /** Мобилен bottom sheet за избор на категория (под lg). */
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
@@ -577,17 +584,62 @@ function OrderPageContent() {
 
   const addToCart = (product: any) => {
     if (publicOps && !publicOps.ordersEnabled) return;
+    const variantsRaw = Array.isArray(product?.variants) ? product.variants : [];
+    const variants = variantsRaw
+      .map((v: any) => {
+        if (typeof v === 'string') {
+          const label = String(v || '').trim();
+          return label ? { label, enabled: true } : null;
+        }
+        const label = String(v?.label ?? v?.name ?? '').trim();
+        if (!label) return null;
+        const enabled = v?.enabled !== false;
+        return { label, enabled };
+      })
+      .filter(Boolean)
+      .filter((v: any) => v.enabled)
+      .map((v: any) => v.label) as string[];
+    if (variants.length > 0) {
+      setVariantPicker({
+        open: true,
+        product,
+        options: variants,
+        selected: variants[0] || null,
+      });
+      return;
+    }
+    if (variantsRaw.length > 0 && variants.length === 0) {
+      const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
+      setToast({
+        message:
+          locale === 'bg'
+            ? `Няма налични варианти за ${productName}`
+            : locale === 'en'
+              ? `No available variants for ${productName}`
+              : `Nu există variante disponibile pentru ${productName}`,
+        type: 'error',
+      });
+      return;
+    }
+    addToCartResolved(product, null);
+  };
+
+  const addToCartResolved = (product: any, variantLabel: string | null) => {
+    if (publicOps && !publicOps.ordersEnabled) return;
     setCart(prev => {
-      const existing = prev.find(item => item.productId === product.id);
+      const existing = prev.find(
+        (item) => item.productId === product.id && String(item.variantLabel || '') === String(variantLabel || '')
+      );
       if (existing) {
         return prev.map(item =>
-          item.productId === product.id
+          item.productId === product.id && String(item.variantLabel || '') === String(variantLabel || '')
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
       return [...prev, {
         productId: product.id,
+        variantLabel,
         nameBg: product.nameBg,
         nameEn: product.nameEn,
         nameRo: product.nameRo,
@@ -600,8 +652,9 @@ function OrderPageContent() {
 
     // Show toast notification
     const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
+    const suffix = variantLabel ? ` (${variantLabel})` : '';
     setToast({
-      message: `${productName} ${locale === 'bg' ? 'добавено в кошницата' : locale === 'en' ? 'added to cart' : 'adăugat în coș'}`,
+      message: `${productName}${suffix} ${locale === 'bg' ? 'добавено в кошницата' : locale === 'en' ? 'added to cart' : 'adăugat în coș'}`,
       type: 'success'
     });
   };
@@ -610,14 +663,21 @@ function OrderPageContent() {
     setCart(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, variantLabel?: string | null) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      setCart((prev) =>
+        prev.filter(
+          (item) =>
+            !(item.productId === productId && String(item.variantLabel || '') === String(variantLabel || ''))
+        )
+      );
       return;
     }
     setCart(prev =>
       prev.map(item =>
-        item.productId === productId ? { ...item, quantity } : item
+        item.productId === productId && String(item.variantLabel || '') === String(variantLabel || '')
+          ? { ...item, quantity }
+          : item
       )
     );
   };
@@ -735,7 +795,8 @@ function OrderPageContent() {
       // Prepare items with productName for the API
       const orderItems = cart.map(item => ({
         productId: item.productId,
-        productName: item.nameBg, // Always use Bulgarian name for orders
+        productName: item.nameBg, // Always use Bulgarian base name for orders
+        variantLabel: item.variantLabel || null,
         priceBgn: item.priceBgn,
         quantity: item.quantity
       }));
@@ -876,6 +937,66 @@ function OrderPageContent() {
         tableNumber && waiterCallEnabled ? 'pb-16 max-md:pb-24 md:pb-8' : 'pb-8'
       }`}
     >
+      {/* Variant Picker */}
+      {variantPicker.open && variantPicker.product ? (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 md:items-center">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] p-5 shadow-2xl">
+            <div className="mb-3">
+              <div className="text-sm malts-muted">
+                {locale === 'bg' ? 'Избери вариант' : locale === 'en' ? 'Choose variant' : 'Alege variantă'}
+              </div>
+              <div className="mt-1 text-lg font-semibold text-[var(--malts-ink)]">
+                {locale === 'bg'
+                  ? variantPicker.product.nameBg
+                  : locale === 'en'
+                    ? variantPicker.product.nameEn
+                    : variantPicker.product.nameRo}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {variantPicker.options.map((opt) => {
+                const active = opt === variantPicker.selected;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setVariantPicker((p) => ({ ...p, selected: opt }))}
+                    className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
+                      active
+                        ? 'border-[var(--malts-accent)] bg-[var(--malts-accent-tint)] text-[var(--malts-ink)]'
+                        : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] hover:bg-[var(--malts-card-hover)] text-[var(--malts-ink)]'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setVariantPicker({ open: false, product: null, options: [], selected: null })}
+                className="flex-1 malts-btn-secondary rounded-xl px-4 py-2 font-semibold"
+              >
+                {locale === 'bg' ? 'Отказ' : locale === 'en' ? 'Cancel' : 'Anulează'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const p = variantPicker.product;
+                  const v = variantPicker.selected;
+                  setVariantPicker({ open: false, product: null, options: [], selected: null });
+                  addToCartResolved(p, v || null);
+                }}
+                className="flex-1 malts-btn-primary rounded-xl px-4 py-2 font-semibold"
+              >
+                {locale === 'bg' ? 'Добави' : locale === 'en' ? 'Add' : 'Adaugă'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {/* Toast Notifications - hidden when server is offline */}
       {toast && !isOffline && (
         <Toast
@@ -1385,6 +1506,11 @@ function OrderPageContent() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                       {categoryProducts.map((product: any) => {
                         const productName = locale === 'bg' ? product.nameBg : locale === 'en' ? product.nameEn : product.nameRo;
+                        const variantsRaw = Array.isArray(product?.variants) ? product.variants : [];
+                        const variants = variantsRaw
+                          .map((v: any) => (typeof v === 'string' ? v : (v?.label ?? v?.name ?? '')))
+                          .map((s: any) => String(s || '').trim())
+                          .filter(Boolean);
                         return (
                           <div
                             key={product.id}
@@ -1422,6 +1548,20 @@ function OrderPageContent() {
                               <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--malts-ink)] transition-colors group-hover:text-[var(--malts-accent)] md:text-xl">
                                 {productName}
                               </h3>
+                              {variants.length > 0 ? (
+                                <div className="-mt-2 mb-3">
+                                  <div className="flex flex-wrap gap-2">
+                                    {variants.map((v: string) => (
+                                      <span
+                                        key={v}
+                                        className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                                      >
+                                        {v}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : null}
 
                               {product.descriptionBg || product.descriptionEn || product.descriptionRo ? (
                                 <p className="malts-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
@@ -1557,6 +1697,11 @@ function OrderPageContent() {
                                     : locale === 'en'
                                       ? p.descriptionEn
                                       : p.descriptionRo;
+                                const variantsRaw = Array.isArray(p?.variants) ? p.variants : [];
+                                const variants = variantsRaw
+                                  .map((v: any) => (typeof v === 'string' ? v : (v?.label ?? v?.name ?? '')))
+                                  .map((s: any) => String(s || '').trim())
+                                  .filter(Boolean);
                                 return (
                                   <div key={p.id} className="group malts-card rounded-2xl overflow-hidden relative">
                                     <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
@@ -1581,6 +1726,18 @@ function OrderPageContent() {
                                     <div className="p-4">
                                       <div className="min-w-0">
                                         <p className="font-semibold text-[var(--malts-ink)] truncate">{name}</p>
+                                        {variants.length > 0 ? (
+                                          <div className="mt-2 flex flex-wrap gap-2">
+                                            {variants.map((v: string) => (
+                                              <span
+                                                key={v}
+                                                className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                                              >
+                                                {v}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        ) : null}
                                         {desc ? (
                                           <p className="mt-2 text-xs malts-muted whitespace-pre-line">{desc}</p>
                                         ) : null}
@@ -1928,9 +2085,13 @@ function OrderPageContent() {
 
                   <div className="space-y-4 mb-6">
                     {cart.map(item => {
-                      const itemName = locale === 'bg' ? item.nameBg : locale === 'en' ? item.nameEn : item.nameRo;
+                      const baseName = locale === 'bg' ? item.nameBg : locale === 'en' ? item.nameEn : item.nameRo;
+                      const itemName = `${baseName}${item.variantLabel ? ` (${item.variantLabel})` : ''}`;
                       return (
-                      <div key={item.productId} className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4 flex flex-col">
+                      <div
+                        key={`${item.productId}::${String(item.variantLabel || '')}`}
+                        className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4 flex flex-col"
+                      >
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-semibold">{itemName}</h4>
                           {item.unit && item.productQuantity && (
@@ -1945,20 +2106,25 @@ function OrderPageContent() {
                           </p>
                           <div className="flex items-center gap-3">
                             <button
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.productId, item.quantity - 1, item.variantLabel)}
                               className="w-8 h-8 bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-lg font-bold"
                             >
                               −
                             </button>
                             <span className="font-bold w-8 text-center">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantLabel)}
                               className="w-8 h-8 malts-btn-primary rounded-lg font-bold"
                             >
                               +
                             </button>
                             <button
-                              onClick={() => removeFromCart(item.productId)}
+                              onClick={() => setCart((prev) =>
+                                prev.filter(
+                                  (x) =>
+                                    !(x.productId === item.productId && String(x.variantLabel || '') === String(item.variantLabel || ''))
+                                )
+                              )}
                               className="ml-2 text-[var(--malts-danger)]"
                             >
                               🗑️

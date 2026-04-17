@@ -33,6 +33,7 @@ export async function PUT(
         imageUrl: data.image_url || null,
         unit: data.unit || 'pcs',
         quantity: data.quantity || 1,
+        variants: Array.isArray(data.variants) ? data.variants : [],
         isAvailable: data.is_available !== undefined ? data.is_available : true,
         isHidden: data.is_hidden !== undefined ? data.is_hidden : false,
         isFeatured: data.is_featured !== undefined ? data.is_featured : false,
