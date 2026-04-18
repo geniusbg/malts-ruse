@@ -698,7 +698,7 @@ export default function QRCodesPage() {
 
       setLoading(true);
 
-      const cards = Array.from(document.querySelectorAll('.qr-card')).filter((el) => {
+      const cards = Array.from(document.querySelectorAll<HTMLElement>('.qr-card')).filter((el) => {
         if (scope === 'all') return true;
         return el.getAttribute('data-table-active') === 'true';
       });
