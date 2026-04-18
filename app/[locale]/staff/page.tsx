@@ -58,11 +58,6 @@ export default function StaffDashboard() {
     typeof process !== 'undefined' &&
     Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim?.());
 
-  /** granted | denied | default | unsupported — за коректен UI спрямо iOS Настройки */
-  const [notifPermission, setNotifPermission] = useState<
-    NotificationPermission | 'unsupported' | null
-  >(null);
-
   // Ref to prevent multiple simultaneous refreshes
   const isRefreshingRef = useRef(false);
 
@@ -70,7 +65,6 @@ export default function StaffDashboard() {
   const refreshPushState = useCallback(async () => {
     try {
       const perm = getNotificationPermission();
-      setNotifPermission(perm);
 
       if (perm === 'denied') {
         await unsubscribePushIfPermissionRevoked();
@@ -587,34 +581,54 @@ export default function StaffDashboard() {
 
   // Enable Push Notifications
   const handleEnablePush = async () => {
-    try {
-      // Check support first
-      const details = getPushSupportDetails();
-      
-      if (!details.isSupported) {
-        if (details.isIOS && !details.isHTTPS) {
-          setToast({ 
-            message: '⚠️ iOS изисква HTTPS за Push! Работи на production с https://', 
-            type: 'error' 
-          });
-          return;
-        }
-        
-        setToast({ message: 'Push notifications не се поддържат на това устройство', type: 'error' });
+    const details = getPushSupportDetails();
+
+    if (!details.isSupported) {
+      if (details.isIOS && !details.isHTTPS) {
+        setToast({
+          message: '⚠️ iOS изисква HTTPS за Push! Работи на production с https://',
+          type: 'error',
+        });
         return;
       }
+      setToast({ message: 'Push notifications не се поддържат на това устройство', type: 'error' });
+      return;
+    }
 
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      setToast({
+        type: 'info',
+        message: details.isIOS
+          ? 'Safari вече е отказал известия за този сайт — iOS няма отделно „Malts“ меню като при Android. Отвори Настройки и провери секциите за Safari и/или известията за приложението от началния екран; при нужда премахни иконата и я добави отново от Safari, за да се появи питането за известия.'
+          : 'Браузърът помни отказ за известия за този сайт. Отвори настройките на сайта от адресната лента (често икона 🔒 или ⋮) и разреши известията, после опитай пак.',
+      });
+      return;
+    }
+
+    try {
       await subscribeToPush();
       await refreshPushState();
-    } catch (error: any) {
+      setToast({ message: 'Известията са активирани.', type: 'success' });
+    } catch (error: unknown) {
       console.error('Enable push error:', error);
+      const raw = error instanceof Error ? error.message : String(error);
+      const lower = raw.toLowerCase();
+      if (lower.includes('permission') || lower.includes('denied')) {
+        setToast({
+          type: 'info',
+          message: details.isIOS
+            ? 'Неуспешно разрешение за известия. На iPhone провери Настройки (Safari / известия за PWA) или добави отново към началния екран.'
+            : 'Неуспешно разрешение за известия. Провери настройките на браузъра за този сайт.',
+        });
+        return;
+      }
       if (isMIUI()) {
-        setToast({ 
-          message: `Грешка: ${error.message}. За Redmi/Xiaomi провери: Настройки → Приложения → Chrome → Автозапуск и Нотификации`, 
-          type: 'error' 
+        setToast({
+          message: `Грешка: ${raw}. За Redmi/Xiaomi: Настройки → Приложения → Chrome → Нотификации`,
+          type: 'error',
         });
       } else {
-        setToast({ message: `Грешка: ${error.message}`, type: 'error' });
+        setToast({ message: `Грешка: ${raw}`, type: 'error' });
       }
     }
   };
@@ -860,34 +874,6 @@ export default function StaffDashboard() {
             <div className="text-right">
               <h1 className="text-xl md:text-4xl font-bold">Staff Dashboard</h1>
               <p className="malts-muted text-sm">Real-time поръчки и известия</p>
-              <p
-                className="mt-1.5 flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-left text-[11px] leading-snug text-[var(--malts-subtle)] md:text-right"
-                aria-live="polite"
-              >
-                <span title="PWA режим">
-                  {isPWA ? '✓ Инсталирано (PWA)' : '○ Отворено в браузър'}
-                </span>
-                <span className="opacity-40" aria-hidden>
-                  ·
-                </span>
-                <span
-                  title={
-                    'Web Push: известия при затворен app на поддържани браузъри (напр. Android Chrome; iOS 16.4+ за инсталиран PWA). Изисква VAPID в .env.'
-                  }
-                >
-                  {!vapidPublicConfigured
-                    ? '⚠ Push: няма NEXT_PUBLIC_VAPID_PUBLIC_KEY'
-                    : !isPushSupported()
-                      ? 'Push: неподдържан на това устройство'
-                      : notifPermission === 'denied'
-                        ? '✕ Push: изключен в Настройки (ОС)'
-                        : pushEnabled
-                          ? '✓ Push: включен'
-                          : notifPermission === 'granted'
-                            ? '○ Push: разрешение ОК, няма абонамент'
-                            : '○ Push: изключен'}
-                </span>
-              </p>
             </div>
 
             <div className="hidden md:flex gap-3">
@@ -901,21 +887,13 @@ export default function StaffDashboard() {
               </button>
             )}
 
-            {!pushEnabled &&
-              isPushSupported() &&
-              vapidPublicConfigured &&
-              notifPermission !== 'denied' && (
+            {!pushEnabled && isPushSupported() && vapidPublicConfigured && (
               <button
                 onClick={handleEnablePush}
-                className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 animate-pulse"
+                className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex shrink-0 items-center gap-2 animate-pulse"
               >
                 🔔 Активирай нотификации
               </button>
-            )}
-            {notifPermission === 'denied' && isPushSupported() && vapidPublicConfigured && (
-              <span className="max-w-xs text-right text-xs text-[var(--malts-subtle)]">
-                Нотификациите са спрени от iOS/системата. Включи ги от Настройки → Malts (или Safari) → Известия.
-              </span>
             )}
 
               {/* User Menu */}
@@ -978,22 +956,13 @@ export default function StaffDashboard() {
             </button>
           )}
 
-          {!pushEnabled &&
-            isPushSupported() &&
-            vapidPublicConfigured &&
-            notifPermission !== 'denied' && (
+          {!pushEnabled && isPushSupported() && vapidPublicConfigured && (
             <button
               onClick={handleEnablePush}
               className="w-full px-4 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 animate-pulse text-sm"
             >
               🔔 Активирай нотификации
             </button>
-          )}
-          {notifPermission === 'denied' && isPushSupported() && vapidPublicConfigured && (
-            <p className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2 text-xs text-[var(--malts-ink)]">
-              Нотификациите са спрени от системата. Включи ги от{' '}
-              <strong>Настройки → Malts → Известия</strong> (или настройките на Safari за сайта).
-            </p>
           )}
 
           {/* Mobile User Menu */}
