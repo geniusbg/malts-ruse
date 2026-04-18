@@ -68,6 +68,22 @@ export async function isSubscribed() {
   }
 }
 
+/** Разрешение от ОС/браузър; на iOS при изключени известия от Настройки става `denied`. */
+export function getNotificationPermission(): NotificationPermission | 'unsupported' {
+  if (!('Notification' in window)) return 'unsupported';
+  return Notification.permission;
+}
+
+/**
+ * Реално ще получиш push: `granted` от ОС И активен push абонамент.
+ * Само `isSubscribed()` подвежда — абонаментът може да остане, след като iOS спре известията.
+ */
+export async function isPushDeliveryEnabled(): Promise<boolean> {
+  if (!isPushSupported()) return false;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+  return isSubscribed();
+}
+
 // Request notification permission
 export async function requestNotificationPermission() {
   if (!('Notification' in window)) {
@@ -206,6 +222,15 @@ export async function unsubscribeFromPush() {
     console.error('Unsubscribe error:', error);
     return false;
   }
+}
+
+/**
+ * Ако известията са отказани в настройките (`denied`), махни абонамента и от сървъра.
+ */
+export async function unsubscribePushIfPermissionRevoked(): Promise<void> {
+  if (!('Notification' in window) || Notification.permission !== 'denied') return;
+  if (!(await isSubscribed())) return;
+  await unsubscribeFromPush();
 }
 
 // Helper to get device name

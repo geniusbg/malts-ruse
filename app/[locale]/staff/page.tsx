@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
@@ -14,11 +14,14 @@ import PendingApprovalsBanner from '@/components/PendingApprovalsBanner';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
-import { 
-  isPushSupported, 
-  isSubscribed, 
+import {
+  isPushSupported,
+  isSubscribed,
   subscribeToPush,
-  getPushSupportDetails
+  getPushSupportDetails,
+  isPushDeliveryEnabled,
+  getNotificationPermission,
+  unsubscribePushIfPermissionRevoked,
 } from '@/lib/push-notifications';
 import { formatBulgarianDateTime, formatBulgarianTime } from '@/lib/date-utils';
 
@@ -54,99 +57,91 @@ export default function StaffDashboard() {
   const vapidPublicConfigured =
     typeof process !== 'undefined' &&
     Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim?.());
-  
+
+  /** granted | denied | default | unsupported — за коректен UI спрямо iOS Настройки */
+  const [notifPermission, setNotifPermission] = useState<
+    NotificationPermission | 'unsupported' | null
+  >(null);
+
   // Ref to prevent multiple simultaneous refreshes
   const isRefreshingRef = useRef(false);
 
+  /** Синхронизира UI с ОС: при denied маха абонамент; при focus/visibility презарежда (след Настройки). */
+  const refreshPushState = useCallback(async () => {
+    try {
+      const perm = getNotificationPermission();
+      setNotifPermission(perm);
+
+      if (perm === 'denied') {
+        await unsubscribePushIfPermissionRevoked();
+      }
+
+      if ('serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.ready;
+        } catch {
+          await new Promise((r) => setTimeout(r, 1000));
+          await navigator.serviceWorker.ready;
+        }
+      }
+
+      let subscribed = await isSubscribed();
+      if (!subscribed && isPushSupported() && perm === 'granted') {
+        try {
+          if ('serviceWorker' in navigator) await navigator.serviceWorker.ready;
+          await subscribeToPush();
+          subscribed = await isSubscribed();
+        } catch (e) {
+          console.error('❌ Auto-subscribe failed:', e);
+        }
+      }
+
+      const enabled = await isPushDeliveryEnabled();
+      setPushEnabled(enabled);
+    } catch (e) {
+      console.error('❌ refreshPushState:', e);
+      setPushEnabled(await isPushDeliveryEnabled().catch(() => false));
+    }
+  }, []);
+
   // ONE-TIME SETUP: PWA, Push, Service Worker (separate useEffect to prevent re-registration)
   useEffect(() => {
-    // Check if running as PWA
     const checkPWA = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                          (window.navigator as any).standalone ||
-                          document.referrer.includes('android-app://');
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone ||
+        document.referrer.includes('android-app://');
       setIsPWA(isStandalone);
     };
     checkPWA();
     setIsAppleMobile(/iPhone|iPad|iPod/.test(navigator.userAgent));
 
-    // Check push subscription status and auto-subscribe if permission already granted
-    const checkPush = async () => {
-      try {
-        // First, ensure Service Worker is ready (critical for Android)
-        if ('serviceWorker' in navigator) {
-          try {
-            await navigator.serviceWorker.ready;
-            console.log('✅ Service Worker is ready');
-          } catch (swError) {
-            console.warn('⚠️ Service Worker not ready yet:', swError);
-            // Wait a bit and try again
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await navigator.serviceWorker.ready;
-            console.log('✅ Service Worker ready after retry');
-          }
-        }
-        
-        const subscribed = await isSubscribed();
-        console.log('📊 Push subscription status:', subscribed ? 'Subscribed' : 'Not subscribed');
-        setPushEnabled(subscribed);
-        
-        // If not subscribed but push is supported, try to auto-subscribe
-        // (only if permission was already granted previously)
-        if (!subscribed && isPushSupported()) {
-          // Check if permission was previously granted
-          if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-              console.log('🔔 Permission already granted, auto-subscribing to push...');
-              console.log('📱 Device:', navigator.userAgent.includes('Android') ? 'Android' : 'Other');
-              
-              // Double-check Service Worker is ready before subscribing (especially important for Android)
-              if ('serviceWorker' in navigator) {
-                const registration = await navigator.serviceWorker.ready;
-                console.log('✅ Service Worker registration ready:', registration.scope);
-              }
-              
-              await subscribeToPush();
-              setPushEnabled(true);
-              console.log('✅✅✅ Auto-subscribed to push notifications successfully!');
-            } catch (error: any) {
-              console.error('❌ Auto-subscribe failed:', error);
-              console.error('Error details:', error.message, error.stack);
-              // Don't show error to user - they can manually subscribe if needed
-              // But log it for debugging
-            }
-          } else {
-            console.log('ℹ️ Permission not granted yet:', Notification.permission);
-          }
-        } else if (!isPushSupported()) {
-          console.log('ℹ️ Push notifications not supported on this device');
-        }
-      } catch (error: any) {
-        console.error('❌ Check push error:', error);
-        console.error('Error details:', error.message);
-      }
-    };
-    
-    // Delay checkPush slightly to ensure page is fully loaded (helps on Android)
-    setTimeout(() => {
-      checkPush();
-    }, 500);
+    const t = setTimeout(() => void refreshPushState(), 500);
 
-
-    // Listen for PWA install prompt
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShowPWAPrompt(true);
-      console.log('📱 PWA install prompt ready');
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void refreshPushState();
+    };
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) void refreshPushState();
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pageshow', onPageShow);
 
     return () => {
+      clearTimeout(t);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pageshow', onPageShow);
     };
-  }, []); // Empty deps - run ONCE on mount
+  }, [refreshPushState]);
 
   useEffect(() => {
     let isMounted = true;
@@ -610,7 +605,7 @@ export default function StaffDashboard() {
       }
 
       await subscribeToPush();
-      setPushEnabled(true);
+      await refreshPushState();
     } catch (error: any) {
       console.error('Enable push error:', error);
       if (isMIUI()) {
@@ -875,14 +870,22 @@ export default function StaffDashboard() {
                 <span className="opacity-40" aria-hidden>
                   ·
                 </span>
-                <span title="Web Push (изисква VAPID в .env)">
+                <span
+                  title={
+                    'Web Push: известия при затворен app на поддържани браузъри (напр. Android Chrome; iOS 16.4+ за инсталиран PWA). Изисква VAPID в .env.'
+                  }
+                >
                   {!vapidPublicConfigured
                     ? '⚠ Push: няма NEXT_PUBLIC_VAPID_PUBLIC_KEY'
                     : !isPushSupported()
                       ? 'Push: неподдържан на това устройство'
-                      : pushEnabled
-                        ? '✓ Push: включен'
-                        : '○ Push: изключен'}
+                      : notifPermission === 'denied'
+                        ? '✕ Push: изключен в Настройки (ОС)'
+                        : pushEnabled
+                          ? '✓ Push: включен'
+                          : notifPermission === 'granted'
+                            ? '○ Push: разрешение ОК, няма абонамент'
+                            : '○ Push: изключен'}
                 </span>
               </p>
             </div>
@@ -898,13 +901,21 @@ export default function StaffDashboard() {
               </button>
             )}
 
-            {!pushEnabled && isPushSupported() && (
+            {!pushEnabled &&
+              isPushSupported() &&
+              vapidPublicConfigured &&
+              notifPermission !== 'denied' && (
               <button
                 onClick={handleEnablePush}
                 className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 animate-pulse"
               >
                 🔔 Активирай нотификации
               </button>
+            )}
+            {notifPermission === 'denied' && isPushSupported() && vapidPublicConfigured && (
+              <span className="max-w-xs text-right text-xs text-[var(--malts-subtle)]">
+                Нотификациите са спрени от iOS/системата. Включи ги от Настройки → Malts (или Safari) → Известия.
+              </span>
             )}
 
               {/* User Menu */}
@@ -967,13 +978,22 @@ export default function StaffDashboard() {
             </button>
           )}
 
-          {!pushEnabled && isPushSupported() && (
+          {!pushEnabled &&
+            isPushSupported() &&
+            vapidPublicConfigured &&
+            notifPermission !== 'denied' && (
             <button
               onClick={handleEnablePush}
               className="w-full px-4 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 animate-pulse text-sm"
             >
               🔔 Активирай нотификации
             </button>
+          )}
+          {notifPermission === 'denied' && isPushSupported() && vapidPublicConfigured && (
+            <p className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2 text-xs text-[var(--malts-ink)]">
+              Нотификациите са спрени от системата. Включи ги от{' '}
+              <strong>Настройки → Malts → Известия</strong> (или настройките на Safari за сайта).
+            </p>
           )}
 
           {/* Mobile User Menu */}
