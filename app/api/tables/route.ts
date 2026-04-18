@@ -11,11 +11,13 @@ export async function GET() {
     });
 
     // Format data for frontend
-    const formattedTables = tables.map(table => ({
+    const formattedTables = tables.map((table) => ({
+      id: table.id,
       tableNumber: table.tableNumber,
       tableName: table.tableName,
+      isActive: table.isActive,
       qrCodeDataUrl: table.qrCodeData,
-      qrCodeUrl: table.qrCodeUrl
+      qrCodeUrl: table.qrCodeUrl,
     }));
 
     return NextResponse.json({ tables: formattedTables });

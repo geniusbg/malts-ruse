@@ -62,7 +62,8 @@ export async function POST(request: Request) {
       qrCodeDataUrl,
       qrUrl,
       tableNumber: n,
-      tableName: table.tableName
+      tableName: table.tableName,
+      isActive: table.isActive,
     });
 
   } catch (error) {
@@ -115,9 +116,10 @@ export async function PUT(request: Request) {
       results.push({
         tableNumber: table.tableNumber,
         tableName: table.tableName,
+        isActive: table.isActive,
         qrCodeDataUrl,
         qrUrl,
-        redirectUrl: `/order?table=${table.tableNumber}`
+        redirectUrl: `/order?table=${table.tableNumber}`,
       });
     }
 
@@ -170,9 +172,10 @@ export async function GET() {
       results.push({
         tableNumber: table.tableNumber,
         tableName: table.tableName,
+        isActive: table.isActive,
         qrCodeDataUrl,
         qrUrl,
-        redirectUrl: `/order?table=${table.tableNumber}`
+        redirectUrl: `/order?table=${table.tableNumber}`,
       });
     }
 

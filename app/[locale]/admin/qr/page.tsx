@@ -271,6 +271,11 @@ export default function QRCodesPage() {
   const [sortBy, setSortBy] = useState<'tableNumber' | 'scanCount' | 'lastScanned'>('tableNumber');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  /** Модал: PDF или принт — всички маси или само активни */
+  const [qrExportModal, setQrExportModal] = useState<null | 'pdf' | 'print'>(null);
+  const [qrExportChoice, setQrExportChoice] = useState<'all' | 'active'>('all');
+  const [qrExportAlert, setQrExportAlert] = useState<string | null>(null);
+
   const cardWidthPx = cmToPx(settings.cardWidth);
   const cardHeightPx = cmToPx(settings.cardHeight);
   /** Мащаб за принт върху A4 с ~1 cm поля (полезно поле ≈ 19×27.7 cm) */
@@ -281,7 +286,9 @@ export default function QRCodesPage() {
       showRedirectsModal ||
       showUnsavedGenerateModal ||
       !!deactivateTableConfirm ||
-      !!deleteTableConfirm
+      !!deleteTableConfirm ||
+      qrExportModal !== null ||
+      !!qrExportAlert
   );
 
   // Load settings from API on mount
@@ -375,7 +382,12 @@ export default function QRCodesPage() {
         const tablesWithQR = data.tables.filter((t: any) => t.qrCodeDataUrl);
         
         if (tablesWithQR.length > 0) {
-          setTables(tablesWithQR);
+          setTables(
+            tablesWithQR.map((t: { isActive?: boolean; [k: string]: unknown }) => ({
+              ...t,
+              isActive: t.isActive !== false,
+            })),
+          );
           setGenerated(true);
         }
       }
@@ -419,7 +431,12 @@ export default function QRCodesPage() {
         })
       });
       const data = await response.json();
-      setTables(data.tables);
+      setTables(
+        (data.tables || []).map((t: { isActive?: boolean; [k: string]: unknown }) => ({
+          ...t,
+          isActive: t.isActive !== false,
+        })),
+      );
       setGenerated(true);
       // If unsaved changes were used, save them automatically after successful generation
       if (hasUnsavedChanges) {
@@ -432,8 +449,41 @@ export default function QRCodesPage() {
     }
   };
 
-  const printAllQRCodes = () => {
+  const printAllQRCodes = (scope: 'all' | 'active') => {
+    if (scope === 'active') {
+      document.documentElement.classList.add('qr-print-active-only');
+      const cleanup = () => {
+        document.documentElement.classList.remove('qr-print-active-only');
+        window.removeEventListener('afterprint', cleanup);
+      };
+      window.addEventListener('afterprint', cleanup);
+      setTimeout(cleanup, 3000);
+    } else {
+      document.documentElement.classList.remove('qr-print-active-only');
+    }
     window.print();
+  };
+
+  const runQrExportConfirm = () => {
+    const kind = qrExportModal;
+    const scope = qrExportChoice;
+    setQrExportAlert(null);
+
+    if (scope === 'active') {
+      const n = document.querySelectorAll('.qr-card[data-table-active="true"]').length;
+      if (n === 0) {
+        setQrExportAlert(
+          kind === 'pdf'
+            ? 'Няма активни маси с QR за изтегляне.'
+            : 'Няма активни маси за принтиране.',
+        );
+        return;
+      }
+    }
+
+    setQrExportModal(null);
+    if (kind === 'pdf') void downloadAllQRCodes(scope);
+    else if (kind === 'print') printAllQRCodes(scope);
   };
 
   // QR Redirects functions
@@ -641,15 +691,26 @@ export default function QRCodesPage() {
 
   const filteredTables = getFilteredAndSortedTables();
 
-  const downloadAllQRCodes = async () => {
+  const downloadAllQRCodes = async (scope: 'all' | 'active' = 'all') => {
     try {
       const { default: html2canvas } = await import('html2canvas');
       const { jsPDF } = await import('jspdf');
 
       setLoading(true);
 
-      const cards = document.querySelectorAll('.qr-card');
-      if (cards.length === 0) return;
+      const cards = Array.from(document.querySelectorAll('.qr-card')).filter((el) => {
+        if (scope === 'all') return true;
+        return el.getAttribute('data-table-active') === 'true';
+      });
+      if (cards.length === 0) {
+        setLoading(false);
+        setQrExportAlert(
+          scope === 'active'
+            ? 'Няма активни маси с QR за изтегляне.'
+            : 'Няма намерени QR карти за изтегляне.',
+        );
+        return;
+      }
 
       const pdf = new jsPDF({
         orientation: settings.orientation === 'portrait' ? 'portrait' : 'landscape',
@@ -669,7 +730,7 @@ export default function QRCodesPage() {
       const qrSize = settings.qrCodeSize;
 
       for (let i = 0; i < cards.length; i++) {
-        const card = cards[i] as HTMLElement;
+        const card = cards[i];
 
         const originalBorders = card.style.border;
         const originalWidth = card.style.width;
@@ -739,7 +800,8 @@ export default function QRCodesPage() {
         pdf.addImage(imgData, 'PNG', x, y, drawW, drawH);
       }
 
-      pdf.save(`qr-codes-${new Date().toISOString().split('T')[0]}.pdf`);
+      const suffix = scope === 'active' ? '-active' : '';
+      pdf.save(`qr-codes${suffix}-${new Date().toISOString().split('T')[0]}.pdf`);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -783,15 +845,24 @@ export default function QRCodesPage() {
           {generated && (
             <>
               <button
-                onClick={downloadAllQRCodes}
+                type="button"
+                onClick={() => {
+                  setQrExportChoice('all');
+                  setQrExportAlert(null);
+                  setQrExportModal('pdf');
+                }}
                 disabled={loading}
                 className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
               >
                 {loading ? 'Изтегляне...' : '⬇️ Изтегли PDF'}
               </button>
               <button
-                onClick={printAllQRCodes}
                 type="button"
+                onClick={() => {
+                  setQrExportChoice('all');
+                  setQrExportAlert(null);
+                  setQrExportModal('print');
+                }}
                 className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
               >
                 🖨️ Принтирай
@@ -1207,6 +1278,83 @@ export default function QRCodesPage() {
         }}
       />
 
+      {qrExportAlert !== null && qrExportModal === null && (
+        <div className="fixed bottom-6 left-1/2 z-[130] w-full max-w-md -translate-x-1/2 px-4 no-print">
+          <MaltsInlineFeedback tone="error" role="alert" className="shadow-lg">
+            <div className="flex items-start justify-between gap-3">
+              <span>{qrExportAlert}</span>
+              <button
+                type="button"
+                className="shrink-0 rounded px-2 py-0.5 text-sm font-semibold hover:bg-black/10"
+                onClick={() => setQrExportAlert(null)}
+                aria-label="Затвори"
+              >
+                ×
+              </button>
+            </div>
+          </MaltsInlineFeedback>
+        </div>
+      )}
+
+      {qrExportModal !== null && (
+        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[120] no-print p-4">
+          <div className="malts-card rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-[var(--malts-ink)] mb-2">
+              {qrExportModal === 'pdf' ? 'Изтегляне на PDF' : 'Принтиране'}
+            </h3>
+            <p className="text-sm malts-muted mb-4">
+              Изберете кои QR кодове да се включат.
+            </p>
+            <div className="flex flex-col gap-3 mb-6">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="qr-export-scope"
+                  checked={qrExportChoice === 'all'}
+                  onChange={() => setQrExportChoice('all')}
+                  className="h-4 w-4"
+                />
+                <span>Всички маси</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="qr-export-scope"
+                  checked={qrExportChoice === 'active'}
+                  onChange={() => setQrExportChoice('active')}
+                  className="h-4 w-4"
+                />
+                <span>Само активни маси</span>
+              </label>
+            </div>
+            {qrExportAlert && (
+              <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+                {qrExportAlert}
+              </MaltsInlineFeedback>
+            )}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                className="malts-btn-secondary rounded-lg px-4 py-2 font-semibold"
+                onClick={() => {
+                  setQrExportModal(null);
+                  setQrExportAlert(null);
+                }}
+              >
+                Отказ
+              </button>
+              <button
+                type="button"
+                className="malts-btn-primary rounded-lg px-4 py-2 font-semibold"
+                onClick={runQrExportConfirm}
+              >
+                {qrExportModal === 'pdf' ? 'Изтегли' : 'Принтирай'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {loading && !generated && (
         <ManagedLoadingScreen locale="bg" />
       )}
@@ -1312,6 +1460,10 @@ export default function QRCodesPage() {
                 page-break-after: auto !important;
                 break-after: auto !important;
               }
+              html.qr-print-active-only .qr-card[data-table-active="false"] {
+                display: none !important;
+                visibility: hidden !important;
+              }
               .qr-card .flex-shrink-0 {
                 flex-shrink: 0 !important;
               }
@@ -1368,6 +1520,7 @@ export default function QRCodesPage() {
               <div
                 key={`${table.tableNumber}-${settings.qrCodeSize}-${settings.orientation}-${settings.qrCodeBackgroundColor}-${settings.qrCodeColor}`}
                 className="qr-card"
+                data-table-active={table.isActive !== false ? 'true' : 'false'}
                 style={{
                   backgroundColor: settings.backgroundColor,
                   color: settings.textColor,

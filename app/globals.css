@@ -741,19 +741,12 @@ img[src='/malts-logo-landscape.svg'],
   display: none; /* Chrome, Safari, Opera */
 }
 
-/* Print styles for QR codes */
+/* Принт за QR админ е в страницата; тук само общо скриване и фон. */
 @media print {
   .no-print {
     display: none !important;
   }
-  
-  .qr-card {
-    page-break-after: always;
-    page-break-inside: avoid;
-    margin: 0;
-    padding: 20mm;
-  }
-  
+
   body {
     background: white;
   }

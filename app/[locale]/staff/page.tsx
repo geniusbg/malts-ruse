@@ -49,6 +49,11 @@ export default function StaffDashboard() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppleMobile, setIsAppleMobile] = useState(false);
+
+  const vapidPublicConfigured =
+    typeof process !== 'undefined' &&
+    Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim?.());
   
   // Ref to prevent multiple simultaneous refreshes
   const isRefreshingRef = useRef(false);
@@ -63,6 +68,7 @@ export default function StaffDashboard() {
       setIsPWA(isStandalone);
     };
     checkPWA();
+    setIsAppleMobile(/iPhone|iPad|iPod/.test(navigator.userAgent));
 
     // Check push subscription status and auto-subscribe if permission already granted
     const checkPush = async () => {
@@ -859,6 +865,26 @@ export default function StaffDashboard() {
             <div className="text-right">
               <h1 className="text-xl md:text-4xl font-bold">Staff Dashboard</h1>
               <p className="malts-muted text-sm">Real-time поръчки и известия</p>
+              <p
+                className="mt-1.5 flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5 text-left text-[11px] leading-snug text-[var(--malts-subtle)] md:text-right"
+                aria-live="polite"
+              >
+                <span title="PWA режим">
+                  {isPWA ? '✓ Инсталирано (PWA)' : '○ Отворено в браузър'}
+                </span>
+                <span className="opacity-40" aria-hidden>
+                  ·
+                </span>
+                <span title="Web Push (изисква VAPID в .env)">
+                  {!vapidPublicConfigured
+                    ? '⚠ Push: няма NEXT_PUBLIC_VAPID_PUBLIC_KEY'
+                    : !isPushSupported()
+                      ? 'Push: неподдържан на това устройство'
+                      : pushEnabled
+                        ? '✓ Push: включен'
+                        : '○ Push: изключен'}
+                </span>
+              </p>
             </div>
 
             <div className="hidden md:flex gap-3">
@@ -926,6 +952,12 @@ export default function StaffDashboard() {
 
         {/* Mobile PWA Buttons & User Menu */}
         <div className="md:hidden flex flex-col gap-2">
+          {!isPWA && isAppleMobile && !showPWAPrompt && (
+            <p className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2 text-xs text-[var(--malts-ink)]">
+              <strong className="font-semibold">iPhone/iPad:</strong> Safari → бутон Споделяне →{' '}
+              <em>Добави към началния екран</em> (Chrome на iOS често няма пълна PWA инсталация).
+            </p>
+          )}
           {!isPWA && showPWAPrompt && (
             <button
               onClick={handleInstallPWA}

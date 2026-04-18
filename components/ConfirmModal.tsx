@@ -3,15 +3,20 @@
 import type { ReactNode } from 'react';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 
-type ConfirmModalProps = {
+export type ConfirmModalProps = {
   open: boolean;
   title?: string;
   message: string | ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: 'danger' | 'default';
-  onConfirm: () => void | Promise<void>;
   onCancel: () => void;
+  /** Стандартен втори бутон (игнорира се при `alert` или `renderFooter`) */
+  onConfirm?: () => void | Promise<void>;
+  /** Само един бутон — затваря с `onCancel` след опционален `onConfirm` */
+  alert?: boolean;
+  /** Пълен контрол върху бутоните под съобщението */
+  renderFooter?: (api: { close: () => void }) => ReactNode;
 };
 
 export default function ConfirmModal({
@@ -23,6 +28,8 @@ export default function ConfirmModal({
   tone = 'default',
   onConfirm,
   onCancel,
+  alert = false,
+  renderFooter,
 }: ConfirmModalProps) {
   useLockScroll(open);
 
@@ -80,22 +87,39 @@ export default function ConfirmModal({
             <div className="malts-muted mb-4 sm:mb-6">{message}</div>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="malts-btn-secondary malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1"
-            >
-              {cancelLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className={`${confirmClass} malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
-            >
-              {confirmLabel}
-            </button>
-          </div>
+          {renderFooter ? (
+            renderFooter({ close: onCancel })
+          ) : alert ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  void Promise.resolve(onConfirm?.());
+                  onCancel();
+                }}
+                className={`${confirmClass} malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="malts-btn-secondary malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1"
+              >
+                {cancelLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => void Promise.resolve(onConfirm?.())}
+                className={`${confirmClass} malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
