@@ -182,7 +182,7 @@ export default function ChefsPicksCarousel({
                            product.descriptionRo}
                         </p>
                       )}
-                      <div className="mt-auto flex items-end justify-between gap-3">
+                      <div className="mt-auto flex flex-col gap-3">
                         <div className="min-w-0 flex flex-col gap-0.5">
                           <Price
                             priceBgn={Number(product.priceBgn)}
@@ -198,14 +198,14 @@ export default function ChefsPicksCarousel({
                             type="button"
                             disabled={addDisabled}
                             onClick={() => onAddToCart(product)}
-                            className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
+                            className="w-full px-4 py-2.5 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
                           >
                             {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
                           </button>
                         ) : (
                           <Link
                             href={`/${locale}/menu?category=${encodeURIComponent(product.categorySlug || product.categoryId)}&product=${encodeURIComponent(productParamForUrl(product))}`}
-                            className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center"
+                            className="w-full px-4 py-2.5 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center text-center"
                           >
                             {locale === 'bg' ? 'Виж' : locale === 'en' ? 'View' : 'Vezi'}
                           </Link>

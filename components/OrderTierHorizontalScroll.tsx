@@ -10,6 +10,8 @@ type OrderTierHorizontalScrollProps = {
   rowClassName?: string;
   ariaScrollLeft: string;
   ariaScrollRight: string;
+  /** Селектор на елемент вътре в скрола (напр. активен чип) — центрира го хоризонтално във видимата лента. */
+  centerItemSelector?: string | null;
 };
 
 export default function OrderTierHorizontalScroll({
@@ -18,6 +20,7 @@ export default function OrderTierHorizontalScroll({
   rowClassName = '',
   ariaScrollLeft,
   ariaScrollRight,
+  centerItemSelector = null,
 }: OrderTierHorizontalScrollProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
@@ -33,22 +36,39 @@ export default function OrderTierHorizontalScroll({
     setCanRight(hasOverflow && scrollLeft < max - 6);
   }, []);
 
+  const centerPivot = useCallback(() => {
+    if (!centerItemSelector || !scrollRef.current) return;
+    const pivot = scrollRef.current.querySelector(centerItemSelector);
+    if (pivot instanceof HTMLElement) {
+      pivot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [centerItemSelector]);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     update();
-    const id = window.requestAnimationFrame(() => update());
+    const id1 = window.requestAnimationFrame(() => {
+      update();
+      window.requestAnimationFrame(() => {
+        update();
+        centerPivot();
+      });
+    });
     el.addEventListener('scroll', update, { passive: true });
-    const ro = new ResizeObserver(() => update());
+    const ro = new ResizeObserver(() => {
+      update();
+      window.requestAnimationFrame(() => centerPivot());
+    });
     ro.observe(el);
     window.addEventListener('resize', update);
     return () => {
-      window.cancelAnimationFrame(id);
+      window.cancelAnimationFrame(id1);
       el.removeEventListener('scroll', update);
       ro.disconnect();
       window.removeEventListener('resize', update);
     };
-  }, [update, children]);
+  }, [update, centerPivot, children]);
 
   const scrollBy = (dir: -1 | 1) => {
     const el = scrollRef.current;

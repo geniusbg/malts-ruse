@@ -1219,6 +1219,7 @@ function OrderPageContent() {
                   <button
                     key={cat.id}
                     type="button"
+                    {...(sheet && isActive ? { 'data-order-tier-active': '' } : {})}
                     onClick={() => {
                       const nextPath =
                         depth === 0 && cat.id === PROMOTIONS_ROOT_ID
@@ -1255,6 +1256,7 @@ function OrderPageContent() {
                     rowClassName={flexClass}
                     ariaScrollLeft={tierScrollLeftAria}
                     ariaScrollRight={tierScrollRightAria}
+                    centerItemSelector="[data-order-tier-active]"
                   >
                     {tierButtons}
                   </OrderTierHorizontalScroll>
@@ -1285,7 +1287,7 @@ function OrderPageContent() {
                   ? 'After you pick a section, dishes appear further down the page.'
                   : 'După ce alegi secțiunea, preparatele apar mai jos pe pagină.';
             const pickActionLabel =
-              locale === 'bg' ? 'Раздели' : locale === 'en' ? 'Sections' : 'Secțiuni';
+              locale === 'bg' ? 'Избери' : locale === 'en' ? 'Choose' : 'Alege';
             const openSheetAria =
               locale === 'bg' ? 'Отвори избор на раздел от менюто' : locale === 'en' ? 'Open menu sections' : 'Deschide secțiunile din meniu';
             const pathScrollLeftAria =
@@ -1294,10 +1296,12 @@ function OrderPageContent() {
               locale === 'bg' ? 'Покажи следващия път' : locale === 'en' ? 'Scroll path right' : 'Derulează calea la dreapta';
 
             const renderPathSegmentButtons = (variant: 'mobile' | 'sheet') => {
+              const lastIdx = categoryPath.length - 1;
               const segments = categoryPath.map((id, idx) => {
                 const c = categories.find((x: any) => x.id === id);
                 if (!c) return null;
                 const name = locale === 'bg' ? c.nameBg : locale === 'en' ? c.nameEn : c.nameRo;
+                const isPathPivot = idx === lastIdx;
                 return (
                   <span key={`${id}-${idx}`} className="inline-flex max-w-full shrink-0 items-center gap-0.5">
                     {idx > 0 ? (
@@ -1311,10 +1315,11 @@ function OrderPageContent() {
                         setCategoryPath(categoryPath.slice(0, idx + 1));
                         if (variant === 'mobile') openCategoryPicker();
                       }}
+                      {...(isPathPivot ? { 'data-order-path-pivot': '' } : {})}
                       className={
                         variant === 'mobile'
-                          ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2.5 py-1 text-left text-sm font-semibold text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
-                          : 'rounded-md border border-transparent px-2 py-1 text-left text-sm font-semibold text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
+                          ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
+                          : 'rounded-md border border-transparent px-1.5 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
                       }
                     >
                       {name}
@@ -1329,6 +1334,7 @@ function OrderPageContent() {
                   rowClassName="flex min-w-max items-center gap-x-1 gap-y-1"
                   ariaScrollLeft={pathScrollLeftAria}
                   ariaScrollRight={pathScrollRightAria}
+                  centerItemSelector="[data-order-path-pivot]"
                 >
                   {segments}
                 </OrderTierHorizontalScroll>
@@ -1739,10 +1745,10 @@ function OrderPageContent() {
                           />
                         </svg>
                         {locale === 'bg'
-                          ? 'Смени раздела от менюто'
+                          ? 'Избери друга категория от менюто'
                           : locale === 'en'
-                            ? 'Change menu section'
-                            : 'Schimbă secțiunea din meniu'}
+                            ? 'Choose another category from the menu'
+                            : 'Alege altă categorie din meniu'}
                       </button>
                     </div>
                   </div>

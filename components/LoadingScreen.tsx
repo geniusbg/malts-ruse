@@ -29,6 +29,8 @@ export default function LoadingScreen({
 }: LoadingScreenProps) {
   useLockScroll(!inline);
   const [loaderSrc, setLoaderSrc] = useState('/beer-mug-loader.gif');
+  /** Нова стойност при всяко монтиране — рестартира GIF/видео вместо да „замръзне“ от предишен показ. */
+  const [mediaMountKey] = useState(() => Date.now());
 
   const [simulatedProgress, setSimulatedProgress] = useState(7);
 
@@ -82,6 +84,7 @@ export default function LoadingScreen({
       }
       return (
         <img
+          key={mediaMountKey}
           src={loaderSrc}
           alt="Loading"
           className={`${gifSizeClasses[logoSize]} object-contain block`}
@@ -93,6 +96,7 @@ export default function LoadingScreen({
     if (assetType === 'video' || /\.(mp4|webm)$/i.test(url)) {
       return (
         <video
+          key={mediaMountKey}
           className={`${gifSizeClasses[logoSize]} object-contain block`}
           src={url}
           muted
@@ -103,7 +107,14 @@ export default function LoadingScreen({
       );
     }
 
-    return <img src={url} alt="Loading" className={`${gifSizeClasses[logoSize]} object-contain block`} />;
+    return (
+      <img
+        key={mediaMountKey}
+        src={url}
+        alt="Loading"
+        className={`${gifSizeClasses[logoSize]} object-contain block`}
+      />
+    );
   })();
 
   const framedMedia = (
