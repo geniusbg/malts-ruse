@@ -32,9 +32,23 @@ interface Product {
 interface ChefsPicksCarouselProps {
   products: Product[];
   locale: string;
+  /** На /order: бутон за добавяне в количка вместо линк към менюто. */
+  orderAddMode?: boolean;
+  onAddToCart?: (product: Product) => void;
+  /** Когато поръчките са изключени — бутонът е неактивен. */
+  addDisabled?: boolean;
+  /** Скрива мобилния текст „плъзни за повече“ (ползва се на /order). */
+  hideScrollHint?: boolean;
 }
 
-export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarouselProps) {
+export default function ChefsPicksCarousel({
+  products,
+  locale,
+  orderAddMode = false,
+  onAddToCart,
+  addDisabled = false,
+  hideScrollHint = false,
+}: ChefsPicksCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -179,12 +193,23 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
                             {qty} {unitSuffix}
                           </span>
                         </div>
-                        <Link
-                          href={`/${locale}/menu?category=${encodeURIComponent(product.categorySlug || product.categoryId)}&product=${encodeURIComponent(productParamForUrl(product))}`}
-                          className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center"
-                        >
-                          {locale === 'bg' ? 'Виж' : locale === 'en' ? 'View' : 'Ansehen'}
-                        </Link>
+                        {orderAddMode && onAddToCart ? (
+                          <button
+                            type="button"
+                            disabled={addDisabled}
+                            onClick={() => onAddToCart(product)}
+                            className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
+                          >
+                            {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
+                          </button>
+                        ) : (
+                          <Link
+                            href={`/${locale}/menu?category=${encodeURIComponent(product.categorySlug || product.categoryId)}&product=${encodeURIComponent(productParamForUrl(product))}`}
+                            className="px-4 py-2 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center"
+                          >
+                            {locale === 'bg' ? 'Виж' : locale === 'en' ? 'View' : 'Vezi'}
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -208,10 +233,10 @@ export default function ChefsPicksCarousel({ products, locale }: ChefsPicksCarou
         )}
         
         {/* Scroll hint - Mobile only */}
-        {products.length > 3 && (
+        {!hideScrollHint && products.length > 3 && (
           <div className="text-center mt-6 md:hidden">
             <p className="malts-muted text-sm">
-              {locale === 'bg' ? '← Плъзни за повече →' : locale === 'en' ? '← Scroll for more →' : '← Scrollen für mehr →'}
+              {locale === 'bg' ? '← Плъзни за повече →' : locale === 'en' ? '← Scroll for more →' : '← Glisează pentru mai mult →'}
             </p>
           </div>
         )}

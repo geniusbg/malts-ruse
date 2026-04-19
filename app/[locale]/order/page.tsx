@@ -13,9 +13,10 @@ import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
+import OrderTierHorizontalScroll from '@/components/OrderTierHorizontalScroll';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import { formatDateForLocale } from '@/lib/date-utils';
-import { eventCardImageUrl } from '@/lib/event-images';
+import { eventCardImageUrl, eventDetailImageUrl } from '@/lib/event-images';
 import { Rampart_One } from 'next/font/google';
 import type { PromotionsUiSettings } from '@/lib/promotions-ui-settings';
 import {
@@ -61,6 +62,9 @@ function OrderPageContent() {
   const [homepageSettings, setHomepageSettings] = useState<any | null>(null);
   const [homepageCards, setHomepageCards] = useState<any[]>([]);
   const [upcomingEventsPreview, setUpcomingEventsPreview] = useState<any[]>([]);
+  const [orderLocationSettings, setOrderLocationSettings] = useState<any | null>(null);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [eventDetailModal, setEventDetailModal] = useState<any | null>(null);
   const [promotionsUiSettings, setPromotionsUiSettings] = useState<PromotionsUiSettings | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [variantPicker, setVariantPicker] = useState<{
@@ -82,7 +86,13 @@ function OrderPageContent() {
   const [sessionMessage, setSessionMessage] = useState<string | null>(null);
   
   // Lock scroll when cart, session gate, or other full-screen overlays are open
-  useLockScroll(showCart || sessionStatus !== 'valid' || categorySheetOpen);
+  useLockScroll(
+    showCart ||
+      sessionStatus !== 'valid' ||
+      categorySheetOpen ||
+      contactModalOpen ||
+      eventDetailModal !== null
+  );
   const [isOffline, setIsOffline] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [requiresApproval, setRequiresApproval] = useState(false);
@@ -167,6 +177,15 @@ function OrderPageContent() {
     } else {
       setCategorySheetOpen(true);
     }
+  }, []);
+
+  /** След избор в bottom sheet: продуктите са в секцията „Меню“ — скрол там (мобилен). */
+  const scrollOrderProductsSectionIntoView = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(min-width: 1024px)').matches) return;
+    window.setTimeout(() => {
+      document.getElementById('order-products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
   }, []);
 
   const handleApprovalStatusUpdate = useCallback(
@@ -517,15 +536,18 @@ function OrderPageContent() {
         const homepageRes = fetch('/api/homepage-settings');
         const eventsRes = fetch('/api/events?published=true');
         const promoUiRes = fetch('/api/promotions-ui-settings');
+        const locationRes = fetch('/api/location-settings');
         setLoadProgress(85);
 
-        const [categoriesData, productsData, homepageData, eventsData, promoUiData] = await Promise.all([
-          categoriesRes.json(),
-          productsRes.json(),
-          homepageRes.then((r) => r.json()).catch(() => null),
-          eventsRes.then((r) => r.json()).catch(() => null),
-          promoUiRes.then((r) => r.json()).catch(() => null),
-        ]);
+        const [categoriesData, productsData, homepageData, eventsData, promoUiData, locationData] =
+          await Promise.all([
+            categoriesRes.json(),
+            productsRes.json(),
+            homepageRes.then((r) => r.json()).catch(() => null),
+            eventsRes.then((r) => r.json()).catch(() => null),
+            promoUiRes.then((r) => r.json()).catch(() => null),
+            locationRes.then((r) => r.json()).catch(() => null),
+          ]);
 
         const rawCats: any[] = categoriesData.categories || [];
         const cats = rawCats.map(normalizeCategoryRow);
@@ -540,11 +562,18 @@ function OrderPageContent() {
           setHomepageCards(Array.isArray(homepageData.cards) ? homepageData.cards : []);
         }
 
+        if (locationData?.settings) {
+          setOrderLocationSettings(locationData.settings);
+        }
+
         if (eventsData?.events && Array.isArray(eventsData.events)) {
           const now = Date.now();
           const upcoming = eventsData.events
             .filter((e: any) => !!e?.eventDate && new Date(e.eventDate).getTime() >= now)
-            .slice(0, 3);
+            .sort(
+              (a: any, b: any) =>
+                new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
+            );
           setUpcomingEventsPreview(upcoming);
         }
 
@@ -1129,18 +1158,43 @@ function OrderPageContent() {
       >
         <div className="container mx-auto px-4">
           {(() => {
-            const tierBtnClass = (depth: number, isActive: boolean) =>
-              depth === 0
-                ? `rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm lg:rounded-xl lg:px-6 lg:py-3 lg:text-base ${
-                    isActive
-                      ? 'scale-[1.02] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-lg lg:scale-105'
-                      : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
-                  }`
-                : `rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-sm lg:rounded-lg lg:px-4 lg:py-2 ${
-                    isActive
-                      ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
-                      : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
-                  }`;
+            const tierBtnClass = (depth: number, isActive: boolean, sheet: boolean) =>
+              sheet
+                ? depth === 0
+                  ? `rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200 whitespace-nowrap sm:px-5 sm:py-3 sm:text-base ${
+                      isActive
+                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6] shadow-md ring-2 ring-[var(--malts-accent)]/30'
+                        : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card-hover)]'
+                    }`
+                  : `rounded-lg px-3.5 py-2 text-sm font-semibold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[15px] ${
+                      isActive
+                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-sm'
+                        : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card-hover)]'
+                    }`
+                : depth === 0
+                  ? `rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm lg:rounded-xl lg:px-6 lg:py-3 lg:text-base ${
+                      isActive
+                        ? 'scale-[1.02] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-lg lg:scale-105'
+                        : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                    }`
+                  : `rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-sm lg:rounded-lg lg:px-4 lg:py-2 ${
+                      isActive
+                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
+                        : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                    }`;
+
+            const tierScrollLeftAria =
+              locale === 'bg'
+                ? 'Покажи предишни раздели'
+                : locale === 'en'
+                  ? 'Show previous items'
+                  : 'Arată elementele anterioare';
+            const tierScrollRightAria =
+              locale === 'bg'
+                ? 'Покажи следващи раздели'
+                : locale === 'en'
+                  ? 'Show more items'
+                  : 'Arată mai multe elemente';
 
             const renderTierRow = (
               depth: number,
@@ -1157,95 +1211,139 @@ function OrderPageContent() {
                     ? getChildrenOf(categories, categoryPath[depth - 1]!)
                     : [];
               if (tierItems.length === 0) return null;
+              const sheet = !!(opts?.closeCategorySheet && opts?.markHorizontalTier);
+              const tierButtons = tierItems.map((cat: any) => {
+                const name = locale === 'bg' ? cat.nameBg : locale === 'en' ? cat.nameEn : cat.nameRo;
+                const isActive = categoryPath[depth] === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => {
+                      const nextPath =
+                        depth === 0 && cat.id === PROMOTIONS_ROOT_ID
+                          ? [PROMOTIONS_ROOT_ID]
+                          : selectCategoryAtDepth(categoryPath, depth, cat.id);
+                      setCategoryPath(nextPath);
+                      if (opts?.closeCategorySheet) {
+                        const leaf = categoryPathLeafId(nextPath);
+                        if (leaf) {
+                          const prodsHere = products.filter((p: any) => p.categoryId === leaf);
+                          const subcats = getChildrenOf(categories, leaf);
+                          if (prodsHere.length > 0 || subcats.length === 0) {
+                            setCategorySheetOpen(false);
+                            scrollOrderProductsSectionIntoView();
+                          }
+                        } else if (nextPath[0] === PROMOTIONS_ROOT_ID) {
+                          setCategorySheetOpen(false);
+                          scrollOrderProductsSectionIntoView();
+                        }
+                      }
+                    }}
+                    className={tierBtnClass(depth, isActive, sheet)}
+                  >
+                    {name}
+                  </button>
+                );
+              });
+
+              if (sheet) {
+                return (
+                  <OrderTierHorizontalScroll
+                    key={`tier-${depth}`}
+                    scrollClassName={wrapClass}
+                    rowClassName={flexClass}
+                    ariaScrollLeft={tierScrollLeftAria}
+                    ariaScrollRight={tierScrollRightAria}
+                  >
+                    {tierButtons}
+                  </OrderTierHorizontalScroll>
+                );
+              }
+
               return (
                 <div
                   key={`tier-${depth}`}
                   className={wrapClass}
                   {...(opts?.markHorizontalTier ? { 'data-order-tier-hscroll': true } : {})}
                 >
-                  <div className={flexClass}>
-                    {tierItems.map((cat: any) => {
-                      const name = locale === 'bg' ? cat.nameBg : locale === 'en' ? cat.nameEn : cat.nameRo;
-                      const isActive = categoryPath[depth] === cat.id;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => {
-                            const nextPath =
-                              depth === 0 && cat.id === PROMOTIONS_ROOT_ID
-                                ? [PROMOTIONS_ROOT_ID]
-                                : selectCategoryAtDepth(categoryPath, depth, cat.id);
-                            setCategoryPath(nextPath);
-                            if (opts?.closeCategorySheet) {
-                              const leaf = categoryPathLeafId(nextPath);
-                              if (leaf) {
-                                const prodsHere = products.filter((p: any) => p.categoryId === leaf);
-                                const subcats = getChildrenOf(categories, leaf);
-                                if (prodsHere.length > 0 || subcats.length === 0) {
-                                  setCategorySheetOpen(false);
-                                }
-                              } else if (nextPath[0] === PROMOTIONS_ROOT_ID) {
-                                setCategorySheetOpen(false);
-                              }
-                            }
-                          }}
-                          className={tierBtnClass(depth, isActive)}
-                        >
-                          {name}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <div className={flexClass}>{tierButtons}</div>
                 </div>
               );
             };
 
-            const sheetTitle =
-              locale === 'bg' ? 'Категории' : locale === 'en' ? 'Categories' : 'Categorii';
+            const menuPickHeading =
+              locale === 'bg'
+                ? 'Избери категория от менюто'
+                : locale === 'en'
+                  ? 'Choose a category from the menu'
+                  : 'Alege o categorie din meniu';
+            const menuPickHint =
+              locale === 'bg'
+                ? 'След избор ястията се показват по-долу на страницата.'
+                : locale === 'en'
+                  ? 'After you pick a section, dishes appear further down the page.'
+                  : 'După ce alegi secțiunea, preparatele apar mai jos pe pagină.';
             const pickActionLabel =
-              locale === 'bg' ? 'Избери' : locale === 'en' ? 'Choose' : 'Alege';
+              locale === 'bg' ? 'Раздели' : locale === 'en' ? 'Sections' : 'Secțiuni';
             const openSheetAria =
-              locale === 'bg' ? 'Отвори избор на категория' : locale === 'en' ? 'Open category picker' : 'Deschide categoriile';
+              locale === 'bg' ? 'Отвори избор на раздел от менюто' : locale === 'en' ? 'Open menu sections' : 'Deschide secțiunile din meniu';
+            const pathScrollLeftAria =
+              locale === 'bg' ? 'Покажи предишния път' : locale === 'en' ? 'Scroll path left' : 'Derulează calea la stânga';
+            const pathScrollRightAria =
+              locale === 'bg' ? 'Покажи следващия път' : locale === 'en' ? 'Scroll path right' : 'Derulează calea la dreapta';
 
-            const renderPathSegmentButtons = (variant: 'mobile' | 'sheet') => (
-              <div className="flex w-full min-w-0 flex-wrap items-center gap-x-0.5 gap-y-1 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
-                {categoryPath.map((id, idx) => {
-                  const c = categories.find((x: any) => x.id === id);
-                  if (!c) return null;
-                  const name = locale === 'bg' ? c.nameBg : locale === 'en' ? c.nameEn : c.nameRo;
-                  return (
-                    <span key={`${id}-${idx}`} className="inline-flex max-w-full shrink-0 items-center gap-0.5">
-                      {idx > 0 ? (
-                        <span className="text-[var(--malts-subtle)]" aria-hidden>
-                          ›
-                        </span>
-                      ) : null}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCategoryPath(categoryPath.slice(0, idx + 1));
-                          if (variant === 'mobile') openCategoryPicker();
-                        }}
-                        className={
-                          variant === 'mobile'
-                            ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
-                            : 'rounded-md border border-transparent px-1.5 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
-                        }
-                      >
-                        {name}
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            );
+            const renderPathSegmentButtons = (variant: 'mobile' | 'sheet') => {
+              const segments = categoryPath.map((id, idx) => {
+                const c = categories.find((x: any) => x.id === id);
+                if (!c) return null;
+                const name = locale === 'bg' ? c.nameBg : locale === 'en' ? c.nameEn : c.nameRo;
+                return (
+                  <span key={`${id}-${idx}`} className="inline-flex max-w-full shrink-0 items-center gap-0.5">
+                    {idx > 0 ? (
+                      <span className="text-[var(--malts-subtle)]" aria-hidden>
+                        ›
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryPath(categoryPath.slice(0, idx + 1));
+                        if (variant === 'mobile') openCategoryPicker();
+                      }}
+                      className={
+                        variant === 'mobile'
+                          ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2.5 py-1 text-left text-sm font-semibold text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
+                          : 'rounded-md border border-transparent px-2 py-1 text-left text-sm font-semibold text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
+                      }
+                    >
+                      {name}
+                    </button>
+                  </span>
+                );
+              });
+
+              return (
+                <OrderTierHorizontalScroll
+                  scrollClassName="w-full min-w-0 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:thin]"
+                  rowClassName="flex min-w-max items-center gap-x-1 gap-y-1"
+                  ariaScrollLeft={pathScrollLeftAria}
+                  ariaScrollRight={pathScrollRightAria}
+                >
+                  {segments}
+                </OrderTierHorizontalScroll>
+              );
+            };
 
             return (
               <>
                 <div className="mb-0 flex w-full flex-col gap-1.5 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)]/50 px-3 py-2.5 lg:hidden">
                   <div className="flex w-full min-w-0 items-center justify-between gap-2">
-                    <span className="min-w-0 shrink text-sm font-semibold text-[var(--malts-ink)]">{sheetTitle}</span>
+                    <div className="min-w-0 flex-1 pr-1">
+                      <p className="text-base font-bold leading-snug text-[var(--malts-ink)] sm:text-lg">
+                        {menuPickHeading}
+                      </p>
+                    </div>
                     <div className="flex shrink-0 items-center gap-1.5">
                       <button
                         type="button"
@@ -1264,19 +1362,16 @@ function OrderPageContent() {
                       </button>
                     </div>
                   </div>
+                  <p className="text-[11px] leading-snug text-[var(--malts-muted)] sm:text-xs">{menuPickHint}</p>
                   {categoryPath.length > 0 ? (
                     renderPathSegmentButtons('mobile')
                   ) : (
                     <button
                       type="button"
                       onClick={() => openCategoryPicker()}
-                      className="w-full rounded-lg border border-dashed border-[var(--malts-hairline)] bg-transparent px-2 py-1.5 text-left text-xs font-medium text-[var(--malts-subtle)] transition-colors hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card)]/40 hover:text-[var(--malts-muted)]"
+                      className="w-full rounded-lg border border-dashed border-[var(--malts-hairline)] bg-transparent px-3 py-2.5 text-left text-sm font-semibold text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card)]/40 sm:text-base"
                     >
-                      {locale === 'bg'
-                        ? 'Избери категория'
-                        : locale === 'en'
-                          ? 'Choose category'
-                          : 'Alege categoria'}
+                      {menuPickHeading}
                     </button>
                   )}
                 </div>
@@ -1305,11 +1400,12 @@ function OrderPageContent() {
                       </div>
                       <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--malts-hairline)] px-4 pb-3 pt-2">
                         <div className="min-w-0 flex-1">
-                          <p id="order-category-sheet-title" className="text-base font-bold text-[var(--malts-ink)]">
-                            {sheetTitle}
+                          <p id="order-category-sheet-title" className="text-lg font-bold leading-snug text-[var(--malts-ink)] sm:text-xl">
+                            {menuPickHeading}
                           </p>
+                          <p className="mt-1 text-xs leading-snug text-[var(--malts-muted)] sm:text-sm">{menuPickHint}</p>
                           {categoryPath.length > 0 ? (
-                            <div className="mt-0.5">{renderPathSegmentButtons('sheet')}</div>
+                            <div className="mt-2">{renderPathSegmentButtons('sheet')}</div>
                           ) : null}
                         </div>
                         <button
@@ -1447,7 +1543,10 @@ function OrderPageContent() {
                 : '';
 
             return (
-              <div className="pb-10">
+              <div
+                id="order-products-section"
+                className="pb-10 scroll-mt-28 md:scroll-mt-32"
+              >
                 {categoryProducts.length === 0 ? (
                   <div className="text-center pt-8 pb-6 md:pt-10 md:pb-8">
                     <div className="text-6xl mb-2">🔍</div>
@@ -1624,6 +1723,27 @@ function OrderPageContent() {
                           </div>
                         );
                       })}
+                    </div>
+                    <div className="mt-10 flex justify-center lg:hidden">
+                      <button
+                        type="button"
+                        onClick={() => openCategoryPicker()}
+                        className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] px-6 py-3 text-sm font-semibold text-[var(--malts-ink)] shadow-sm transition hover:border-[var(--malts-accent)]/50 hover:bg-[var(--malts-card-hover)] sm:px-8 sm:text-base"
+                      >
+                        <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h10M4 18h16"
+                          />
+                        </svg>
+                        {locale === 'bg'
+                          ? 'Смени раздела от менюто'
+                          : locale === 'en'
+                            ? 'Change menu section'
+                            : 'Schimbă secțiunea din meniu'}
+                      </button>
                     </div>
                   </div>
                 ) : null}
@@ -1843,8 +1963,9 @@ function OrderPageContent() {
                         )}
 
                         <div className="relative mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-                          <Link
-                            href={`/${locale}/menu`}
+                          <button
+                            type="button"
+                            onClick={() => openCategoryPicker()}
                             className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-primary px-8 py-3 font-semibold tracking-wide transition"
                           >
                             {locale === 'bg'
@@ -1853,11 +1974,12 @@ function OrderPageContent() {
                                 ? homepageSettings?.ctaPrimaryEn ?? 'View the menu'
                                 : homepageSettings?.ctaPrimaryRo ?? 'Vezi meniul'}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-7-7l7 7-7 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             </svg>
-                          </Link>
-                          <Link
-                            href={`/${locale}/contact`}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setContactModalOpen(true)}
                             className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
                           >
                             {locale === 'bg'
@@ -1866,9 +1988,9 @@ function OrderPageContent() {
                                 ? homepageSettings?.ctaSecondaryEn ?? 'Book an evening'
                                 : homepageSettings?.ctaSecondaryRo ?? 'Rezervă o seară'}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-7-7l7 7-7 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     </section>
@@ -1877,65 +1999,59 @@ function OrderPageContent() {
                   {/* Chef's Picks Carousel */}
                   {featuredProducts.length > 0 && (
                     <ChefsPicksCarousel
-                      products={featuredProducts.map((p: any) => ({
-                        id: p.id,
-                        slug: p.slug,
-                        nameBg: p.nameBg,
-                        nameEn: p.nameEn,
-                        nameRo: p.nameRo,
-                        descriptionBg: p.descriptionBg,
-                        descriptionEn: p.descriptionEn,
-                        descriptionRo: p.descriptionRo,
-                        priceBgn: Number(p.priceBgn),
-                        quantity: p.quantity ?? 1,
-                        unit: p.unit ?? 'pcs',
-                        imageUrl: p.imageUrl,
-                        categoryId: p.categoryId,
-                        categorySlug: '',
-                        category: {
-                          nameBg: '',
-                          nameEn: '',
-                          nameRo: '',
-                        },
-                      }))}
+                      products={featuredProducts.map((p: any) => {
+                        const cat = categories.find((c: any) => c.id === p.categoryId);
+                        return {
+                          id: p.id,
+                          slug: p.slug,
+                          nameBg: p.nameBg,
+                          nameEn: p.nameEn,
+                          nameRo: p.nameRo,
+                          descriptionBg: p.descriptionBg,
+                          descriptionEn: p.descriptionEn,
+                          descriptionRo: p.descriptionRo,
+                          priceBgn: Number(p.priceBgn),
+                          quantity: p.quantity ?? 1,
+                          unit: p.unit ?? 'pcs',
+                          imageUrl: p.imageUrl,
+                          categoryId: p.categoryId,
+                          categorySlug: cat?.slug ?? '',
+                          category: {
+                            nameBg: cat?.nameBg ?? '',
+                            nameEn: cat?.nameEn ?? '',
+                            nameRo: cat?.nameRo ?? '',
+                          },
+                        };
+                      })}
                       locale={locale}
+                      orderAddMode
+                      hideScrollHint
+                      addDisabled={!ordersEnabled}
+                      onAddToCart={(mini) => {
+                        const full = products.find((x: any) => x.id === mini.id);
+                        if (full) addToCart(full);
+                      }}
                     />
                   )}
 
                   {/* Upcoming Events Preview */}
                   {upcomingEventsPreview.length > 0 && (
                     <div className="mt-16 md:mt-24">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 md:mb-12 gap-4">
-                        <div>
-                          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
-                            {locale === 'bg'
-                              ? 'Предстоящи събития'
-                              : locale === 'en'
-                                ? 'Upcoming Events'
-                                : 'Evenimente viitoare'}
-                          </h2>
-                          <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
-                            {locale === 'bg'
-                              ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
-                              : locale === 'en'
-                                ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
-                                : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
-                          </p>
-                        </div>
-                        <Link
-                          href={`/${locale}/contact`}
-                          className="group px-6 py-3 malts-btn-secondary rounded-xl font-semibold border-2 transition-all flex items-center gap-2"
-                        >
-                          {locale === 'bg' ? 'Виж всички' : locale === 'en' ? 'View all' : 'Alle ansehen'}
-                          <svg
-                            className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
+                      <div className="mb-10 md:mb-12">
+                        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
+                          {locale === 'bg'
+                            ? 'Предстоящи събития'
+                            : locale === 'en'
+                              ? 'Upcoming Events'
+                              : 'Evenimente viitoare'}
+                        </h2>
+                        <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
+                          {locale === 'bg'
+                            ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
+                            : locale === 'en'
+                              ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
+                              : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
+                        </p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -1952,10 +2068,11 @@ function OrderPageContent() {
                           const cardImageSrc = eventCardImageUrl(event);
 
                           return (
-                            <Link
+                            <button
                               key={event.id}
-                              href={`/${locale}/events/${event.id}`}
-                              className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block"
+                              type="button"
+                              onClick={() => setEventDetailModal(event)}
+                              className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block w-full text-left cursor-pointer"
                             >
                               {cardImageSrc && (
                                 <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
@@ -1998,7 +2115,7 @@ function OrderPageContent() {
                                   </svg>
                                 </div>
                               </div>
-                            </Link>
+                            </button>
                           );
                         })}
                       </div>
@@ -2183,6 +2300,321 @@ function OrderPageContent() {
                  locale === 'en' ? 'Call Waiter' : 
                  'Cheamă chelnerul'}
           </a>
+        </div>
+      )}
+
+      {/* Контакти / резервации — същите данни като страницата Контакти */}
+      {contactModalOpen && (
+        <div
+          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--malts-paper)]/70 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="order-contact-modal-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+            onClick={() => setContactModalOpen(false)}
+          />
+          <div className="relative malts-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--malts-hairline)] px-5 py-4 shrink-0 bg-[var(--malts-card)]">
+              <h2 id="order-contact-modal-title" className="text-xl font-bold pr-8">
+                {locale === 'bg' ? 'Контакти' : locale === 'en' ? 'Contact' : 'Date de contact'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setContactModalOpen(false)}
+                className="text-3xl leading-none text-[var(--malts-ink)] hover:text-[var(--malts-accent)] shrink-0"
+                aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+              >
+                ×
+              </button>
+            </div>
+            <div className="overflow-y-auto p-5 md:p-6 flex-1 space-y-6">
+              {orderLocationSettings ? (
+                <>
+                  <div className="flex items-start gap-4">
+                    <svg
+                      className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-[var(--malts-ink)] font-semibold">
+                        {locale === 'bg' ? 'Адрес' : locale === 'en' ? 'Address' : 'Adres'}
+                      </p>
+                      <p className="malts-muted whitespace-pre-line">
+                        {locale === 'bg'
+                          ? orderLocationSettings.addressBg
+                          : locale === 'en'
+                            ? orderLocationSettings.addressEn
+                            : orderLocationSettings.addressRo}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <svg
+                      className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                    <div>
+                      <p className="text-[var(--malts-ink)] font-semibold">
+                        {locale === 'bg' ? 'Телефон' : locale === 'en' ? 'Phone' : 'Telefon'}
+                      </p>
+                      {orderLocationSettings.phone?.trim() ? (
+                        <a
+                          href={`tel:${String(orderLocationSettings.phone).replace(/[^\d+]/g, '')}`}
+                          className="text-[var(--malts-ink)] hover:text-[var(--malts-accent)] transition-colors"
+                        >
+                          {orderLocationSettings.phone}
+                        </a>
+                      ) : (
+                        <p className="malts-muted text-sm">
+                          {locale === 'bg' ? '—' : locale === 'en' ? '—' : '—'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <svg className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    <div className="min-w-0">
+                      <p className="text-[var(--malts-ink)] font-semibold">Instagram</p>
+                      {orderLocationSettings.instagramUrl?.trim() ? (
+                        <a
+                          href={orderLocationSettings.instagramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[var(--malts-accent)] break-all hover:underline"
+                        >
+                          {orderLocationSettings.instagramUrl}
+                        </a>
+                      ) : (
+                        <p className="malts-muted text-sm">—</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <svg className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                    <div className="min-w-0">
+                      <p className="text-[var(--malts-ink)] font-semibold">Facebook</p>
+                      {orderLocationSettings.facebookUrl?.trim() ? (
+                        <a
+                          href={orderLocationSettings.facebookUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[var(--malts-accent)] break-all hover:underline"
+                        >
+                          {orderLocationSettings.facebookUrl}
+                        </a>
+                      ) : (
+                        <p className="malts-muted text-sm">—</p>
+                      )}
+                    </div>
+                  </div>
+                  {(() => {
+                    const addr =
+                      locale === 'bg'
+                        ? orderLocationSettings.addressBg
+                        : locale === 'en'
+                          ? orderLocationSettings.addressEn
+                          : orderLocationSettings.addressRo;
+                    const lat = orderLocationSettings.latitude as number | null | undefined;
+                    const lng = orderLocationSettings.longitude as number | null | undefined;
+                    const hasCoords =
+                      typeof lat === 'number' &&
+                      Number.isFinite(lat) &&
+                      typeof lng === 'number' &&
+                      Number.isFinite(lng);
+                    const mapQueryAddress = (addr || '').trim();
+                    const mapSrc = hasCoords
+                      ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}&z=17&output=embed`
+                      : mapQueryAddress
+                        ? `https://www.google.com/maps?q=${encodeURIComponent(mapQueryAddress)}&output=embed`
+                        : 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2889.8!2d25.95!3d43.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUxJzAwLjAiTiAyNcKwNTcnMDAuMCJF!5e0!3m2!1sen!2sbg!4v1234567890';
+                    return (
+                      <div className="malts-card rounded-xl overflow-hidden border border-[var(--malts-hairline)]">
+                        <iframe
+                          src={mapSrc}
+                          width="100%"
+                          height={220}
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          title={locale === 'bg' ? 'Карта' : locale === 'en' ? 'Map' : 'Hartă'}
+                          className="w-full"
+                        />
+                      </div>
+                    );
+                  })()}
+                </>
+              ) : loading ? (
+                <p className="malts-muted text-center py-8">
+                  {locale === 'bg' ? 'Зареждане…' : locale === 'en' ? 'Loading…' : 'Se încarcă…'}
+                </p>
+              ) : (
+                <p className="malts-muted text-center py-8">
+                  {locale === 'bg'
+                    ? 'Информацията не е налична.'
+                    : locale === 'en'
+                      ? 'Information is not available.'
+                      : 'Informațiile nu sunt disponibile.'}
+                </p>
+              )}
+            </div>
+            <div className="border-t border-[var(--malts-hairline)] p-4 shrink-0 bg-[var(--malts-card)]">
+              <button
+                type="button"
+                onClick={() => setContactModalOpen(false)}
+                className="w-full rounded-xl malts-btn-primary py-3 font-semibold"
+              >
+                {locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {eventDetailModal && (
+        <div
+          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--malts-paper)]/70 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="order-event-modal-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default"
+            aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+            onClick={() => setEventDetailModal(null)}
+          />
+          <div className="relative malts-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--malts-hairline)] px-5 py-4 shrink-0 bg-[var(--malts-card)]">
+              <h2 id="order-event-modal-title" className="text-lg md:text-xl font-bold pr-8 line-clamp-2">
+                {locale === 'bg'
+                  ? eventDetailModal.titleBg
+                  : locale === 'en'
+                    ? eventDetailModal.titleEn
+                    : eventDetailModal.titleRo}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setEventDetailModal(null)}
+                className="text-3xl leading-none text-[var(--malts-ink)] hover:text-[var(--malts-accent)] shrink-0"
+                aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
+              >
+                ×
+              </button>
+            </div>
+            <div className="overflow-y-auto p-5 md:p-6 flex-1 space-y-5">
+              {eventDetailImageUrl(eventDetailModal) ? (
+                <div className="relative w-full overflow-hidden rounded-xl bg-[var(--malts-inset)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={eventDetailImageUrl(eventDetailModal)!}
+                    alt=""
+                    className="mx-auto block max-h-[min(40vh,360px)] w-auto max-w-full object-contain"
+                  />
+                </div>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span
+                  className={
+                    eventDetailModal.isExternal
+                      ? 'px-3 py-1 rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)]'
+                      : 'px-3 py-1 rounded-full border border-[var(--malts-accent-tint-border)] bg-[var(--malts-accent-tint)] text-[var(--malts-accent)]'
+                  }
+                >
+                  {eventDetailModal.isExternal
+                    ? locale === 'bg'
+                      ? 'Партньорско'
+                      : locale === 'en'
+                        ? 'Partner'
+                        : 'Partener'
+                    : locale === 'bg'
+                      ? 'При нас'
+                      : locale === 'en'
+                        ? 'At Malts'
+                        : 'La Malts'}
+                </span>
+                <span className="malts-muted">
+                  {formatDateForLocale(new Date(eventDetailModal.eventDate), locale as 'bg' | 'en' | 'ro')}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm malts-muted mb-1">
+                  {locale === 'bg' ? 'Локация' : locale === 'en' ? 'Location' : 'Locație'}
+                </p>
+                <p className="font-medium text-[var(--malts-ink)]">
+                  {eventDetailModal.isExternal
+                    ? locale === 'bg'
+                      ? eventDetailModal.locationBg || eventDetailModal.location
+                      : locale === 'en'
+                        ? eventDetailModal.locationEn || eventDetailModal.location
+                        : eventDetailModal.locationRo || eventDetailModal.location
+                    : eventDetailModal.location}
+                </p>
+              </div>
+              <p className="text-[var(--malts-ink)] leading-relaxed whitespace-pre-line">
+                {locale === 'bg'
+                  ? eventDetailModal.descriptionBg
+                  : locale === 'en'
+                    ? eventDetailModal.descriptionEn
+                    : eventDetailModal.descriptionRo}
+              </p>
+              {eventDetailModal.isExternal && eventDetailModal.externalUrl ? (
+                <a
+                  href={eventDetailModal.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-[var(--malts-accent)] font-medium hover:underline break-all"
+                >
+                  {eventDetailModal.externalUrl}
+                </a>
+              ) : null}
+              {eventDetailModal.contactInfo ? (
+                <p className="text-sm malts-muted whitespace-pre-line border-t border-[var(--malts-hairline)] pt-4">
+                  {eventDetailModal.contactInfo}
+                </p>
+              ) : null}
+            </div>
+            <div className="border-t border-[var(--malts-hairline)] p-4 shrink-0 bg-[var(--malts-card)]">
+              <button
+                type="button"
+                onClick={() => setEventDetailModal(null)}
+                className="w-full rounded-xl malts-btn-primary py-3 font-semibold"
+              >
+                OK
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
