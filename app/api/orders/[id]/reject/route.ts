@@ -77,8 +77,8 @@ export async function POST(
 
     let pusherServerInstance: any = null;
     try {
-      const module = await import('@/lib/pusher-server');
-      pusherServerInstance = module.pusherServer;
+      const pusherModule = await import('@/lib/pusher-server');
+      pusherServerInstance = pusherModule.pusherServer;
     } catch (pusherInitError) {
       console.log('Pusher not available:', pusherInitError);
     }

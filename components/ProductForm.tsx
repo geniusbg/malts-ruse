@@ -614,7 +614,7 @@ export default function ProductForm({
               <div>
                 <span className="font-semibold">✅ Налично</span>
                 <p className="text-sm malts-muted mt-1">
-                  Махни отметката ако продукта е временно неналичен. Ще се показва в менюто с избледнял ефект и "Не е наличен" етикет.
+                  Махни отметката ако продукта е временно неналичен. Ще се показва в менюто с избледнял ефект и &quot;Не е наличен&quot; етикет.
                 </p>
               </div>
             </label>

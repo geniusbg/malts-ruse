@@ -36,7 +36,6 @@ type LoadingUiSettings = {
 type AppRouteInfo = { path: string; file: string };
 
 function uuid() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const c: any = globalThis.crypto;
   return typeof c?.randomUUID === 'function' ? c.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }

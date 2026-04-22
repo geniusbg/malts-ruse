@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import Image from 'next/image';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import { getAdminPanelHeading, getSiteDisplayName } from '@/lib/site-display-name';
@@ -88,8 +89,8 @@ export default function AdminDashboard({
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a
-          href="/bg/admin/categories"
+        <Link
+          href={`/${locale}/admin/categories`}
           className="group malts-card rounded-2xl p-8 hover:bg-[var(--malts-card-hover)] transition-all duration-300 cursor-pointer"
         >
           <div className="flex items-center justify-between">
@@ -99,10 +100,10 @@ export default function AdminDashboard({
             </div>
             <div className="text-6xl group-hover:scale-110 transition-transform duration-300">📁</div>
           </div>
-        </a>
+        </Link>
 
-        <a
-          href="/bg/admin/products"
+        <Link
+          href={`/${locale}/admin/products`}
           className="group malts-card rounded-2xl p-8 hover:bg-[var(--malts-card-hover)] transition-all duration-300 cursor-pointer"
         >
           <div className="flex items-center justify-between">
@@ -112,10 +113,10 @@ export default function AdminDashboard({
             </div>
             <div className="text-6xl group-hover:scale-110 transition-transform duration-300">🍽️</div>
           </div>
-        </a>
+        </Link>
 
-        <a
-          href="/bg/admin/events"
+        <Link
+          href={`/${locale}/admin/events`}
           className="group malts-card rounded-2xl p-8 hover:bg-[var(--malts-card-hover)] transition-all duration-300 sm:col-span-2 lg:col-span-1 cursor-pointer"
         >
           <div className="flex items-center justify-between">
@@ -125,76 +126,76 @@ export default function AdminDashboard({
             </div>
             <div className="text-6xl group-hover:scale-110 transition-transform duration-300">🎉</div>
           </div>
-        </a>
+        </Link>
       </div>
 
       {/* Quick Actions */}
       <div className="mt-12">
         <h2 className="malts-admin-heading-font malts-admin-section-title mb-6">Бързи действия</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <a
-            href="/bg/admin/products/new"
+          <Link
+            href={`/${locale}/admin/products/new`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">🍽️</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Добави продукт</h3>
-          </a>
-          <a
-            href="/bg/admin/events/new"
+          </Link>
+          <Link
+            href={`/${locale}/admin/events/new`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">🎉</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Добави събитие</h3>
-          </a>
-          <a
-            href="/bg/admin/categories"
+          </Link>
+          <Link
+            href={`/${locale}/admin/categories`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">📁</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Категории</h3>
-          </a>
-          <a
-            href="/bg/admin/qr"
+          </Link>
+          <Link
+            href={`/${locale}/admin/qr`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">📱</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">QR Кодове</h3>
-          </a>
-          <a
-            href="/bg/admin/working-hours"
+          </Link>
+          <Link
+            href={`/${locale}/admin/working-hours`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">🕐</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Работно време</h3>
-          </a>
-          <a
-            href="/bg/admin/security-settings"
+          </Link>
+          <Link
+            href={`/${locale}/admin/security-settings`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">🛡️</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Настройки за сигурност</h3>
-          </a>
-          <a
-            href="/bg/admin/location-settings"
+          </Link>
+          <Link
+            href={`/${locale}/admin/location-settings`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">📍</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Контакти</h3>
-          </a>
-          <a
-            href="/bg/admin/homepage-settings"
+          </Link>
+          <Link
+            href={`/${locale}/admin/homepage-settings`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">🏠</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Начална страница</h3>
-          </a>
-          <a
-            href="/bg/admin/menu-settings"
+          </Link>
+          <Link
+            href={`/${locale}/admin/menu-settings`}
             className="group malts-card rounded-2xl p-6 hover:bg-[var(--malts-card-hover)] transition-all duration-300 text-center"
           >
             <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">📋</div>
             <h3 className="text-[var(--malts-ink)] font-bold text-lg">Настройки на меню</h3>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

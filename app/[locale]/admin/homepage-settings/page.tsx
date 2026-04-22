@@ -304,7 +304,7 @@ export default function HomepageSettingsPage({
           </button>
           <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки на началната страница</h1>
           <p className="malts-muted mt-2">
-            Управлявай съдържанието на секцията "Предложения" на началната страница.
+            Управлявай съдържанието на секцията &quot;Предложения&quot; на началната страница.
           </p>
         </div>
 

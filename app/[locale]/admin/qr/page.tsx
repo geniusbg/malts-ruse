@@ -1366,7 +1366,7 @@ export default function QRCodesPage() {
             Няма генерирани QR кодове
           </p>
           <p className="malts-muted text-sm mb-2">
-            Кликнете "Генерирай QR кодове" за да създадете QR кодове за всички 30 маси
+            Кликнете &quot;Генерирай QR кодове&quot; за да създадете QR кодове за всички 30 маси
           </p>
           <p className="malts-muted text-sm">
             QR кодовете ще се запазят в базата данни и ще са достъпни винаги
