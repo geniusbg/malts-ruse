@@ -1,37 +1,46 @@
 'use client';
 
 import { useEffect } from 'react';
+import { ensureServiceWorkerRegistered } from '@/lib/service-worker';
 
 export default function ServiceWorkerUpdater() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      // Register service worker with force update
-      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
-        .then(registration => {
-          console.log('✅ Service Worker registered');
-          
-          // Force immediate update check
-          registration.update();
-          
-          // Listen for updates
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            console.log('🔄 Service Worker update found');
-            
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('✅ New Service Worker installed! Ready to activate.');
-                  // Send message to activate immediately
-                  newWorker.postMessage({ type: 'SKIP_WAITING' });
-                }
-              });
-            }
+      // Register once (shared singleton) to avoid AbortError.
+      // Run after load so we don't fight initial navigation.
+      const onLoad = () => {
+        ensureServiceWorkerRegistered({ scriptUrl: '/sw.js', scope: '/', updateViaCache: 'none' })
+          .then((registration) => {
+            console.log('✅ Service Worker registered');
+
+            // Force immediate update check
+            registration.update();
+
+            // Listen for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('🔄 Service Worker update found');
+
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('✅ New Service Worker installed! Ready to activate.');
+                    // Send message to activate immediately
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                });
+              }
+            });
+          })
+          .catch((error) => {
+            // AbortError happens when a competing register/update aborts this attempt.
+            // Keep it non-fatal and allow future retries.
+            console.error('❌ Service Worker registration failed:', error);
           });
-        })
-        .catch(error => {
-          console.error('❌ Service Worker registration failed:', error);
-        });
+      };
+
+      if (document.readyState === 'complete') onLoad();
+      else window.addEventListener('load', onLoad, { once: true });
       
       // Listen for SW update messages
       navigator.serviceWorker.addEventListener('message', (event) => {
@@ -62,7 +71,10 @@ export default function ServiceWorkerUpdater() {
         });
       }, 60000); // Check every 1 minute (more aggressive for PWA)
       
-      return () => clearInterval(updateInterval);
+      return () => {
+        clearInterval(updateInterval);
+        window.removeEventListener('load', onLoad);
+      };
     }
   }, []);
 

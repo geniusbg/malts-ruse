@@ -1,3 +1,5 @@
+import { ensureServiceWorkerRegistered } from '@/lib/service-worker';
+
 // Web Push Notifications - Client Side
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
@@ -129,8 +131,8 @@ export async function subscribeToPush() {
         registration = existingReg;
         console.log('✅ Using existing Service Worker registration');
       } else {
-        // Register service worker
-        registration = await navigator.serviceWorker.register('/sw.js');
+        // Register service worker (single shared registration)
+        registration = await ensureServiceWorkerRegistered({ scriptUrl: '/sw.js', scope: '/', updateViaCache: 'none' });
         console.log('✅ Service Worker registered:', registration.scope);
       }
       

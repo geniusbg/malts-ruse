@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import LoadingScreen from '@/components/LoadingScreen';
 import { locales } from '@/i18n';
@@ -164,7 +164,7 @@ export default function AppLoadingOverlay() {
     }
   };
 
-  const startForTarget = (targetPath: string) => {
+  const startForTarget = useCallback((targetPath: string) => {
     if (!settings?.enabled) return;
 
     const { raw, canonical } = normalizePathForRules(targetPath);
@@ -176,7 +176,7 @@ export default function AppLoadingOverlay() {
 
     pendingTargetRef.current = raw;
     startOverlay(rule, asset, 'link');
-  };
+  }, [assetIndex, ruleIndex, settings]);
 
   // Apply rules reliably on route changes (works for router.push, back/forward, direct loads).
   useEffect(() => {
@@ -264,7 +264,7 @@ export default function AppLoadingOverlay() {
 
     document.addEventListener('click', onClickCapture, true);
     return () => document.removeEventListener('click', onClickCapture, true);
-  }, [settings, ruleIndex, assetIndex]);
+  }, [settings, ruleIndex, assetIndex, startForTarget]);
 
   if (!active) return null;
 

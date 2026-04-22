@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import EventForm from '@/components/EventForm';
 import Toast from '@/components/Toast';
@@ -17,11 +17,7 @@ export default function EditEventPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    loadEvent();
-  }, [eventId]);
-
-  async function loadEvent() {
+  const loadEvent = useCallback(async () => {
     try {
       const response = await fetch(`/api/events/${eventId}`);
       if (response.ok) {
@@ -72,7 +68,11 @@ export default function EditEventPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId]);
+
+  useEffect(() => {
+    loadEvent();
+  }, [loadEvent]);
 
   async function handleSubmit(data: any) {
     try {

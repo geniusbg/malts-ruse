@@ -182,9 +182,11 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                   <div>
                     <p className="malts-help mb-2">Preview на логото (фон: {settings.backgroundColor}):</p>
                     <div className="relative inline-block">
-                      <img 
-                        src={settings.logoUrl} 
-                        alt="Logo preview" 
+                      <Image
+                        src={settings.logoUrl}
+                        alt="Logo preview"
+                        width={Math.max(1, settings.logoSize)}
+                        height={Math.max(1, settings.logoSize)}
                         className="object-contain border border-[var(--malts-hairline)] rounded p-2 bg-[var(--malts-card)]"
                         style={{
                           backgroundColor: settings.backgroundColor,
@@ -193,10 +195,10 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                           width: `${settings.logoSize}px`,
                           height: `${settings.logoSize}px`
                         }}
+                        unoptimized
                         onError={(e) => {
-                          const img = e.target as HTMLImageElement;
-                          img.style.display = 'none';
-                          const parent = img.parentElement;
+                          const imgEl = (e.target as any) as HTMLImageElement;
+                          const parent = imgEl?.parentElement;
                           if (parent && !parent.querySelector('.logo-error')) {
                             const errorMsg = document.createElement('div');
                             errorMsg.className = 'logo-error text-red-500 text-xs mt-1 p-2 border border-red-500 rounded bg-red-500/10';
@@ -1546,9 +1548,12 @@ export default function QRCodesPage() {
                     {/* Logo */}
                     {settings.useLogo && settings.logoUrl && settings.logoUrl.trim() !== '' ? (
                       <div style={{ margin: `${settings.logoMargin}px`, paddingTop: '0', paddingBottom: '0', display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        <img 
-                          src={settings.logoUrl} 
-                          alt="Logo" 
+                        <Image
+                          src={settings.logoUrl}
+                          alt="Logo"
+                          width={Math.max(1, settings.logoSize)}
+                          height={Math.max(1, Math.round(settings.logoSize * 0.5))}
+                          className="object-contain"
                           style={{ 
                             maxWidth: '100%', 
                             display: 'block',
@@ -1556,12 +1561,7 @@ export default function QRCodesPage() {
                             height: 'auto',
                             margin: '0'
                           }}
-                          onError={(e) => {
-                            // Logo failed to load
-                          }}
-                          onLoad={(e) => {
-                            // Logo loaded successfully
-                          }}
+                          unoptimized
                         />
                       </div>
                     ) : (
@@ -1587,10 +1587,12 @@ export default function QRCodesPage() {
                         backgroundColor: settings.qrCodeBackgroundColor,
                       }}
                     >
-                      <img
+                      <Image
                         data-qr-matrix="1"
                         src={table.qrCodeDataUrl}
                         alt={`QR Code Маса ${table.tableNumber}`}
+                        width={Math.max(1, settings.qrCodeSize)}
+                        height={Math.max(1, settings.qrCodeSize)}
                         style={{
                           border: 'none',
                           display: 'block',
@@ -1601,6 +1603,7 @@ export default function QRCodesPage() {
                           height: `${settings.qrCodeSize}px`,
                           maxWidth: 'none',
                         }}
+                        unoptimized
                       />
                     </div>
                     
@@ -1620,15 +1623,18 @@ export default function QRCodesPage() {
                       }}
                     >
                       <div className="flex items-center gap-3" style={{ width: '100%', minWidth: '0' }}>
-                        <img 
-                          src="/smartphone_10450488.png" 
-                          alt="Smartphone" 
+                        <Image
+                          src="/smartphone_10450488.png"
+                          alt="Smartphone"
+                          width={64}
+                          height={80}
                           className="flex-shrink-0"
                           style={{ 
                             width: '4rem', 
                             height: '5rem', 
                             objectFit: 'contain'
                           }}
+                          unoptimized
                         />
                         <div style={{ flex: '1 1 0%', minWidth: '0', width: '100%' }}>
                           <p style={{ 
@@ -1672,10 +1678,12 @@ export default function QRCodesPage() {
                           borderRadius: '0'
                         }}
                       >
-                        <img
+                        <Image
                           data-qr-matrix="1"
                           src={table.qrCodeDataUrl}
                           alt={`QR Code Маса ${table.tableNumber}`}
+                          width={Math.max(1, settings.qrCodeSize)}
+                          height={Math.max(1, settings.qrCodeSize)}
                           style={{
                             border: 'none',
                             display: 'block',
@@ -1686,6 +1694,7 @@ export default function QRCodesPage() {
                             height: `${settings.qrCodeSize}px`,
                             maxWidth: 'none',
                           }}
+                          unoptimized
                         />
                       </div>
                     </div>
@@ -1693,9 +1702,11 @@ export default function QRCodesPage() {
                       {/* Logo */}
                       {settings.useLogo && settings.logoUrl && settings.logoUrl.trim() !== '' ? (
                         <div style={{ margin: `${settings.logoMargin}px`, padding: '0' }}>
-                          <img 
-                            src={settings.logoUrl} 
-                            alt="Logo" 
+                          <Image
+                            src={settings.logoUrl}
+                            alt="Logo"
+                            width={Math.max(1, settings.logoSize)}
+                            height={Math.max(1, Math.round(settings.logoSize * 0.5))}
                             className="object-contain"
                             style={{ 
                               maxWidth: '100%', 
@@ -1705,12 +1716,7 @@ export default function QRCodesPage() {
                               margin: '0',
                               padding: '0'
                             }}
-                            onError={(e) => {
-                              // Logo failed to load
-                            }}
-                            onLoad={(e) => {
-                              // Logo loaded successfully
-                            }}
+                            unoptimized
                           />
                         </div>
                       ) : (
@@ -1741,15 +1747,18 @@ export default function QRCodesPage() {
                       }}
                     >
                       <div className="flex items-center gap-3" style={{ width: '100%', minWidth: '0' }}>
-                        <img 
-                          src="/smartphone_10450488.png" 
-                          alt="Smartphone" 
+                        <Image
+                          src="/smartphone_10450488.png"
+                          alt="Smartphone"
+                          width={64}
+                          height={80}
                           className="flex-shrink-0"
                           style={{ 
                             width: '4rem', 
                             height: '5rem', 
                             objectFit: 'contain'
                           }}
+                          unoptimized
                         />
                         <div style={{ flex: '1 1 0%', minWidth: '0', width: '100%' }}>
                           <p style={{ 

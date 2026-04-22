@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Toast from '@/components/Toast';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 
@@ -265,10 +266,13 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                     className="h-24 w-auto max-w-full rounded-md object-contain"
                   />
                 ) : settings.defaultAssetId ? (
-                  <img
+                  <Image
                     src={assetsById.get(settings.defaultAssetId)?.url || ''}
                     alt="preview"
+                    width={96}
+                    height={96}
                     className="h-24 w-auto max-w-full rounded-md object-contain"
+                    unoptimized
                   />
                 ) : (
                   <span className="malts-muted text-sm">Избери default asset</span>
@@ -291,7 +295,14 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                       {a.type === 'video' ? (
                         <video src={a.url} muted playsInline autoPlay loop className="h-full w-full object-cover" />
                       ) : (
-                        <img src={a.url} alt={a.name} className="h-full w-full object-cover" />
+                        <Image
+                          src={a.url}
+                          alt={a.name}
+                          width={56}
+                          height={56}
+                          className="h-full w-full object-cover"
+                          unoptimized
+                        />
                       )}
                     </div>
                     <div className="min-w-0">

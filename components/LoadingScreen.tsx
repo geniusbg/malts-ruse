@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLockScroll } from '@/lib/use-lock-scroll';
+import Image from 'next/image';
 
 interface LoadingScreenProps {
   locale?: string;
@@ -83,12 +84,16 @@ export default function LoadingScreen({
         return <div className={`${gifSizeClasses[logoSize]}`} aria-hidden />;
       }
       return (
-        <img
+        <Image
           key={mediaMountKey}
           src={loaderSrc}
           alt="Loading"
+          width={320}
+          height={320}
+          sizes="(max-width: 768px) 50vw, 320px"
           className={`${gifSizeClasses[logoSize]} object-contain block`}
           onError={() => setLoaderSrc('/beer-mug-loader.png')}
+          unoptimized
         />
       );
     }
@@ -108,11 +113,15 @@ export default function LoadingScreen({
     }
 
     return (
-      <img
+      <Image
         key={mediaMountKey}
         src={url}
         alt="Loading"
+        width={320}
+        height={320}
+        sizes="(max-width: 768px) 50vw, 320px"
         className={`${gifSizeClasses[logoSize]} object-contain block`}
+        unoptimized
       />
     );
   })();

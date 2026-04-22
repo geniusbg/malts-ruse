@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import Toast from '@/components/Toast';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -93,12 +94,13 @@ export default function AdminEventsPage() {
             >
               {cardImageSrc && (
                 <div className="h-48 bg-[var(--malts-inset)] relative overflow-hidden">
-                  <img
+                  <Image
                     src={cardImageSrc}
                     alt={event.titleBg}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain group-hover:scale-105 transition-transform duration-500"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,16,0.65)] via-transparent to-transparent opacity-60"></div>
                 </div>

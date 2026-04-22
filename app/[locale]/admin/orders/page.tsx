@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Price from '@/components/Price';
 import Toast from '@/components/Toast';
@@ -278,6 +278,113 @@ function AdminOrdersPageContent() {
   // Lock scroll when modals are open (backdrop locked, modals can scroll)
   useLockScroll(showCancelModal || showApprovalModal || showOrderModal);
 
+  const loadActiveOrders = useCallback(async () => {
+    try {
+      // Use /api/orders/active to get ALL active orders (not just today's)
+      const response = await fetch('/api/orders/active');
+      const data = await response.json();
+      setOrders(data.orders || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Load active orders error:', error);
+      setToast({ message: 'Грешка при зареждане на поръчките', type: 'error' });
+      setLoading(false);
+    }
+  }, []);
+
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(appliedFilters.dateFrom && { dateFrom: appliedFilters.dateFrom }),
+        ...(appliedFilters.dateTo && { dateTo: appliedFilters.dateTo }),
+        ...(appliedFilters.tableNumbers.length > 0 && { tableNumbers: appliedFilters.tableNumbers.join(',') }),
+        ...(appliedFilters.status && { status: appliedFilters.status }),
+        sortBy: appliedFilters.sortBy,
+        sortOrder: appliedFilters.sortOrder
+      });
+      
+      const response = await fetch(`/api/orders/history?${params}`);
+      const data = await response.json();
+      
+      setHistoryOrders(data.orders || []);
+      setPagination(prev => ({ ...prev, ...data.pagination }));
+      setHistoryRevenue(data.revenue);
+      setHistoryLoading(false);
+    } catch (error) {
+      console.error('Load history error:', error);
+      setToast({ message: 'Грешка при зареждане на историята', type: 'error' });
+      setHistoryLoading(false);
+    }
+  }, [appliedFilters, pagination.page, pagination.limit]);
+
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (statsFilters.dateFrom) params.append('dateFrom', statsFilters.dateFrom);
+      if (statsFilters.dateTo) params.append('dateTo', statsFilters.dateTo);
+      
+      const [revenueRes, productsRes, tablesRes] = await Promise.all([
+        fetch(`/api/stats/revenue?${params.toString()}`),
+        fetch(`/api/stats/products?${params.toString()}`),
+        fetch(`/api/stats/tables?${params.toString()}`)
+      ]);
+      
+      const [revenueData, productsData, tablesData] = await Promise.all([
+        revenueRes.json(),
+        productsRes.json(),
+        tablesRes.json()
+      ]);
+      
+      setRevenueStats(revenueData);
+      setProductStats(productsData);
+      setTableStats(tablesData);
+      setStatsLoading(false);
+    } catch (error) {
+      console.error('Load stats error:', error);
+      setToast({ message: 'Грешка при зареждане на статистиките', type: 'error' });
+      setStatsLoading(false);
+    }
+  }, [statsFilters.dateFrom, statsFilters.dateTo]);
+
+  const loadQrScanStats = useCallback(async () => {
+    setQrScanStatsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (statsFilters.dateFrom) params.append('dateFrom', statsFilters.dateFrom);
+      if (statsFilters.dateTo) params.append('dateTo', statsFilters.dateTo);
+      
+      const response = await fetch(`/api/qr/redirects?${params.toString()}`);
+      const data = await response.json();
+      setQrScanStats(data.tables || []);
+      setQrScanStatsLoading(false);
+    } catch (error) {
+      console.error('Load QR scan stats error:', error);
+      setQrScanStatsLoading(false);
+    }
+  }, [statsFilters.dateFrom, statsFilters.dateTo]);
+
+  const loadPendingApprovals = useCallback(async () => {
+    setApprovalsLoading(true);
+    try {
+      const response = await fetch('/api/orders/pending-approval');
+      if (response.ok) {
+        const data = await response.json();
+        setPendingApprovals(data.approvals || []);
+      } else {
+        setToast({ message: 'Грешка при зареждане на одобренията', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Load pending approvals error:', error);
+      setToast({ message: 'Грешка при зареждане на одобренията', type: 'error' });
+    } finally {
+      setApprovalsLoading(false);
+    }
+  }, []);
+
   // Load active orders and pending approvals on mount
   useEffect(() => {
     loadActiveOrders();
@@ -303,7 +410,7 @@ function AdminOrdersPageContent() {
       channel.unbind_all();
       pusher.unsubscribe('staff-channel');
     };
-  }, []);
+  }, [loadActiveOrders, loadPendingApprovals]);
 
   // Listen for approval notifications (admin channel)
   useEffect(() => {
@@ -335,7 +442,7 @@ function AdminOrdersPageContent() {
       adminChannel.unbind_all();
       pusher.unsubscribe('admin-channel');
     };
-  }, [activeTab]);
+  }, [activeTab, loadActiveOrders, loadHistory, loadPendingApprovals]);
 
   // Auto-reject expired approvals (configurable)
   useEffect(() => {
@@ -381,7 +488,7 @@ function AdminOrdersPageContent() {
     if (activeTab === 'history') {
       loadHistory();
     }
-  }, [activeTab, appliedFilters, pagination.page]);
+  }, [activeTab, loadHistory]);
   
   // Load stats when tab changes or filters change
   useEffect(() => {
@@ -389,14 +496,14 @@ function AdminOrdersPageContent() {
       loadStats();
       loadQrScanStats();
     }
-  }, [activeTab, statsFilters]);
+  }, [activeTab, loadStats, loadQrScanStats]);
 
   // Load pending approvals when approvals tab is opened
   useEffect(() => {
     if (activeTab === 'approvals') {
       loadPendingApprovals();
     }
-  }, [activeTab]);
+  }, [activeTab, loadPendingApprovals]);
 
   useEffect(() => {
     let isMounted = true;
@@ -426,7 +533,7 @@ function AdminOrdersPageContent() {
       setActiveTab('approvals');
       loadPendingApprovals();
     }
-  }, [urlTab]);
+  }, [urlTab, loadPendingApprovals]);
 
   // Auto-open approval modal if approval ID is in URL
   useEffect(() => {
@@ -439,113 +546,6 @@ function AdminOrdersPageContent() {
       }
     }
   }, [approvalId, pendingApprovals]);
-
-  async function loadActiveOrders() {
-    try {
-      // Use /api/orders/active to get ALL active orders (not just today's)
-      const response = await fetch('/api/orders/active');
-      const data = await response.json();
-      setOrders(data.orders || []);
-      setLoading(false);
-    } catch (error) {
-      console.error('Load active orders error:', error);
-      setToast({ message: 'Грешка при зареждане на поръчките', type: 'error' });
-      setLoading(false);
-    }
-  }
-
-  async function loadHistory() {
-    setHistoryLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        ...(appliedFilters.dateFrom && { dateFrom: appliedFilters.dateFrom }),
-        ...(appliedFilters.dateTo && { dateTo: appliedFilters.dateTo }),
-        ...(appliedFilters.tableNumbers.length > 0 && { tableNumbers: appliedFilters.tableNumbers.join(',') }),
-        ...(appliedFilters.status && { status: appliedFilters.status }),
-        sortBy: appliedFilters.sortBy,
-        sortOrder: appliedFilters.sortOrder
-      });
-      
-      const response = await fetch(`/api/orders/history?${params}`);
-      const data = await response.json();
-      
-      setHistoryOrders(data.orders || []);
-      setPagination(prev => ({ ...prev, ...data.pagination }));
-      setHistoryRevenue(data.revenue);
-      setHistoryLoading(false);
-    } catch (error) {
-      console.error('Load history error:', error);
-      setToast({ message: 'Грешка при зареждане на историята', type: 'error' });
-      setHistoryLoading(false);
-    }
-  }
-
-  async function loadStats() {
-    setStatsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (statsFilters.dateFrom) params.append('dateFrom', statsFilters.dateFrom);
-      if (statsFilters.dateTo) params.append('dateTo', statsFilters.dateTo);
-      
-      const [revenueRes, productsRes, tablesRes] = await Promise.all([
-        fetch(`/api/stats/revenue?${params.toString()}`),
-        fetch(`/api/stats/products?${params.toString()}`),
-        fetch(`/api/stats/tables?${params.toString()}`)
-      ]);
-      
-      const [revenueData, productsData, tablesData] = await Promise.all([
-        revenueRes.json(),
-        productsRes.json(),
-        tablesRes.json()
-      ]);
-      
-      setRevenueStats(revenueData);
-      setProductStats(productsData);
-      setTableStats(tablesData);
-      setStatsLoading(false);
-    } catch (error) {
-      console.error('Load stats error:', error);
-      setToast({ message: 'Грешка при зареждане на статистиките', type: 'error' });
-      setStatsLoading(false);
-    }
-  }
-
-  async function loadQrScanStats() {
-    setQrScanStatsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (statsFilters.dateFrom) params.append('dateFrom', statsFilters.dateFrom);
-      if (statsFilters.dateTo) params.append('dateTo', statsFilters.dateTo);
-      
-      const response = await fetch(`/api/qr/redirects?${params.toString()}`);
-      const data = await response.json();
-      setQrScanStats(data.tables || []);
-      setQrScanStatsLoading(false);
-    } catch (error) {
-      console.error('Load QR scan stats error:', error);
-      setQrScanStatsLoading(false);
-    }
-  }
-
-  async function loadPendingApprovals() {
-    setApprovalsLoading(true);
-    try {
-      const response = await fetch('/api/orders/pending-approval');
-      if (response.ok) {
-        const data = await response.json();
-        setPendingApprovals(data.approvals || []);
-      } else {
-        setToast({ message: 'Грешка при зареждане на одобренията', type: 'error' });
-      }
-    } catch (error) {
-      console.error('Load pending approvals error:', error);
-      setToast({ message: 'Грешка при зареждане на одобренията', type: 'error' });
-    } finally {
-      setApprovalsLoading(false);
-    }
-  }
 
   const handleApproveOrder = async (orderId: string) => {
     setProcessingApproval(true);
