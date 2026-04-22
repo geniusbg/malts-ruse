@@ -259,8 +259,8 @@ export async function showTestNotification() {
   if (Notification.permission === 'granted') {
     new Notification('Malts Test', {
       body: 'Notifications are working! 🎉',
-      icon: '/malts-icon.svg',
-      badge: '/malts-icon.svg',
+      icon: '/malts-logo-hero.webp',
+      badge: '/malts-logo-hero.webp',
       vibrate: [200, 100, 200]
     } as NotificationOptions & { vibrate?: number[] });
   }

@@ -1,7 +1,7 @@
 // Malts — Service Worker (PWA & push)
 
 // ⚠️ SW VERSION - Single source of truth (no duplicates)
-const CACHE_VERSION = 'v1.0.4';
+const CACHE_VERSION = 'v1.0.5';
 const CACHE_NAME = `malts-web-${CACHE_VERSION}`;
 const urlsToCache = [
   '/bg/staff',
@@ -442,8 +442,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'Malts',
     body: 'Ново известие',
-    icon: '/malts-icon.svg',
-    badge: '/malts-icon.svg',
+    icon: '/malts-logo-hero.webp',
+    badge: '/malts-logo-hero.webp',
     tag: 'malts-notification-' + Date.now(),
     vibrate: [200, 100, 200, 100, 200],
     requireInteraction: true,
@@ -472,8 +472,8 @@ self.addEventListener('push', (event) => {
 
   const notificationOptions = {
     body: data.body,
-    icon: data.icon || '/malts-icon.svg',
-    badge: data.badge || '/malts-icon.svg',
+    icon: data.icon || '/malts-logo-hero.webp',
+    badge: data.badge || '/malts-logo-hero.webp',
     tag: data.tag,
     vibrate: data.vibrate,
     requireInteraction: data.requireInteraction,

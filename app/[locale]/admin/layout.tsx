@@ -33,11 +33,13 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
       <div className="malts-surface">
         <ServiceWorkerUpdater />
         <AdminNav locale={locale} />
-        <GlobalApprovalsBanner locale={locale} />
-        
-        <main className="pt-28 px-4 pb-8 md:px-8">
-          {children}
-        </main>
+        {/* Push all content below the fixed AdminNav (without adding extra space between banner and content). */}
+        <div className="pt-16 md:pt-20">
+          <GlobalApprovalsBanner locale={locale} />
+          <main className="px-4 pb-8 md:px-8">
+            {children}
+          </main>
+        </div>
       </div>
     </>
   );

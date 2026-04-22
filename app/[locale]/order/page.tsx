@@ -76,6 +76,8 @@ function OrderPageContent() {
   const [showCart, setShowCart] = useState(false);
   /** Мобилен bottom sheet за избор на категория (под lg). */
   const [categorySheetOpen, setCategorySheetOpen] = useState(false);
+  /** Кратък accent около лентата с раздели / sheet при „Избери“ / „Разгледай менюто“. */
+  const [categoryNavHighlight, setCategoryNavHighlight] = useState(false);
   const categorySheetPanelRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
@@ -170,12 +172,32 @@ function OrderPageContent() {
     }
   }, []);
 
-  /** Мобилно: bottom sheet; десктоп: скрол към блока с категориите. */
+  /** Мобилен: bottom sheet; всички: скрол до лентата (scroll-mt компенсира sticky хедъра). */
   const openCategoryPicker = useCallback(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches) {
-      document.getElementById('order-category-nav')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
+    if (typeof window === 'undefined') return;
+
+    const navEl = document.getElementById('order-category-nav');
+    if (navEl) {
+      requestAnimationFrame(() => {
+        navEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    const endHighlight = () => window.setTimeout(() => setCategoryNavHighlight(false), 2600);
+
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (!isDesktop) {
       setCategorySheetOpen(true);
+      // Следващ кадър(ове): sheet + чиповете са в DOM, иначе анимацията стартира „върху празно“.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setCategoryNavHighlight(true);
+          endHighlight();
+        });
+      });
+    } else {
+      setCategoryNavHighlight(true);
+      endHighlight();
     }
   }, []);
 
@@ -1154,7 +1176,7 @@ function OrderPageContent() {
       {/* Category Filter — мобилен: сгъваем панел + ограничена височина; десктоп: пълен ред */}
       <div
         id="order-category-nav"
-        className="border-b border-[var(--malts-hairline)] bg-[var(--malts-paper)]/92 py-2 backdrop-blur-lg lg:py-4"
+        className="border-b border-[var(--malts-hairline)] bg-[var(--malts-paper)]/92 py-2 backdrop-blur-lg lg:py-4 scroll-mt-32"
       >
         <div className="container mx-auto px-4">
           {(() => {
@@ -1241,7 +1263,10 @@ function OrderPageContent() {
                         }
                       }
                     }}
-                    className={tierBtnClass(depth, isActive, sheet)}
+                    className={
+                      tierBtnClass(depth, isActive, sheet) +
+                      (categoryNavHighlight ? ' malts-order-category-btn-blink' : '')
+                    }
                   >
                     {name}
                   </button>

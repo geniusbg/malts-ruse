@@ -451,9 +451,69 @@ img[src='/malts-logo-landscape.svg'],
 
 @media (prefers-reduced-motion: reduce) {
   .malts-hero-logo,
-  .malts-mood-banner {
-    animation: none;
+  .malts-mood-banner,
+  .malts-order-category-btn-blink {
+    animation: none !important;
   }
+}
+
+/* /order: мигане на чиповете за категории (5× червен акцент).
+   Само outline — без box-shadow (ring) и без пипане на background на чипа. */
+@keyframes malts-order-category-btn-blink {
+  0%,
+  100% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  2% {
+    outline: 2px solid rgba(176, 22, 47, 0.95);
+    outline-offset: 2px;
+  }
+  8% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  20% {
+    outline: 2px solid rgba(176, 22, 47, 0.95);
+    outline-offset: 2px;
+  }
+  26% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  38% {
+    outline: 2px solid rgba(176, 22, 47, 0.95);
+    outline-offset: 2px;
+  }
+  44% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  56% {
+    outline: 2px solid rgba(176, 22, 47, 0.95);
+    outline-offset: 2px;
+  }
+  62% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  74% {
+    outline: 2px solid rgba(176, 22, 47, 0.95);
+    outline-offset: 2px;
+  }
+  80%,
+  100% {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.malts-order-category-btn-blink {
+  /* transition-all на чиповете изглажда keyframes до „нищо“ */
+  transition-property: none !important;
+  animation: malts-order-category-btn-blink 2.4s ease-in-out 1 both;
+  position: relative;
+  z-index: 1;
 }
 
 /* Logo optimizations */

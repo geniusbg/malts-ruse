@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 let lockDepth = 0;
 let storedScrollY = 0;
+let storedPathname: string | null = null;
 
 function preventScrollBehindModal(e: Event) {
   const target = e.target;
@@ -55,16 +56,12 @@ function applyBodyLock() {
   if (typeof window === 'undefined') return;
 
   storedScrollY = window.scrollY;
+  storedPathname = window.location.pathname;
 
-  window.scrollTo(0, 0);
   if (document.documentElement) {
-    document.documentElement.scrollTop = 0;
-    document.documentElement.scrollLeft = 0;
     document.documentElement.style.overscrollBehavior = 'none';
   }
   if (document.body) {
-    document.body.scrollTop = 0;
-    document.body.scrollLeft = 0;
     document.body.style.overscrollBehavior = 'none';
   }
 
@@ -100,9 +97,12 @@ function releaseBodyLock() {
     document.documentElement.style.overscrollBehavior = '';
   }
 
-  if (storedScrollY > 0) {
-    window.scrollTo(0, storedScrollY);
-  }
+  const currentPath = window.location.pathname;
+  const shouldRestore = storedPathname !== null && storedPathname === currentPath;
+  const y = shouldRestore ? storedScrollY : 0;
+  storedScrollY = 0;
+  storedPathname = null;
+  window.scrollTo(0, y);
 }
 
 /**

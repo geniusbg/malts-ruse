@@ -119,8 +119,8 @@ export async function POST(request: Request) {
           const payload = {
             title,
             body,
-            icon: '/malts-icon.svg',
-            badge: '/malts-icon.svg',
+            icon: '/malts-logo-hero.webp',
+            badge: '/malts-logo-hero.webp',
             url: url || '/bg/staff',
             tag: 'malts-notification',
             requireInteraction: true,

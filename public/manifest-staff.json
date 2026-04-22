@@ -6,10 +6,17 @@
   "start_url": "/bg/staff",
   "scope": "/bg/staff",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "theme_color": "#e8e0d4",
   "background_color": "#e8e0d4",
   "categories": ["business", "food"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+malts-staff",
+      "url": "/bg/staff/malts-protocol?target=%s"
+    }
+  ],
   "icons": [
     {
       "src": "/malts-icon-192.png",

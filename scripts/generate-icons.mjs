@@ -5,7 +5,8 @@ import sharp from 'sharp';
 const ROOT = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, 'public');
 
-/** Prefer mark for small icons; fallback to full logo */
+/** Same hero as admin login; then legacy SVGs */
+const SRC_HERO = path.join(PUBLIC_DIR, 'malts-logo-hero.webp');
 const SRC_ICON = path.join(PUBLIC_DIR, 'malts-icon.svg');
 const SRC_LOGO = path.join(PUBLIC_DIR, 'malts.svg');
 
@@ -18,12 +19,16 @@ async function exists(filePath) {
   }
 }
 
-async function resolveSourceSvg() {
-  const hasIcon = await exists(SRC_ICON);
-  if (hasIcon) return SRC_ICON;
-  const hasLogo = await exists(SRC_LOGO);
-  if (hasLogo) return SRC_LOGO;
-  throw new Error(`No source SVG found. Expected ${SRC_ICON} or ${SRC_LOGO}`);
+function isRasterSource(filePath) {
+  return /\.(webp|png|jpe?g|gif|avif)$/i.test(filePath);
+}
+
+/** Prefer login hero; fallback to mark SVG, then full SVG logo. */
+async function resolveSourceImage() {
+  if (await exists(SRC_HERO)) return SRC_HERO;
+  if (await exists(SRC_ICON)) return SRC_ICON;
+  if (await exists(SRC_LOGO)) return SRC_LOGO;
+  throw new Error(`No source image found. Expected ${SRC_HERO}, ${SRC_ICON} or ${SRC_LOGO}`);
 }
 
 async function ensurePublic() {
@@ -34,9 +39,12 @@ async function ensurePublic() {
 /**
  * PNG with opaque white background (favicon / PWA tiles on dark browser chrome).
  */
-async function writePng({ size, outFile, sourceSvg }) {
+async function writePng({ size, outFile, sourcePath }) {
   const outPath = path.join(PUBLIC_DIR, outFile);
-  const buf = await sharp(sourceSvg, { density: 512 })
+  const sharpIn = isRasterSource(sourcePath)
+    ? sharp(sourcePath)
+    : sharp(sourcePath, { density: 512 });
+  const buf = await sharpIn
     .resize(size, size, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
     .flatten({ background: '#ffffff' })
     .png({ compressionLevel: 9, adaptiveFiltering: true })
@@ -47,7 +55,7 @@ async function writePng({ size, outFile, sourceSvg }) {
 
 async function main() {
   await ensurePublic();
-  const sourceSvg = await resolveSourceSvg();
+  const sourcePath = await resolveSourceImage();
 
   const outputs = [
     { size: 16, outFile: 'favicon-16x16.png' },
@@ -61,11 +69,11 @@ async function main() {
   const written = [];
   for (const o of outputs) {
     // eslint-disable-next-line no-await-in-loop
-    written.push(await writePng({ ...o, sourceSvg }));
+    written.push(await writePng({ ...o, sourcePath }));
   }
 
   // eslint-disable-next-line no-console
-  console.log(`Generated ${written.length} icons from ${path.basename(sourceSvg)} (white background)`);
+  console.log(`Generated ${written.length} icons from ${path.basename(sourcePath)} (white background)`);
 }
 
 await main();

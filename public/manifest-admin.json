@@ -6,10 +6,17 @@
   "start_url": "/bg/admin",
   "scope": "/bg/admin",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "theme_color": "#e8e0d4",
   "background_color": "#e8e0d4",
   "categories": ["business", "utilities"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+malts-admin",
+      "url": "/bg/admin/malts-protocol?target=%s"
+    }
+  ],
   "icons": [
     {
       "src": "/malts-icon-192.png",
