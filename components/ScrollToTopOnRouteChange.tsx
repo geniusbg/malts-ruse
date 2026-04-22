@@ -1,11 +1,10 @@
 'use client';
 
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 export default function ScrollToTopOnRouteChange() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const lastPathname = useRef<string | null>(null);
 
   useEffect(() => {
@@ -23,13 +22,16 @@ export default function ScrollToTopOnRouteChange() {
 
     // Deep-links (e.g. home → menu with ?product=...) handle their own scrolling.
     // Avoid a "jump to top then jump again" UX.
-    if (searchParams?.get('product') || searchParams?.get('category')) return;
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get('product') || sp.get('category')) return;
+    }
 
     // Ensure we scroll after the new route paints.
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     });
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return null;
 }
