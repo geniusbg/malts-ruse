@@ -1,7 +1,7 @@
 // Malts — Service Worker (PWA & push)
 
 // ⚠️ SW VERSION - Single source of truth (no duplicates)
-const CACHE_VERSION = 'v1.0.3';
+const CACHE_VERSION = 'v1.0.4';
 const CACHE_NAME = `malts-web-${CACHE_VERSION}`;
 const urlsToCache = [
   '/bg/staff',

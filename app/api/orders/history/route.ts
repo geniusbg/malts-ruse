@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     // Filters
     const status = searchParams.get('status'); // pending, preparing, ready, completed, cancelled
     const tableNumber = searchParams.get('tableNumber');
+    const tableNumbersRaw = searchParams.get('tableNumbers');
     const dateFrom = searchParams.get('dateFrom'); // YYYY-MM-DD
     const dateTo = searchParams.get('dateTo'); // YYYY-MM-DD
     const sortBy = searchParams.get('sortBy') || 'createdAt'; // createdAt, totalBgn, tableNumber
@@ -27,7 +28,16 @@ export async function GET(request: Request) {
       where.status = status;
     }
     
-    if (tableNumber) {
+    const tableNumbers = (tableNumbersRaw || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => Number.parseInt(s, 10))
+      .filter((n) => Number.isFinite(n));
+
+    if (tableNumbers.length > 0) {
+      where.tableNumber = { in: tableNumbers };
+    } else if (tableNumber) {
       where.tableNumber = parseInt(tableNumber);
     }
     

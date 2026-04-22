@@ -141,7 +141,7 @@ function AdminOrdersPageContent() {
   const [tempFilters, setTempFilters] = useState({
     dateFrom: new Date().toISOString().split('T')[0], // Today
     dateTo: new Date().toISOString().split('T')[0],
-    tableNumber: '',
+    tableNumbers: [] as string[],
     status: '',
     sortBy: 'createdAt',
     sortOrder: 'desc'
@@ -151,7 +151,7 @@ function AdminOrdersPageContent() {
   const [appliedFilters, setAppliedFilters] = useState({
     dateFrom: new Date().toISOString().split('T')[0],
     dateTo: new Date().toISOString().split('T')[0],
-    tableNumber: '',
+    tableNumbers: [] as string[],
     status: '',
     sortBy: 'createdAt',
     sortOrder: 'desc'
@@ -201,12 +201,32 @@ function AdminOrdersPageContent() {
     return `${year}-${month}-${day}`;
   };
 
+  // Format date as YYYY-MM-DD in a specific IANA timezone (reliable on iOS Safari).
+  const formatDateInTimeZone = (date: Date, timeZone: string): string => {
+    try {
+      const parts = new Intl.DateTimeFormat('en', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(date);
+
+      const year = parts.find(p => p.type === 'year')?.value;
+      const month = parts.find(p => p.type === 'month')?.value;
+      const day = parts.find(p => p.type === 'day')?.value;
+
+      if (year && month && day) return `${year}-${month}-${day}`;
+    } catch {
+      // Fallback below
+    }
+    return formatLocalDate(date);
+  };
+
   // Quick filter presets
   const setQuickFilter = (preset: 'today' | 'yesterday' | 'week' | 'month') => {
     // Get current date in Bulgarian timezone as YYYY-MM-DD string
     const now = new Date();
-    const bgTodayStr = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Sofia' }); // YYYY-MM-DD format
-    const [year, month, day] = bgTodayStr.split('-').map(Number);
+    const bgTodayStr = formatDateInTimeZone(now, 'Europe/Sofia');
     
     let dateFromStr: string;
     let dateToStr: string;
@@ -217,23 +237,23 @@ function AdminOrdersPageContent() {
         dateToStr = bgTodayStr;
         break;
       case 'yesterday': {
-        const yesterday = new Date(year, month - 1, day);
+        const yesterday = new Date(now);
         yesterday.setDate(yesterday.getDate() - 1);
-        dateFromStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+        dateFromStr = formatDateInTimeZone(yesterday, 'Europe/Sofia');
         dateToStr = dateFromStr;
         break;
       }
       case 'week': {
-        const weekAgo = new Date(year, month - 1, day);
+        const weekAgo = new Date(now);
         weekAgo.setDate(weekAgo.getDate() - 7);
-        dateFromStr = `${weekAgo.getFullYear()}-${String(weekAgo.getMonth() + 1).padStart(2, '0')}-${String(weekAgo.getDate()).padStart(2, '0')}`;
+        dateFromStr = formatDateInTimeZone(weekAgo, 'Europe/Sofia');
         dateToStr = bgTodayStr;
         break;
       }
       case 'month': {
-        const monthAgo = new Date(year, month - 1, day);
+        const monthAgo = new Date(now);
         monthAgo.setMonth(monthAgo.getMonth() - 1);
-        dateFromStr = `${monthAgo.getFullYear()}-${String(monthAgo.getMonth() + 1).padStart(2, '0')}-${String(monthAgo.getDate()).padStart(2, '0')}`;
+        dateFromStr = formatDateInTimeZone(monthAgo, 'Europe/Sofia');
         dateToStr = bgTodayStr;
         break;
       }
@@ -442,7 +462,7 @@ function AdminOrdersPageContent() {
         limit: pagination.limit.toString(),
         ...(appliedFilters.dateFrom && { dateFrom: appliedFilters.dateFrom }),
         ...(appliedFilters.dateTo && { dateTo: appliedFilters.dateTo }),
-        ...(appliedFilters.tableNumber && { tableNumber: appliedFilters.tableNumber }),
+        ...(appliedFilters.tableNumbers.length > 0 && { tableNumbers: appliedFilters.tableNumbers.join(',') }),
         ...(appliedFilters.status && { status: appliedFilters.status }),
         sortBy: appliedFilters.sortBy,
         sortOrder: appliedFilters.sortOrder
@@ -589,6 +609,48 @@ function AdminOrdersPageContent() {
 
   const handleFilterChange = (key: string, value: string) => {
     setTempFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const [tables, setTables] = useState<Array<{ id: string; tableNumber: number; tableName?: string | null; isActive?: boolean }>>([]);
+  const [tablesLoading, setTablesLoading] = useState(false);
+  const [tablesDropdownOpen, setTablesDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== 'history') return;
+    let cancelled = false;
+
+    const run = async () => {
+      setTablesLoading(true);
+      try {
+        const res = await fetch('/api/tables');
+        const data = await res.json();
+        const list = (data?.tables || []) as Array<{ id: string; tableNumber: number; tableName?: string | null; isActive?: boolean }>;
+        if (!cancelled) setTables(list);
+      } catch {
+        if (!cancelled) setTables([]);
+      } finally {
+        if (!cancelled) setTablesLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
+
+  const toggleTableSelection = (tableNumber: number) => {
+    const value = String(tableNumber);
+    setTempFilters(prev => {
+      const set = new Set(prev.tableNumbers);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      return { ...prev, tableNumbers: Array.from(set).sort((a, b) => Number(a) - Number(b)) };
+    });
+  };
+
+  const clearTableSelection = () => {
+    setTempFilters(prev => ({ ...prev, tableNumbers: [] }));
   };
   
   const applyFilters = () => {
@@ -1092,14 +1154,74 @@ function AdminOrdersPageContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm malts-subtle mb-2">Маса</label>
-                <input
-                  type="number"
-                  value={tempFilters.tableNumber}
-                  onChange={(e) => handleFilterChange('tableNumber', e.target.value)}
-                  placeholder="Всички"
-                  className="w-full px-4 py-2 malts-inset rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
-                />
+                <label className="block text-sm malts-subtle mb-2">Маси</label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setTablesDropdownOpen(v => !v)}
+                    className="w-full px-4 py-2 malts-inset rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)] text-left flex items-center justify-between gap-3"
+                  >
+                    <span className="truncate">
+                      {tempFilters.tableNumbers.length === 0
+                        ? (tablesLoading ? 'Зареждане...' : 'Всички')
+                        : tempFilters.tableNumbers.length === 1
+                          ? `Маса ${tempFilters.tableNumbers[0]}`
+                          : `${tempFilters.tableNumbers.length} маси избрани`}
+                    </span>
+                    <span className="malts-subtle text-sm">{tablesDropdownOpen ? '▲' : '▼'}</span>
+                  </button>
+
+                  {tablesDropdownOpen && (
+                    <div className="absolute z-20 mt-2 w-full malts-card rounded-lg p-3 max-h-64 overflow-auto">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="text-sm font-semibold text-[var(--malts-ink)]">Избери маси</div>
+                        {tempFilters.tableNumbers.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => clearTableSelection()}
+                            className="text-sm malts-muted underline underline-offset-2"
+                          >
+                            Изчисти
+                          </button>
+                        )}
+                      </div>
+
+                      {tablesLoading ? (
+                        <div className="text-sm malts-muted py-2">Зареждане...</div>
+                      ) : tables.length === 0 ? (
+                        <div className="text-sm malts-muted py-2">Няма налични маси</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {tables.map((t) => {
+                            const selected = tempFilters.tableNumbers.includes(String(t.tableNumber));
+                            const label = t.tableName ? `Маса ${t.tableNumber} — ${t.tableName}` : `Маса ${t.tableNumber}`;
+                            return (
+                              <label key={t.id} className="flex items-start gap-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={selected}
+                                  onChange={() => toggleTableSelection(t.tableNumber)}
+                                  className="mt-1 w-4 h-4 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
+                                />
+                                <span className="text-sm text-[var(--malts-ink)] leading-5">{label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="mt-3 pt-3 border-t border-[var(--malts-hairline)] flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setTablesDropdownOpen(false)}
+                          className="px-3 py-2 malts-btn-secondary rounded-lg font-semibold transition-all text-sm"
+                        >
+                          Готово
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-sm malts-subtle mb-2">Статус</label>
@@ -1132,7 +1254,7 @@ function AdminOrdersPageContent() {
                   setTempFilters({
                     dateFrom: today,
                     dateTo: today,
-                    tableNumber: '',
+                    tableNumbers: [],
                     status: '',
                     sortBy: 'createdAt',
                     sortOrder: 'desc'
@@ -1140,7 +1262,7 @@ function AdminOrdersPageContent() {
                   setAppliedFilters({
                     dateFrom: today,
                     dateTo: today,
-                    tableNumber: '',
+                    tableNumbers: [],
                     status: '',
                     sortBy: 'createdAt',
                     sortOrder: 'desc'
@@ -1204,8 +1326,9 @@ function AdminOrdersPageContent() {
                     </button>
                   </div>
                 )}
-                
-                <div className="overflow-x-auto">
+
+                {/* Orders Table - Desktop */}
+                <div className="overflow-x-auto hidden md:block">
                   <table className="w-full">
                     <thead className="bg-[var(--malts-inset)] border-b border-[var(--malts-hairline)]">
                       <tr>
@@ -1228,86 +1351,178 @@ function AdminOrdersPageContent() {
                     </thead>
                     <tbody className="divide-y divide-[var(--malts-hairline)]">
                       {historyOrders.map((order: any, index: number) => (
-                      <tr
+                        <tr
+                          key={order.id}
+                          className="hover:bg-[var(--malts-accent-tint)] transition-colors"
+                        >
+                          <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedOrderIds.has(order.id)}
+                              onChange={() => handleToggleSelectOrder(order.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-4 h-4 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
+                            />
+                          </td>
+                          <td
+                            className="px-6 py-4 text-[var(--malts-ink)] font-medium cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            {(pagination.page - 1) * pagination.limit + index + 1}
+                          </td>
+                          <td
+                            className="px-6 py-4 text-[var(--malts-ink)] cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            {order.tableNumber}
+                          </td>
+                          <td
+                            className="px-6 py-4 malts-muted text-sm cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            {formatBulgarianDateTime(order.createdAt)}
+                          </td>
+                          <td
+                            className="px-6 py-4 malts-muted cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            {order.items?.length || 0} бр.
+                          </td>
+                          <td
+                            className="px-6 py-4 cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                order.status === 'completed'
+                                  ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
+                                  : order.status === 'cancelled'
+                                    ? 'bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)] border border-[rgba(153,27,27,0.25)]'
+                                    : 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]'
+                              }`}
+                            >
+                              {order.status === 'completed'
+                                ? '✓ Завършена'
+                                : order.status === 'cancelled'
+                                  ? '✗ Отменена'
+                                  : order.status}
+                            </span>
+                          </td>
+                          <td
+                            className="px-6 py-4 text-right cursor-pointer"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            <Price priceBgn={Number(order.totalBgn)} className="text-[var(--malts-ink)] font-semibold" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Orders Cards - Mobile */}
+                <div className="md:hidden p-4 space-y-3">
+                  {/* Mobile select-all */}
+                  <div className="flex items-center justify-between bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg px-3 py-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedOrderIds.size === historyOrders.length && historyOrders.length > 0}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
+                      />
+                      <span className="text-sm font-semibold text-[var(--malts-ink)]">Избери всички</span>
+                    </label>
+                    <span className="text-xs malts-muted">{historyOrders.length} поръчки</span>
+                  </div>
+
+                  {historyOrders.map((order: any, index: number) => {
+                    const statusLabel =
+                      order.status === 'completed'
+                        ? '✓ Завършена'
+                        : order.status === 'cancelled'
+                          ? '✗ Отменена'
+                          : String(order.status || '');
+
+                    const statusClass =
+                      order.status === 'completed'
+                        ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
+                        : order.status === 'cancelled'
+                          ? 'bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)] border border-[rgba(153,27,27,0.25)]'
+                          : 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]';
+
+                    return (
+                      <div
                         key={order.id}
-                        className="hover:bg-[var(--malts-accent-tint)] transition-colors"
+                        className="malts-card rounded-xl p-4"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowOrderModal(true);
+                        }}
                       >
-                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={selectedOrderIds.has(order.id)}
-                            onChange={() => handleToggleSelectOrder(order.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-4 h-4 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
-                          />
-                        </td>
-                        <td 
-                          className="px-6 py-4 text-[var(--malts-ink)] font-medium cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          {(pagination.page - 1) * pagination.limit + index + 1}
-                        </td>
-                        <td 
-                          className="px-6 py-4 text-[var(--malts-ink)] cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          {order.tableNumber}
-                        </td>
-                        <td 
-                          className="px-6 py-4 malts-muted text-sm cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          {formatBulgarianDateTime(order.createdAt)}
-                        </td>
-                        <td 
-                          className="px-6 py-4 malts-muted cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          {order.items?.length || 0} бр.
-                        </td>
-                        <td 
-                          className="px-6 py-4 cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            order.status === 'completed' ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]' :
-                            order.status === 'cancelled' ? 'bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)] border border-[rgba(153,27,27,0.25)]' :
-                            'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]'
-                          }`}>
-                            {order.status === 'completed' ? '✓ Завършена' :
-                             order.status === 'cancelled' ? '✗ Отменена' :
-                             order.status}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 min-w-0">
+                            <div onClick={(e) => e.stopPropagation()} className="pt-1">
+                              <input
+                                type="checkbox"
+                                checked={selectedOrderIds.has(order.id)}
+                                onChange={() => handleToggleSelectOrder(order.id)}
+                                className="w-4 h-4 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
+                              />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div className="font-bold text-[var(--malts-ink)]">
+                                  #{(pagination.page - 1) * pagination.limit + index + 1}
+                                </div>
+                                <div className="text-sm malts-muted">Маса {order.tableNumber}</div>
+                              </div>
+                              <div className="text-sm malts-muted mt-1 truncate">
+                                {formatBulgarianDateTime(order.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${statusClass}`}>
+                            {statusLabel}
                           </span>
-                        </td>
-                        <td 
-                          className="px-6 py-4 text-right cursor-pointer"
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowOrderModal(true);
-                          }}
-                        >
-                          <Price priceBgn={Number(order.totalBgn)} className="text-[var(--malts-ink)] font-semibold" />
-                        </td>
-                    </tr>
-                    ))}
-                </tbody>
-              </table>
-              </div>
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3">
+                            <div className="text-xs malts-subtle">Продукти</div>
+                            <div className="text-lg font-bold text-[var(--malts-ink)]">
+                              {order.items?.length || 0}
+                            </div>
+                          </div>
+                          <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3 text-right">
+                            <div className="text-xs malts-subtle">Сума</div>
+                            <div className="text-lg font-bold text-[var(--malts-ink)]">
+                              <Price priceBgn={Number(order.totalBgn)} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               
               {/* Pagination */}
               {pagination.totalPages > 1 && (
@@ -1533,32 +1748,65 @@ function AdminOrdersPageContent() {
                 <div>
                   <h2 className="text-2xl font-bold text-[var(--malts-ink)] mb-4">🏆 Топ продукти ({formatDatePeriod()})</h2>
                   <div className="malts-card overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-[var(--malts-inset)] border-b border-[var(--malts-hairline)]">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">#</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">Продукт</th>
-                          <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">Категория</th>
-                          <th className="px-6 py-4 text-center text-xs font-semibold malts-subtle uppercase">Продадени</th>
-                          <th className="px-6 py-4 text-right text-xs font-semibold malts-subtle uppercase">Приход</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[var(--malts-hairline)]">
-                        {productStats.topProducts.slice(0, 10).map((product: any, idx: number) => (
-                          <tr key={product.productId} className="hover:bg-[var(--malts-accent-tint)] transition-colors">
-                            <td className="px-6 py-4 malts-muted font-medium">{idx + 1}</td>
-                            <td className="px-6 py-4 text-[var(--malts-ink)] font-medium">{product.productName}</td>
-                            <td className="px-6 py-4 malts-muted text-sm">{product.category}</td>
-                            <td className="px-6 py-4 text-center text-[var(--malts-ink)] font-semibold">
-                              {product.quantitySold}
-                            </td>
-                            <td className="px-6 py-4 text-right text-[var(--malts-ink)] font-semibold">
-                              <Price priceBgn={Number(product.revenue || 0)} />
-                            </td>
+                    {/* Top Products Table - Desktop */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-[var(--malts-inset)] border-b border-[var(--malts-hairline)]">
+                          <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">#</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">Продукт</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold malts-subtle uppercase">Категория</th>
+                            <th className="px-6 py-4 text-center text-xs font-semibold malts-subtle uppercase">Продадени</th>
+                            <th className="px-6 py-4 text-right text-xs font-semibold malts-subtle uppercase">Приход</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--malts-hairline)]">
+                          {productStats.topProducts.slice(0, 10).map((product: any, idx: number) => (
+                            <tr key={product.productId} className="hover:bg-[var(--malts-accent-tint)] transition-colors">
+                              <td className="px-6 py-4 malts-muted font-medium">{idx + 1}</td>
+                              <td className="px-6 py-4 text-[var(--malts-ink)] font-medium">{product.productName}</td>
+                              <td className="px-6 py-4 malts-muted text-sm">{product.category}</td>
+                              <td className="px-6 py-4 text-center text-[var(--malts-ink)] font-semibold">
+                                {product.quantitySold}
+                              </td>
+                              <td className="px-6 py-4 text-right text-[var(--malts-ink)] font-semibold">
+                                <Price priceBgn={Number(product.revenue || 0)} />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Top Products Cards - Mobile */}
+                    <div className="md:hidden p-4 space-y-3">
+                      {productStats.topProducts.slice(0, 10).map((product: any, idx: number) => (
+                        <div key={product.productId} className="malts-card rounded-xl p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] text-[var(--malts-accent)] font-bold">
+                                  {idx + 1}
+                                </span>
+                                <div className="font-bold text-[var(--malts-ink)] truncate">{product.productName}</div>
+                              </div>
+                              <div className="text-sm malts-muted mt-2">{product.category}</div>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <div className="text-xs malts-subtle">Приход</div>
+                              <div className="text-lg font-bold text-[var(--malts-ink)]">
+                                <Price priceBgn={Number(product.revenue || 0)} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3 flex items-center justify-between">
+                            <span className="text-sm malts-subtle">Продадени</span>
+                            <span className="text-lg font-bold text-[var(--malts-ink)]">{product.quantitySold}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

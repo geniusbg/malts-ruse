@@ -6,6 +6,7 @@ import Navigation from '@/components/Navigation';
 import { SessionProvider } from 'next-auth/react';
 import OfflineBanner from '@/components/OfflineBanner';
 import AppLoadingOverlay from '@/components/AppLoadingOverlay';
+import ScrollToTopOnRouteChange from '@/components/ScrollToTopOnRouteChange';
 
 export default function ConditionalNav({ children }: { children?: ReactNode }) {
   const pathname = usePathname();
@@ -69,6 +70,7 @@ export default function ConditionalNav({ children }: { children?: ReactNode }) {
     >
       <OfflineBanner onStatusChange={handleStatusChange} />
       <AppLoadingOverlay />
+      <ScrollToTopOnRouteChange />
       <div className={isOffline ? 'pointer-events-none opacity-50' : ''}>
         {!hideNav && <Navigation />}
         <div className={hideNav ? '' : 'pt-16'}>
