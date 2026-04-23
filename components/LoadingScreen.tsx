@@ -92,6 +92,8 @@ export default function LoadingScreen({
           height={320}
           sizes="(max-width: 768px) 50vw, 320px"
           className={`${gifSizeClasses[logoSize]} object-contain block`}
+          priority
+          fetchPriority="high"
           onError={() => setLoaderSrc('/beer-mug-loader.png')}
           unoptimized
         />

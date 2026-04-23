@@ -1,13 +1,18 @@
 // Malts — Service Worker (PWA & push)
 
 // ⚠️ SW VERSION - Single source of truth (no duplicates)
-const CACHE_VERSION = 'v1.0.5';
+const CACHE_VERSION = 'v1.0.6';
 const CACHE_NAME = `malts-web-${CACHE_VERSION}`;
 const urlsToCache = [
   '/bg/staff',
   '/bg/admin',
   '/bg/menu',
-  '/bg'
+  '/bg',
+  // Loader media (helps Safari show instantly)
+  '/beer-mug-loader.gif',
+  '/beer-mug-loader.png',
+  // Push icon (new default)
+  '/malts-logo-hero.webp'
 ];
 
 // Listen for messages from clients (e.g., version requests, skip waiting)

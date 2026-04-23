@@ -72,6 +72,7 @@ export default function AppLoadingOverlay() {
   const rafRef = useRef<number | null>(null);
   const pendingTargetRef = useRef<string | null>(null);
   const lastAppliedPathRef = useRef<string | null>(null);
+  const lastStartKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +124,14 @@ export default function AppLoadingOverlay() {
     return map;
   }, [settings]);
 
-  const startOverlay = (rule: LoadingRule, asset: LoadingAsset | null, mode: 'route' | 'link') => {
+  const startOverlay = (rule: LoadingRule, asset: LoadingAsset | null, mode: 'route' | 'link', startKey: string) => {
+    // Avoid "double start" on Safari/slow devices where settings apply + route effect can race,
+    // which causes progress to jump then reset.
+    if (active && lastStartKeyRef.current === startKey) {
+      return;
+    }
+    lastStartKeyRef.current = startKey;
+
     if (hideTimerRef.current) {
       window.clearTimeout(hideTimerRef.current);
       hideTimerRef.current = null;
@@ -175,7 +183,7 @@ export default function AppLoadingOverlay() {
     const asset = assetId ? (assetIndex.get(assetId) ?? null) : null;
 
     pendingTargetRef.current = raw;
-    startOverlay(rule, asset, 'link');
+    startOverlay(rule, asset, 'link', `link:${raw}`);
   }, [assetIndex, ruleIndex, settings]);
 
   // Apply rules reliably on route changes (works for router.push, back/forward, direct loads).
@@ -194,7 +202,7 @@ export default function AppLoadingOverlay() {
 
     const assetId = rule.assetId ?? settings.defaultAssetId;
     const asset = assetId ? (assetIndex.get(assetId) ?? null) : null;
-    startOverlay(rule, asset, 'route');
+    startOverlay(rule, asset, 'route', `route:${raw}`);
 
     return () => {
       if (hideTimerRef.current) {

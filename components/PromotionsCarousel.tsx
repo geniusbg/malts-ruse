@@ -34,6 +34,7 @@ export default function PromotionsCarousel({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const rafRef = useRef<number | null>(null);
 
   const checkScrollability = () => {
     if (!scrollContainerRef.current) return;
@@ -47,11 +48,23 @@ export default function PromotionsCarousel({
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    container.addEventListener('scroll', checkScrollability);
-    window.addEventListener('resize', checkScrollability);
+    const onScroll = () => {
+      if (rafRef.current) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        checkScrollability();
+      });
+    };
+
+    container.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', checkScrollability, { passive: true } as AddEventListenerOptions);
     return () => {
-      container.removeEventListener('scroll', checkScrollability);
-      window.removeEventListener('resize', checkScrollability);
+      container.removeEventListener('scroll', onScroll as any);
+      window.removeEventListener('resize', checkScrollability as any);
+      if (rafRef.current) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, [products.length]);
 

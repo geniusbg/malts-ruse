@@ -76,6 +76,9 @@ export default function RootLayout({
         <meta name="msapplication-TileImage" content="/malts-icon-192.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#e8e0d4" />
+        {/* Preload loader media for Safari (avoid blank first frame). */}
+        <link rel="preload" as="image" href="/beer-mug-loader.gif" />
+        <link rel="preload" as="image" href="/beer-mug-loader.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${maltsDisplay.variable} ${maltsButtons.variable} ${maltsLang.variable} ${maltsNav.variable} antialiased`}
