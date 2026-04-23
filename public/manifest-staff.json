@@ -13,7 +13,7 @@
   "categories": ["business", "food"],
   "protocol_handlers": [
     {
-      "protocol": "web+malts-staff",
+      "protocol": "web+maltsstaff",
       "url": "/bg/staff/malts-protocol?target=%s"
     }
   ],

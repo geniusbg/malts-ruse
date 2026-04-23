@@ -13,7 +13,7 @@
   "categories": ["business", "utilities"],
   "protocol_handlers": [
     {
-      "protocol": "web+malts-admin",
+      "protocol": "web+maltsadmin",
       "url": "/bg/admin/malts-protocol?target=%s"
     }
   ],
