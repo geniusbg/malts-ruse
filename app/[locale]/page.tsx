@@ -346,7 +346,7 @@ export default async function HomePage({
 
             {/* Tagline — red frame + glow; един ред (размерът се смалява леко на тесен екран) */}
             <div className="mb-8 md:mb-12 flex justify-center px-3 py-6 md:py-8">
-              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.8rem,3.1vw,2.25rem)] text-[#f5f0e6] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
+              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[#f5f0e6] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
                 {moodText}
               </p>
             </div>

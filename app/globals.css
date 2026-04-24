@@ -416,78 +416,33 @@ img[src='/malts-logo-landscape.svg'],
   }
 }
 
-@keyframes malts-mood-red-pulse {
-  0%,
-  100% {
-    border-color: var(--malts-accent);
-    box-shadow:
-      0 0 16px rgba(176, 22, 47, 0.28),
-      0 0 40px rgba(176, 22, 47, 0.16),
-      0 0 72px rgba(176, 22, 47, 0.1),
-      0 12px 36px rgba(0, 0, 0, 0.28);
-  }
-  50% {
-    border-color: #c42840;
-    box-shadow:
-      0 0 30px rgba(176, 22, 47, 0.48),
-      0 0 56px rgba(176, 22, 47, 0.3),
-      0 0 100px rgba(176, 22, 47, 0.18),
-      0 12px 36px rgba(0, 0, 0, 0.28);
-  }
-}
-
-/* Homepage hero logo: color trim + pulsing red glow (keyframes own the full filter each frame) */
+/* Homepage hero logo: trim + pulsing red glow. drop-shadow() следва алфа на картинката (без квадратен glow от псевдо+box-shadow). */
 .malts-hero-logo {
   animation: malts-hero-logo-red-pulse 1.35s ease-in-out infinite;
 }
 
-/* Hero mood pill: pulsing red frame + glow */
+/* Анимиран `filter` + няколко drop-shadow е костенурка на iOS Safari — под ~lg само статичен ореол (като 0% кадър), без пулс. */
+@media (max-width: 1023px) {
+  .malts-hero-logo {
+    animation: none !important;
+    filter: saturate(0.72) hue-rotate(6deg) brightness(1.03)
+      drop-shadow(0 0 18px rgba(176, 22, 47, 0.28))
+      drop-shadow(0 0 40px rgba(176, 22, 47, 0.16))
+      drop-shadow(0 0 78px rgba(176, 22, 47, 0.1));
+  }
+}
+
+/* Hero mood pill: статичен червен ореол (без пулс) */
 .malts-mood-banner {
   border: 4px solid var(--malts-accent);
   border-radius: 9999px;
   background: rgba(0, 0, 0, 0.88);
-  animation: malts-mood-red-pulse 1.35s ease-in-out infinite;
-}
-
-/*
- * Mobile performance: avoid animating filter/drop-shadow (expensive on iOS Safari).
- * Keep the "alive" feel, but switch to transform/opacity-only pulses on touch devices.
- */
-@keyframes malts-hero-logo-mobile-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.96;
-  }
-  50% {
-    transform: scale(1.015);
-    opacity: 1;
-  }
-}
-
-@keyframes malts-mood-banner-mobile-pulse {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.96;
-  }
-  50% {
-    transform: translateY(-1px);
-    opacity: 1;
-  }
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .malts-hero-logo {
-    /* Keep base filter from .malts-brand-filter; do not animate filter on mobile. */
-    animation: malts-hero-logo-mobile-pulse 1.15s ease-in-out infinite;
-    will-change: transform, opacity;
-  }
-
-  .malts-mood-banner {
-    animation: malts-mood-banner-mobile-pulse 1.15s ease-in-out infinite;
-    will-change: transform, opacity;
-  }
+  box-shadow:
+    0 0 0 2px rgba(176, 22, 47, 0.4),
+    0 0 22px rgba(176, 22, 47, 0.34),
+    0 0 48px rgba(176, 22, 47, 0.2),
+    0 0 84px rgba(176, 22, 47, 0.11),
+    0 12px 36px rgba(0, 0, 0, 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {
