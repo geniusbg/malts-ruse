@@ -10,6 +10,7 @@ type LoadingAsset = { id: string; name: string; url: string; type: LoadingAssetT
 type LoadingRule = {
   id: string;
   path: string;
+  matchMode?: 'exact' | 'prefix';
   enabled: boolean;
   assetId: string | null;
   minMs: number;
@@ -32,13 +33,39 @@ function normalizePathForRules(pathname: string): { raw: string; canonical: stri
   return { raw, canonical: raw };
 }
 
-function resolveRuleForPath(ruleIndex: Map<string, LoadingRule>, raw: string, canonical: string): LoadingRule | null {
-  const direct = ruleIndex.get(raw) ?? ruleIndex.get(canonical);
-  if (direct) return direct;
-  const global = ruleIndex.get('/');
-  if (global) return global;
+function normalizeMatchMode(v: any): 'exact' | 'prefix' {
+  return v === 'prefix' ? 'prefix' : 'exact';
+}
+
+function isPrefixMatch(rulePath: string, targetPath: string): boolean {
+  if (!rulePath) return false;
+  if (rulePath === '/') return true;
+  if (targetPath === rulePath) return true;
+  return targetPath.startsWith(rulePath.endsWith('/') ? rulePath : `${rulePath}/`);
+}
+
+function resolveRuleForPath(rules: LoadingRule[], raw: string, canonical: string): LoadingRule | null {
+  const exact = rules.find((r) => r?.enabled && typeof r.path === 'string' && normalizeMatchMode(r.matchMode) === 'exact' && (r.path === raw || r.path === canonical));
+  if (exact) return exact;
+
+  let best: LoadingRule | null = null;
+  let bestLen = -1;
+  for (const r of rules) {
+    if (!r?.enabled || typeof r.path !== 'string') continue;
+    if (normalizeMatchMode(r.matchMode) !== 'prefix') continue;
+    const p = r.path;
+    if (isPrefixMatch(p, raw) || isPrefixMatch(p, canonical)) {
+      const len = p.length;
+      if (len > bestLen) {
+        best = r;
+        bestLen = len;
+      }
+    }
+  }
+  if (best) return best;
+
   if (canonical === '/:locale') {
-    const localeRoot = ruleIndex.get('/:locale');
+    const localeRoot = rules.find((r) => r?.enabled && typeof r.path === 'string' && r.path === '/:locale');
     if (localeRoot) return localeRoot;
   }
   return null;
@@ -78,13 +105,7 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
     return () => ch.close();
   }, []);
 
-  const ruleIndex = useMemo(() => {
-    const map = new Map<string, LoadingRule>();
-    for (const r of settings?.rules ?? []) {
-      if (r && typeof r.path === 'string') map.set(r.path, r);
-    }
-    return map;
-  }, [settings]);
+  const rules = useMemo(() => (settings?.rules ?? []) as LoadingRule[], [settings]);
 
   const assetIndex = useMemo(() => {
     const map = new Map<string, LoadingAsset>();
@@ -95,7 +116,7 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
   }, [settings]);
 
   const { raw, canonical } = normalizePathForRules(pathname);
-  const rule = settings?.enabled ? resolveRuleForPath(ruleIndex, raw, canonical) : null;
+  const rule = settings?.enabled ? resolveRuleForPath(rules, raw, canonical) : null;
   const assetId = rule?.enabled ? (rule.assetId ?? settings?.defaultAssetId ?? null) : null;
   const asset = assetId ? assetIndex.get(assetId) : null;
 

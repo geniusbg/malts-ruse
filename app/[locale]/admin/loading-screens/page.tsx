@@ -20,6 +20,7 @@ type LoadingAsset = {
 type LoadingRule = {
   id: string;
   path: string;
+  matchMode?: 'exact' | 'prefix';
   enabled: boolean;
   assetId: string | null;
   minMs: number;
@@ -339,7 +340,7 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
             <div>
               <h2 className="text-xl font-bold text-[var(--malts-ink)]">Rules (по път)</h2>
               <p className="malts-muted mt-1 text-sm">
-                Exact match по път. Можеш да избираш от автоматичния списък или да въведеш custom path.
+                Можеш да зададеш правило за точен път или за път + всички под-пътища (prefix).
               </p>
             </div>
             <button
@@ -349,6 +350,7 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                 const next: LoadingRule = {
                   id: uuid(),
                   path: '',
+                  matchMode: 'exact',
                   enabled: true,
                   assetId: settings.defaultAssetId ?? null,
                   minMs: 0,
@@ -407,6 +409,22 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                           />
                         </div>
                       </div>
+
+                      <label className="flex items-center gap-2 text-sm font-semibold">
+                        <input
+                          type="checkbox"
+                          checked={(r.matchMode ?? 'exact') === 'prefix'}
+                          onChange={(e) =>
+                            setSettings({
+                              ...settings,
+                              rules: settings.rules.map((x) =>
+                                x.id === r.id ? { ...x, matchMode: e.target.checked ? 'prefix' : 'exact' } : x
+                              ),
+                            })
+                          }
+                        />
+                        Важи и за под-пътища (prefix)
+                      </label>
 
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                         <div className="md:col-span-2">

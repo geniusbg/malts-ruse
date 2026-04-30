@@ -13,8 +13,10 @@ export type LoadingAsset = {
 
 export type LoadingRule = {
   id: string;
-  /** Canonical app path, e.g. "/:locale/order" or "/bg/order". Exact match. */
+  /** Canonical app path, e.g. "/:locale/order" or "/bg/order". */
   path: string;
+  /** "exact" = only this path, "prefix" = this path + all subpaths. */
+  matchMode?: 'exact' | 'prefix';
   enabled: boolean;
   assetId: string | null;
   minMs: number;
@@ -44,13 +46,20 @@ function asArray<T>(v: unknown): T[] {
 }
 
 function sanitizeSettings(row: any): LoadingUiSettings {
+  const rules = asArray<LoadingRule>(row.rules)
+    .filter(Boolean)
+    .map((r) => {
+      const matchMode: 'exact' | 'prefix' = r?.matchMode === 'prefix' ? 'prefix' : 'exact';
+      return { ...r, matchMode };
+    });
+
   return {
     id: row.id,
     brandId: row.brandId,
     enabled: Boolean(row.enabled),
     defaultAssetId: row.defaultAssetId ?? null,
     assets: asArray<LoadingAsset>(row.assets).filter(Boolean),
-    rules: asArray<LoadingRule>(row.rules).filter(Boolean),
+    rules,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

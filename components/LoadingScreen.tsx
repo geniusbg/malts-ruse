@@ -11,6 +11,8 @@ interface LoadingScreenProps {
   logoSize?: 'small' | 'medium' | 'large';
   /** 0-100: beer fill; omit = simulated progress. */
   progress?: number;
+  /** Changes force the media element to remount (restart). */
+  activationKey?: string | number;
   /** Optional admin-managed loading media. */
   assetUrl?: string;
   assetType?: 'image' | 'video';
@@ -24,14 +26,13 @@ export default function LoadingScreen({
   message,
   logoSize = 'large',
   progress,
+  activationKey,
   assetUrl,
   assetType,
   hideDefaultMedia = false,
 }: LoadingScreenProps) {
   useLockScroll(!inline);
   const [loaderSrc, setLoaderSrc] = useState('/beer-mug-loader.gif');
-  /** Нова стойност при всяко монтиране — рестартира GIF/видео вместо да „замръзне“ от предишен показ. */
-  const [mediaMountKey] = useState(() => Date.now());
 
   const [simulatedProgress, setSimulatedProgress] = useState(7);
 
@@ -79,13 +80,14 @@ export default function LoadingScreen({
 
   const media = (() => {
     const url = (assetUrl || '').trim();
+    const key = activationKey ?? `${url}:${loaderSrc}:${logoSize}`;
     if (!url) {
       if (hideDefaultMedia) {
         return <div className={`${gifSizeClasses[logoSize]}`} aria-hidden />;
       }
       return (
         <Image
-          key={mediaMountKey}
+          key={key}
           src={loaderSrc}
           alt="Loading"
           width={320}
@@ -103,7 +105,7 @@ export default function LoadingScreen({
     if (assetType === 'video' || /\.(mp4|webm)$/i.test(url)) {
       return (
         <video
-          key={mediaMountKey}
+          key={key}
           className={`${gifSizeClasses[logoSize]} object-contain block`}
           src={url}
           muted
@@ -116,7 +118,7 @@ export default function LoadingScreen({
 
     return (
       <Image
-        key={mediaMountKey}
+        key={key}
         src={url}
         alt="Loading"
         width={320}

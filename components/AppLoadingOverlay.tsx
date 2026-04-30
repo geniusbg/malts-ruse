@@ -10,6 +10,7 @@ type LoadingAsset = { id: string; name: string; url: string; type: LoadingAssetT
 type LoadingRule = {
   id: string;
   path: string;
+  matchMode?: 'exact' | 'prefix';
   enabled: boolean;
   assetId: string | null;
   minMs: number;
@@ -39,18 +40,42 @@ function clampMs(v: any, fallback: number): number {
   return Math.min(60_000, Math.round(n));
 }
 
-function resolveRuleForPath(ruleIndex: Map<string, LoadingRule>, raw: string, canonical: string): LoadingRule | null {
-  // Exact matches first
-  const direct = ruleIndex.get(raw) ?? ruleIndex.get(canonical);
-  if (direct) return direct;
+function normalizeMatchMode(v: any): 'exact' | 'prefix' {
+  return v === 'prefix' ? 'prefix' : 'exact';
+}
 
-  // Special case: "/" means "all routes"
-  const global = ruleIndex.get('/');
-  if (global) return global;
+function isPrefixMatch(rulePath: string, targetPath: string): boolean {
+  if (!rulePath) return false;
+  if (rulePath === '/') return true;
+  if (targetPath === rulePath) return true;
+  return targetPath.startsWith(rulePath.endsWith('/') ? rulePath : `${rulePath}/`);
+}
 
-  // Special case: locale root ("/bg") is commonly treated as "/"
+function resolveRuleForPath(rules: LoadingRule[], raw: string, canonical: string): LoadingRule | null {
+  // Exact matches first (raw, then canonical)
+  const exact = rules.find((r) => r?.enabled && typeof r.path === 'string' && normalizeMatchMode(r.matchMode) === 'exact' && (r.path === raw || r.path === canonical));
+  if (exact) return exact;
+
+  // Prefix matches: pick the most specific (longest path) among raw/canonical matches.
+  let best: LoadingRule | null = null;
+  let bestLen = -1;
+  for (const r of rules) {
+    if (!r?.enabled || typeof r.path !== 'string') continue;
+    if (normalizeMatchMode(r.matchMode) !== 'prefix') continue;
+    const p = r.path;
+    if (isPrefixMatch(p, raw) || isPrefixMatch(p, canonical)) {
+      const len = p.length;
+      if (len > bestLen) {
+        best = r;
+        bestLen = len;
+      }
+    }
+  }
+  if (best) return best;
+
+  // Back-compat: if canonical locale root, allow "/:locale" exact rule even without matchMode.
   if (canonical === '/:locale') {
-    const localeRoot = ruleIndex.get('/:locale');
+    const localeRoot = rules.find((r) => r?.enabled && typeof r.path === 'string' && r.path === '/:locale');
     if (localeRoot) return localeRoot;
   }
 
@@ -64,6 +89,7 @@ export default function AppLoadingOverlay() {
   const [activeAssetUrl, setActiveAssetUrl] = useState<string | null>(null);
   const [activeAssetType, setActiveAssetType] = useState<LoadingAssetType | null>(null);
   const [progress, setProgress] = useState<number>(0);
+  const [activationKey, setActivationKey] = useState(0);
 
   const startAtRef = useRef<number>(0);
   const minMsRef = useRef<number>(0);
@@ -73,6 +99,7 @@ export default function AppLoadingOverlay() {
   const pendingTargetRef = useRef<string | null>(null);
   const lastAppliedPathRef = useRef<string | null>(null);
   const lastStartKeyRef = useRef<string | null>(null);
+  // Keep previous simple behavior: apply route rules on initial mount too.
 
   useEffect(() => {
     let cancelled = false;
@@ -108,13 +135,7 @@ export default function AppLoadingOverlay() {
     return () => ch.close();
   }, []);
 
-  const ruleIndex = useMemo(() => {
-    const map = new Map<string, LoadingRule>();
-    for (const r of settings?.rules ?? []) {
-      if (r && typeof r.path === 'string') map.set(r.path, r);
-    }
-    return map;
-  }, [settings]);
+  const rules = useMemo(() => (settings?.rules ?? []) as LoadingRule[], [settings]);
 
   const assetIndex = useMemo(() => {
     const map = new Map<string, LoadingAsset>();
@@ -149,6 +170,7 @@ export default function AppLoadingOverlay() {
     setActiveAssetUrl(asset?.url ?? null);
     setActiveAssetType(asset?.type ?? null);
     setProgress(0);
+    setActivationKey((k) => k + 1);
     setActive(true);
 
     const tick = () => {
@@ -176,7 +198,7 @@ export default function AppLoadingOverlay() {
     if (!settings?.enabled) return;
 
     const { raw, canonical } = normalizePathForRules(targetPath);
-    const rule = resolveRuleForPath(ruleIndex, raw, canonical);
+    const rule = resolveRuleForPath(rules, raw, canonical);
     if (!rule || !rule.enabled) return;
 
     const assetId = rule.assetId ?? settings.defaultAssetId;
@@ -184,14 +206,14 @@ export default function AppLoadingOverlay() {
 
     pendingTargetRef.current = raw;
     startOverlay(rule, asset, 'link', `link:${raw}`);
-  }, [assetIndex, ruleIndex, settings]);
+  }, [assetIndex, rules, settings]);
 
   // Apply rules reliably on route changes (works for router.push, back/forward, direct loads).
   useEffect(() => {
     if (!settings?.enabled) return;
 
     const { raw, canonical } = normalizePathForRules(pathname);
-    const rule = resolveRuleForPath(ruleIndex, raw, canonical);
+    const rule = resolveRuleForPath(rules, raw, canonical);
     if (!rule || !rule.enabled) {
       lastAppliedPathRef.current = null;
       return;
@@ -214,7 +236,7 @@ export default function AppLoadingOverlay() {
         rafRef.current = null;
       }
     };
-  }, [pathname, settings, ruleIndex, assetIndex]);
+  }, [pathname, settings, rules, assetIndex]);
 
   useEffect(() => {
     // Hide logic: when the route commit happens (pathname changes), keep overlay
@@ -272,7 +294,7 @@ export default function AppLoadingOverlay() {
 
     document.addEventListener('click', onClickCapture, true);
     return () => document.removeEventListener('click', onClickCapture, true);
-  }, [settings, ruleIndex, assetIndex, startForTarget]);
+  }, [settings, rules, assetIndex, startForTarget]);
 
   if (!active) return null;
 
@@ -280,6 +302,7 @@ export default function AppLoadingOverlay() {
     <LoadingScreen
       locale={pathname.split('/')[1] || 'bg'}
       progress={progress}
+      activationKey={activationKey}
       assetUrl={activeAssetUrl ?? undefined}
       assetType={activeAssetType ?? undefined}
       hideDefaultMedia
