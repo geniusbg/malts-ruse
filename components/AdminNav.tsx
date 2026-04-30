@@ -24,6 +24,10 @@ function buildNavLinks(locale: string, isSuper: boolean) {
       href: `/${locale}/admin/operational-settings`,
       label: '⚙️ Оперативни',
     });
+    links.splice(links.length - 1, 0, {
+      href: `/${locale}/admin/backups`,
+      label: '🗄️ Backups',
+    });
   }
   return links;
 }
@@ -43,6 +47,22 @@ export default function AdminNav({ locale }: AdminNavProps) {
   if (pathname?.includes('/login')) {
     return null;
   }
+
+  const clearNextAuthCookies = () => {
+    // Middleware checks both secureCookie true/false; in some setups one cookie can survive,
+    // causing a "bounce" back to login once after switching users.
+    const names = [
+      '__Secure-next-auth.session-token',
+      'next-auth.session-token',
+      '__Host-next-auth.csrf-token',
+      'next-auth.csrf-token',
+      'next-auth.callback-url',
+      '__Secure-next-auth.callback-url',
+    ];
+    for (const name of names) {
+      document.cookie = `${name}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+    }
+  };
 
   const isSuper = (session?.user as { role?: string })?.role === 'SUPER_ADMIN';
   const navLinks = buildNavLinks(locale, isSuper);
@@ -64,6 +84,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
   const handleLogout = async () => {
     // Sign out without NextAuth redirect
     await signOut({ redirect: false });
+    clearNextAuthCookies();
 
     // Manually redirect to login using current origin
     const currentOrigin = window.location.origin;
@@ -217,9 +238,12 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 setMobileMenuOpen(false);
                 setShowLogoutConfirm(true);
               }}
-              className="block w-full text-left py-3 px-4 text-[var(--malts-danger)] transition-colors font-semibold"
+              className="malts-admin-nav-tab block w-full py-4 px-4 rounded-2xl transition-colors mb-2 text-[var(--malts-danger)] hover:bg-[var(--malts-accent-tint)]"
             >
-              🚪 Изход
+              <span className="flex flex-col items-center justify-center gap-1 leading-tight">
+                <span className="text-2xl leading-none" aria-hidden>🚪</span>
+                <span className="malts-admin-nav-tab-label">Изход</span>
+              </span>
             </button>
           </div>
         )}

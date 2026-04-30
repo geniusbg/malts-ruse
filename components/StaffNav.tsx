@@ -22,8 +22,23 @@ export default function StaffNav({ locale }: StaffNavProps) {
     return null;
   }
 
+  const clearNextAuthCookies = () => {
+    const names = [
+      '__Secure-next-auth.session-token',
+      'next-auth.session-token',
+      '__Host-next-auth.csrf-token',
+      'next-auth.csrf-token',
+      'next-auth.callback-url',
+      '__Secure-next-auth.callback-url',
+    ];
+    for (const name of names) {
+      document.cookie = `${name}=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+    }
+  };
+
   const handleLogout = async () => {
     await signOut({ redirect: false });
+    clearNextAuthCookies();
 
     const currentOrigin = window.location.origin;
     const loginUrl = `${currentOrigin}/${locale}/staff/login`;
