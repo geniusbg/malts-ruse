@@ -17,6 +17,7 @@
 
   --malts-accent: #b0162f;
   --malts-accent-hover: #921226;
+  --malts-accent-contrast: #f5f0e6;
   --malts-accent-tint: rgba(176, 22, 47, 0.1);
   --malts-accent-tint-border: rgba(176, 22, 47, 0.25);
 
@@ -244,7 +245,7 @@ select option {
 
 .malts-btn-primary {
   background: var(--malts-accent);
-  color: #f5f0e6;
+  color: var(--malts-accent-contrast);
   border-radius: 14px;
   transition: background-color 0.2s ease;
   font-family: var(--font-malts-buttons), 'Inter', system-ui, -apple-system, sans-serif;

@@ -1,10 +1,8 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 import AdminNav from '@/components/AdminNav';
 import ServiceWorkerUpdater from '@/components/ServiceWorkerUpdater';
 import GlobalApprovalsBanner from '@/components/GlobalApprovalsBanner';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { Metadata } from 'next';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -20,6 +18,16 @@ export const metadata: Metadata = {
     title: "Malt's Admin"
   }
 };
+
+export async function generateViewport() {
+  const appearance = await getBrandAppearanceSettings().catch(() => null);
+  const themeColor = (appearance?.themeColor || '').trim() || '#e8e0d4';
+  return {
+    themeColor,
+    width: 'device-width',
+    initialScale: 1,
+  };
+}
 
 export default async function AdminLayout({ children, params }: AdminLayoutProps) {
   const { locale } = await params;

@@ -840,7 +840,7 @@ export default function QRCodesPage() {
           <button
             onClick={() => generateQRCodes(false)}
             disabled={loading}
-            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
+            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
           >
             {loading ? 'Генериране...' : generated ? '🔄 Регенерирай' : '✨ Генерирай'}
           </button>
@@ -854,7 +854,7 @@ export default function QRCodesPage() {
                   setQrExportModal('pdf');
                 }}
                 disabled={loading}
-                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
+                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
               >
                 {loading ? 'Изтегляне...' : '⬇️ Изтегли PDF'}
               </button>
@@ -865,7 +865,7 @@ export default function QRCodesPage() {
                   setQrExportAlert(null);
                   setQrExportModal('print');
                 }}
-                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--malts-accent)] active:!text-[#f5f0e6] active:!border-[var(--malts-accent)]"
+                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
               >
                 🖨️ Принтирай
               </button>
@@ -1924,7 +1924,7 @@ export default function QRCodesPage() {
                               onClick={() => setFilterStatus('all')}
                               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                                 filterStatus === 'all'
-                                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                                   : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
                               }`}
                             >

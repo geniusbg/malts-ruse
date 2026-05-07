@@ -257,10 +257,20 @@ function getDeviceName() {
 // Show test notification
 export async function showTestNotification() {
   if (Notification.permission === 'granted') {
+    let icon = '/malts-logo-hero.webp';
+    try {
+      const res = await fetch('/api/brand-appearance', { cache: 'no-store' });
+      const data = (await res.json().catch(() => ({}))) as any;
+      const s = data?.settings ?? null;
+      const candidate = (s?.appIconUrl || s?.heroLogoUrl || '').toString().trim();
+      if (candidate) icon = candidate;
+    } catch {
+      // ignore
+    }
     new Notification('Malts Test', {
       body: 'Notifications are working! 🎉',
-      icon: '/malts-logo-hero.webp',
-      badge: '/malts-logo-hero.webp',
+      icon,
+      badge: icon,
       vibrate: [200, 100, 200]
     } as NotificationOptions & { vibrate?: number[] });
   }

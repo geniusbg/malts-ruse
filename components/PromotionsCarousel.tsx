@@ -135,7 +135,7 @@ export default function PromotionsCarousel({
                     href={`/${locale}/menu?category=${encodeURIComponent(categorySlug)}&product=${encodeURIComponent(productParamForUrl(p as any))}`}
                     className="group malts-card rounded-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block relative"
                   >
-                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
+                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
                       {badge}
                     </div>
 

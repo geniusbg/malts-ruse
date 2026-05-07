@@ -10,9 +10,7 @@ const urlsToCache = [
   '/bg',
   // Loader media (helps Safari show instantly)
   '/beer-mug-loader.gif',
-  '/beer-mug-loader.png',
-  // Push icon (new default)
-  '/malts-logo-hero.webp'
+  '/beer-mug-loader.png'
 ];
 
 // Listen for messages from clients (e.g., version requests, skip waiting)
@@ -447,8 +445,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'Malts',
     body: 'Ново известие',
-    icon: '/malts-logo-hero.webp',
-    badge: '/malts-logo-hero.webp',
+    icon: '/apple-touch-icon.png',
+    badge: '/apple-touch-icon.png',
     tag: 'malts-notification-' + Date.now(),
     vibrate: [200, 100, 200, 100, 200],
     requireInteraction: true,
@@ -477,8 +475,8 @@ self.addEventListener('push', (event) => {
 
   const notificationOptions = {
     body: data.body,
-    icon: data.icon || '/malts-logo-hero.webp',
-    badge: data.badge || '/malts-logo-hero.webp',
+    icon: data.icon || '/apple-touch-icon.png',
+    badge: data.badge || '/apple-touch-icon.png',
     tag: data.tag,
     vibrate: data.vibrate,
     requireInteraction: data.requireInteraction,

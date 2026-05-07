@@ -161,12 +161,12 @@ export default function AdminProductsPage() {
             depth === 0
               ? `rounded-lg px-3 py-2 text-sm font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                    ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                     : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
                 }`
               : `rounded-lg px-3 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
+                    ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                     : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
                 }`;
 
@@ -257,7 +257,7 @@ export default function AdminProductsPage() {
               onClick={() => setVisibilityFilter('all')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'all'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
               }`}
             >
@@ -268,7 +268,7 @@ export default function AdminProductsPage() {
               onClick={() => setVisibilityFilter('visible')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'visible'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
               }`}
             >
@@ -279,7 +279,7 @@ export default function AdminProductsPage() {
               onClick={() => setVisibilityFilter('hidden')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'hidden'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
               }`}
             >

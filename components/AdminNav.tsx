@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ConfirmModal from '@/components/ConfirmModal';
+import { useBrandAppearance } from '@/lib/use-brand-appearance';
 
 function buildNavLinks(locale: string, isSuper: boolean) {
   const links = [
@@ -25,6 +26,10 @@ function buildNavLinks(locale: string, isSuper: boolean) {
       label: '⚙️ Оперативни',
     });
     links.splice(links.length - 1, 0, {
+      href: `/${locale}/admin/branding`,
+      label: '🎨 Branding',
+    });
+    links.splice(links.length - 1, 0, {
       href: `/${locale}/admin/backups`,
       label: '🗄️ Backups',
     });
@@ -42,6 +47,8 @@ export default function AdminNav({ locale }: AdminNavProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const appearance = useBrandAppearance();
+  const navLogoSrc = appearance?.navLogoUrl || '/malts-logo-nav.webp';
 
   // Don't show nav on login page
   if (pathname?.includes('/login')) {
@@ -103,7 +110,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
             className="flex h-12 max-h-12 min-w-0 shrink-0 items-center md:h-14 md:max-h-14 xl:h-[4.25rem] xl:max-h-[4.25rem] 2xl:h-20 2xl:max-h-20"
           >
             <Image
-              src="/malts-logo-nav.webp"
+              src={navLogoSrc}
               alt="Malt's"
               width={400}
               height={331}
@@ -126,7 +133,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                   title={link.label.trim()}
                   className={`malts-admin-nav-tab shrink-0 rounded-lg px-1 py-1 transition-colors md:rounded-xl md:px-1.5 md:py-1.5 xl:rounded-2xl xl:px-3 xl:py-2 2xl:px-4 2xl:py-3 ${
                     isActive(link.href)
-                      ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                      ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                       : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
                   }`}
                 >
@@ -156,7 +163,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-1.5 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] px-1.5 py-1 transition-colors hover:bg-[var(--malts-card-hover)] md:rounded-xl md:px-2 md:py-1.5 xl:px-3 xl:py-2"
               >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--malts-accent)] text-sm font-bold text-[#f5f0e6] md:h-7 md:w-7">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--malts-accent)] text-sm font-bold text-[var(--malts-accent-contrast)] md:h-7 md:w-7">
                   {(session?.user as any)?.name?.[0] || 'A'}
                 </div>
                 <span className="text-[var(--malts-ink)] text-sm font-medium hidden xl:block">
@@ -221,7 +228,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`malts-admin-nav-tab block py-4 px-4 rounded-2xl transition-colors mb-2 ${
                   isActive(link.href)
-                    ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                    ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                     : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
                 }`}
               >

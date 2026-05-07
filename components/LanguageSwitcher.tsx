@@ -40,7 +40,7 @@ export default function LanguageSwitcher() {
           onClick={() => switchLocale(locale)}
           className={`px-3 py-1 rounded-md transition-all malts-lang-font ${
             currentLocale === locale
-              ? 'bg-[var(--malts-accent)] text-[#f5f0e6] font-semibold'
+              ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] font-semibold'
               : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
           }`}
         >

@@ -36,6 +36,7 @@ model Brand {
   menuSettings          MenuSettings[]
   promotionsUiSettings  PromotionsUiSettings?
   loadingUiSettings     LoadingUiSettings?
+  appearanceSettings    BrandAppearanceSettings?
   operationalSettings   OperationalSettings?
   operationalAuditLogs  OperationalSettingsAuditLog[]
   staffTableAssignments StaffTableAssignment[]
@@ -567,6 +568,46 @@ model LoadingUiSettings {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("loading_ui_settings")
+}
+
+/// Per-brand appearance (theme tokens + logos). Managed via SUPER_ADMIN UI.
+model BrandAppearanceSettings {
+  id        String   @id @default(uuid())
+  brandId   String   @unique @map("brand_id")
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  // Core theme tokens (nullable = fallback to defaults in app/globals.css)
+  paper     String?  @map("paper")
+  ink       String?  @map("ink")
+  muted     String?  @map("muted")
+  subtle    String?  @map("subtle")
+  card      String?  @map("card")
+  cardHover String?  @map("card_hover")
+  inset     String?  @map("inset")
+  hairline  String?  @map("hairline")
+
+  accent         String? @map("accent")
+  accentHover    String? @map("accent_hover")
+  accentContrast String? @map("accent_contrast")
+
+  success String? @map("success")
+  warning String? @map("warning")
+  danger  String? @map("danger")
+  info    String? @map("info")
+
+  // Browser / PWA UI
+  themeColor String? @map("theme_color")
+
+  // Logos / icons (URLs)
+  navLogoUrl  String? @map("nav_logo_url")
+  heroLogoUrl String? @map("hero_logo_url")
+  appIconUrl  String? @map("app_icon_url")
+  faviconUrl  String? @map("favicon_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("brand_appearance_settings")
 }
 
 /// Per-brand toggles: max QR tables, ordering, waiter call (super admin).

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ConfirmModal from '@/components/ConfirmModal';
+import { useBrandAppearance } from '@/lib/use-brand-appearance';
 
 interface StaffNavProps {
   locale: string;
@@ -16,6 +17,8 @@ export default function StaffNav({ locale }: StaffNavProps) {
   const { data: session } = useSession();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const appearance = useBrandAppearance();
+  const navLogoSrc = appearance?.navLogoUrl || '/malts-logo-nav.webp';
 
   // Don't show nav on login page
   if (pathname?.includes('/login')) {
@@ -53,7 +56,7 @@ export default function StaffNav({ locale }: StaffNavProps) {
           {/* Logo/Title */}
           <Link href={`/${locale}/staff`} className="flex h-16 max-h-16 items-center gap-3 sm:max-h-20">
             <Image
-              src="/malts-logo-nav.webp"
+              src={navLogoSrc}
               alt="Malt's"
               width={400}
               height={331}
@@ -70,7 +73,7 @@ export default function StaffNav({ locale }: StaffNavProps) {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)] transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[#f5f0e6] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] flex items-center justify-center font-bold">
                 {(session?.user as any)?.name?.[0] || 'S'}
               </div>
               <span className="text-[var(--malts-ink)] font-medium hidden sm:block">

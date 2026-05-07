@@ -212,7 +212,7 @@ export default function WorkingHoursPage({
           >
             {saving ? (
               <>
-                <div className="w-5 h-5 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                 <span>{locale === 'bg' ? 'Запазване...' : locale === 'en' ? 'Saving...' : 'Speichern...'}</span>
               </>
             ) : (

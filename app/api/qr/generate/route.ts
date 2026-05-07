@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { getDefaultBrandId } from '@/lib/brand';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 import { generateQRCodeWithTableNumber, type QrMatrixSettings } from '@/lib/qr-code-table-svg';
 
 function requireAdmin(role: string | undefined) {

@@ -4,7 +4,7 @@ import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import BrandedHeroLogo from '@/components/BrandedHeroLogo';
 import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 const backToSiteLabel: Record<string, string> = {
   bg: 'Назад към сайта',
@@ -96,9 +96,7 @@ export default function AdminLoginPage() {
         <div className="malts-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center">
-              <Image
-                src="/malts-logo-hero.webp"
-                alt="Malt's"
+              <BrandedHeroLogo
                 width={834}
                 height={812}
                 sizes="(max-width: 768px) 90vw, 380px"

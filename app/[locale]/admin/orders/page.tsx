@@ -893,7 +893,7 @@ function AdminOrdersPageContent() {
             onClick={() => setActiveTab('active')}
             className={`flex-shrink-0 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base whitespace-nowrap ${
               activeTab === 'active'
-                ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                 : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
             }`}
           >
@@ -903,7 +903,7 @@ function AdminOrdersPageContent() {
             onClick={() => setActiveTab('history')}
             className={`flex-shrink-0 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base whitespace-nowrap ${
               activeTab === 'history'
-                ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                 : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
             }`}
           >
@@ -913,7 +913,7 @@ function AdminOrdersPageContent() {
             onClick={() => setActiveTab('stats')}
             className={`flex-shrink-0 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base whitespace-nowrap ${
               activeTab === 'stats'
-                ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                 : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
             }`}
           >
@@ -923,13 +923,13 @@ function AdminOrdersPageContent() {
             onClick={() => setActiveTab('approvals')}
             className={`flex-shrink-0 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base whitespace-nowrap relative ${
               activeTab === 'approvals'
-                ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                 : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
             }`}
           >
             ⚠️ Одобрения
             {pendingApprovals.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[var(--malts-danger)] text-[#f5f0e6] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+              <span className="absolute -top-1 -right-1 bg-[var(--malts-danger)] text-[var(--malts-accent-contrast)] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                 {pendingApprovals.length}
               </span>
             )}
@@ -1061,7 +1061,7 @@ function AdminOrdersPageContent() {
                           className="px-3 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                         >
                           {updatingStatus[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             '✓ Завърши'
                           )}

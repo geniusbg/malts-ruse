@@ -1,7 +1,5 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { Metadata } from 'next';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
 
 export const metadata: Metadata = {
   title: 'Malts Staff Dashboard',
@@ -13,11 +11,15 @@ export const metadata: Metadata = {
   }
 };
 
-export const viewport = {
-  themeColor: '#e8e0d4',
-  width: 'device-width',
-  initialScale: 1
-};
+export async function generateViewport() {
+  const appearance = await getBrandAppearanceSettings().catch(() => null);
+  const themeColor = (appearance?.themeColor || '').trim() || '#e8e0d4';
+  return {
+    themeColor,
+    width: 'device-width',
+    initialScale: 1,
+  };
+}
 
 export default async function StaffLayout({
   children,

@@ -792,7 +792,7 @@ export default function StaffDashboard() {
                   {notifications.length > 1 && (
                     <div className={`absolute top-2 md:top-3 right-2 md:right-3 px-2 md:px-3 py-1 rounded-full font-bold text-xs md:text-sm ${
                       notif.urgent
-                        ? 'bg-[rgba(245,240,230,0.25)] text-[#f5f0e6]'
+                        ? 'bg-[rgba(245,240,230,0.25)] text-[var(--malts-accent-contrast)]'
                         : 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]'
                     }`}>
                       {index + 1}/{notifications.length}
@@ -805,13 +805,13 @@ export default function StaffDashboard() {
                         {notif.type === 'order' ? '🔔' : '🚨'}
                       </div>
                       <h3 className={`font-bold leading-tight flex-1 ${
-                        notif.urgent ? 'text-[#f5f0e6]' : 'text-[var(--malts-ink)]'
+                        notif.urgent ? 'text-[var(--malts-accent-contrast)]' : 'text-[var(--malts-ink)]'
                       } text-base md:text-2xl`}>
                         {notif.title}
                       </h3>
                     </div>
                     <p className={`font-semibold leading-tight ${
-                      notif.urgent ? 'text-[#f5f0e6]' : 'text-[var(--malts-ink)]'
+                      notif.urgent ? 'text-[var(--malts-accent-contrast)]' : 'text-[var(--malts-ink)]'
                     } text-sm md:text-lg`}>
                       {notif.message}
                     </p>
@@ -823,7 +823,7 @@ export default function StaffDashboard() {
                       className={`flex-1 rounded-lg font-bold transition-all shadow-lg px-4 py-3 text-base md:text-lg ${
                         notif.urgent 
                           ? 'bg-[rgba(245,240,230,0.92)] text-[var(--malts-danger)] hover:bg-[rgba(245,240,230,1)]' 
-                          : 'bg-[var(--malts-accent)] text-[#f5f0e6] hover:bg-[var(--malts-accent-hover)]'
+                          : 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] hover:bg-[var(--malts-accent-hover)]'
                       }`}
                     >
                       ✓ OK
@@ -834,7 +834,7 @@ export default function StaffDashboard() {
                         onClick={() => setNotifications([])}
                         className={`rounded-lg font-bold transition-all whitespace-nowrap px-3 py-3 text-sm md:text-base ${
                           notif.urgent 
-                            ? 'bg-[rgba(245,240,230,0.22)] text-[#f5f0e6] hover:bg-[rgba(245,240,230,0.30)]' 
+                            ? 'bg-[rgba(245,240,230,0.22)] text-[var(--malts-accent-contrast)] hover:bg-[rgba(245,240,230,0.30)]' 
                             : 'bg-[var(--malts-accent-tint)] text-[var(--malts-ink)] border border-[var(--malts-accent-tint-border)]'
                         }`}
                       >
@@ -902,7 +902,7 @@ export default function StaffDashboard() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 px-4 py-3 bg-[var(--malts-card)] rounded-xl hover:bg-[var(--malts-card-hover)] transition-colors border border-[var(--malts-hairline)]"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[#f5f0e6] flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] flex items-center justify-center font-bold">
                     {(session?.user as any)?.name?.[0] || 'S'}
                   </div>
                   <span className="text-[var(--malts-ink)] font-medium hidden lg:block">
@@ -972,7 +972,7 @@ export default function StaffDashboard() {
               className="w-full flex items-center gap-2 px-4 py-3 bg-[var(--malts-card)] rounded-xl hover:bg-[var(--malts-card-hover)] transition-colors border border-[var(--malts-hairline)] justify-between"
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[#f5f0e6] flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] flex items-center justify-center font-bold">
                   {(session?.user as any)?.name?.[0] || 'S'}
                 </div>
                 <span className="text-[var(--malts-ink)] font-medium">
@@ -1036,7 +1036,7 @@ export default function StaffDashboard() {
               onClick={() => setCallsTab('active')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 callsTab === 'active'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
               }`}
             >
@@ -1046,7 +1046,7 @@ export default function StaffDashboard() {
               onClick={() => setCallsTab('completed')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 callsTab === 'completed'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
               }`}
             >
@@ -1096,7 +1096,7 @@ export default function StaffDashboard() {
                     >
                       {loadingActions[call.id] ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           <span className="hidden sm:inline">...</span>
                         </>
                       ) : (
@@ -1110,7 +1110,7 @@ export default function StaffDashboard() {
                     >
                       {loadingActions[`complete_${call.id}`] ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           <span className="hidden sm:inline">...</span>
                         </>
                       ) : (
@@ -1127,7 +1127,7 @@ export default function StaffDashboard() {
                   >
                     {loadingActions[`complete_${call.id}`] ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                         <span className="hidden sm:inline">...</span>
                       </>
                     ) : (
@@ -1198,7 +1198,7 @@ export default function StaffDashboard() {
               onClick={() => setOrdersTab('active')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 ordersTab === 'active'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
               }`}
             >
@@ -1208,7 +1208,7 @@ export default function StaffDashboard() {
               onClick={() => setOrdersTab('completed')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 ordersTab === 'completed'
-                  ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                   : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
               }`}
             >
@@ -1281,7 +1281,7 @@ export default function StaffDashboard() {
                           className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             <span>Приготвяме</span>
                           )}
@@ -1303,7 +1303,7 @@ export default function StaffDashboard() {
                           className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             <span>Готова</span>
                           )}
@@ -1325,7 +1325,7 @@ export default function StaffDashboard() {
                           className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             '✓ Завърши'
                           )}

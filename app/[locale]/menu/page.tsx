@@ -411,18 +411,18 @@ function MenuPageContent() {
               depth === 0
                 ? `px-6 py-3 rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[var(--malts-accent)] text-[#f5f0e6] shadow-md scale-[1.02]'
+                      ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-md scale-[1.02]'
                       : 'bg-[rgba(245,240,230,0.85)] text-[var(--malts-ink)] hover:bg-[rgba(245,240,230,0.95)] border border-[var(--malts-hairline)] shadow-sm'
                   }`
                 : tierStyle1
                   ? `px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap text-sm ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6] border-2 border-[var(--malts-accent)]'
+                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] border-2 border-[var(--malts-accent)]'
                         : 'bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)]'
                     }`
                   : `px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6]'
+                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                         : 'bg-amber-50/90 text-[var(--malts-ink)] border border-amber-200/80'
                     }`;
 
@@ -574,7 +574,7 @@ function MenuPageContent() {
                     <div className="h-1.5 w-full bg-gradient-to-r from-[var(--malts-accent)] to-amber-600/90" aria-hidden />
                   )}
                   {product.isPromoted && (
-                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
                       {product.promotionLabel?.trim()
                         ? product.promotionLabel
                         : locale === 'bg'
@@ -586,7 +586,7 @@ function MenuPageContent() {
                   )}
                   {/* Unavailable Badge */}
                   {!product.isAvailable && (
-                    <div className="absolute top-3 right-3 bg-[var(--malts-danger)] text-[#f5f0e6] px-3 py-1.5 rounded-full text-xs font-bold z-10 shadow-lg">
+                    <div className="absolute top-3 right-3 bg-[var(--malts-danger)] text-[var(--malts-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold z-10 shadow-lg">
                       {locale === 'bg' ? '✕ Не е наличен' : 
                        locale === 'en' ? '✕ Unavailable' : 
                        '✕ Indisponibil'}

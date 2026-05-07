@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useBrandAppearance } from '@/lib/use-brand-appearance';
 
 // Translations
 const translations: Record<string, Record<string, string>> = {
@@ -32,6 +33,8 @@ export default function Navigation() {
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'bg';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const appearance = useBrandAppearance();
+  const navLogoSrc = appearance?.navLogoUrl || '/malts-logo-nav.webp';
 
   const t = translations[locale] || translations.bg;
 
@@ -82,7 +85,7 @@ export default function Navigation() {
               className="flex h-16 max-h-16 shrink-0 items-center sm:h-20 sm:max-h-20"
             >
               <Image
-                src="/malts-logo-nav.webp"
+                src={navLogoSrc}
                 alt="Malt's"
                 width={400}
                 height={331}

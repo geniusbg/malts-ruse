@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getHomepageSettings, updateHomepageSettings, getHomepageOfferingCards } from '@/lib/homepage-settings';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 
 // GET homepage settings (public - no auth required)
 export async function GET() {

@@ -213,7 +213,7 @@ export default async function EventDetailPage({
                       href={event.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-8 py-4 bg-[var(--malts-accent)] hover:opacity-95 text-[#f5f0e6] rounded-xl font-semibold transition-all text-center flex items-center justify-center gap-2 shadow-sm"
+                      className="px-8 py-4 bg-[var(--malts-accent)] hover:opacity-95 text-[var(--malts-accent-contrast)] rounded-xl font-semibold transition-all text-center flex items-center justify-center gap-2 shadow-sm"
                     >
                       {locale === 'bg' ? 'Към събитието' : locale === 'en' ? 'Go to event' : 'Către eveniment'}
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +232,7 @@ export default async function EventDetailPage({
                 <>
                   <Link
                     href={`/${locale}/menu`}
-                    className="px-8 py-4 bg-[var(--malts-accent)] hover:opacity-95 text-[#f5f0e6] rounded-xl font-semibold transition-all text-center shadow-sm"
+                    className="px-8 py-4 bg-[var(--malts-accent)] hover:opacity-95 text-[var(--malts-accent-contrast)] rounded-xl font-semibold transition-all text-center shadow-sm"
                   >
                     {locale === 'bg' ? 'Виж менюто' : locale === 'en' ? 'View menu' : 'Vezi meniul'}
                   </Link>

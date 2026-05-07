@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getLocationSettings, updateLocationSettings } from '@/lib/location-settings';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-options';
 
 // GET location settings (public - no auth required)
 export async function GET() {

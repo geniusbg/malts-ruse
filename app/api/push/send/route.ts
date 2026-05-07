@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { webpush } from '@/lib/web-push';
 import { getDefaultBrandId } from '@/lib/brand';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
 
 export async function POST(request: Request) {
   try {
@@ -101,6 +102,12 @@ export async function POST(request: Request) {
       });
     }
 
+    const appearance = await getBrandAppearanceSettings().catch(() => null);
+    const notificationIcon =
+      (appearance?.appIconUrl || '').trim() ||
+      (appearance?.heroLogoUrl || '').trim() ||
+      '/malts-logo-hero.webp';
+
     console.log(`📤 Sending push to ${filteredSubscriptions.length} devices...`);
 
     // Send push notifications
@@ -119,8 +126,8 @@ export async function POST(request: Request) {
           const payload = {
             title,
             body,
-            icon: '/malts-logo-hero.webp',
-            badge: '/malts-logo-hero.webp',
+            icon: notificationIcon,
+            badge: notificationIcon,
             url: url || '/bg/staff',
             tag: 'malts-notification',
             requireInteraction: true,

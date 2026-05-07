@@ -3,7 +3,7 @@
 import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import BrandedHeroLogo from '@/components/BrandedHeroLogo';
 import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
 
 export default function StaffLoginPage() {
@@ -64,9 +64,7 @@ export default function StaffLoginPage() {
         <div className="malts-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center">
-              <Image
-                src="/malts-logo-hero.webp"
-                alt="Malt's"
+              <BrandedHeroLogo
                 width={834}
                 height={812}
                 sizes="(max-width: 768px) 90vw, 340px"

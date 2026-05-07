@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useSearchParams, usePathname } from 'next/navigation';
 import Image from 'next/image';
+import BrandedHeroLogo from '@/components/BrandedHeroLogo';
 import Price from '@/components/Price';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Toast from '@/components/Toast';
@@ -1158,7 +1159,7 @@ function OrderPageContent() {
                   >
                     🛒 {locale === 'bg' ? 'Количка' : locale === 'en' ? 'Cart' : 'Coș'}
                     {cartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-[var(--malts-danger)] text-[#f5f0e6] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
+                      <span className="absolute -top-2 -right-2 bg-[var(--malts-danger)] text-[var(--malts-accent-contrast)] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
                         {cartCount}
                       </span>
                     )}
@@ -1185,23 +1186,23 @@ function OrderPageContent() {
                 ? depth === 0
                   ? `rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200 whitespace-nowrap sm:px-5 sm:py-3 sm:text-base ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[#f5f0e6] shadow-md ring-2 ring-[var(--malts-accent)]/30'
+                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-md ring-2 ring-[var(--malts-accent)]/30'
                         : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card-hover)]'
                     }`
                   : `rounded-lg px-3.5 py-2 text-sm font-semibold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[15px] ${
                       isActive
-                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-sm'
+                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-sm'
                         : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card-hover)]'
                     }`
                 : depth === 0
                   ? `rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm lg:rounded-xl lg:px-6 lg:py-3 lg:text-base ${
                       isActive
-                        ? 'scale-[1.02] bg-[var(--malts-accent)] text-[#f5f0e6] shadow-lg lg:scale-105'
+                        ? 'scale-[1.02] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-lg lg:scale-105'
                         : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
                     }`
                   : `rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-sm lg:rounded-lg lg:px-4 lg:py-2 ${
                       isActive
-                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[#f5f0e6]'
+                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
                         : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
                     }`;
 
@@ -1611,9 +1612,7 @@ function OrderPageContent() {
                               : 'Nu există produse în această categorie'}
                     </button>
                     <div className="mt-5 flex justify-center">
-                      <Image
-                        src="/malts-logo-hero.webp"
-                        alt="Malt's"
+                      <BrandedHeroLogo
                         width={320}
                         height={311}
                         className="malts-brand-filter h-auto w-[210px] max-w-[70vw] object-contain opacity-95"
@@ -1647,7 +1646,7 @@ function OrderPageContent() {
                             className="group relative malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent-tint-border)] hover:shadow-lg transition-all duration-300"
                           >
                             {product.isPromoted && (
-                              <div className="absolute top-3 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
+                              <div className="absolute top-3 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
                                 {product.promotionLabel?.trim()
                                   ? product.promotionLabel
                                   : locale === 'bg'
@@ -1855,7 +1854,7 @@ function OrderPageContent() {
                                   .filter(Boolean);
                                 return (
                                   <div key={p.id} className="group malts-card rounded-2xl overflow-hidden relative">
-                                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[#f5f0e6] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
                                       {p.promotionLabel?.trim()
                                         ? p.promotionLabel
                                         : locale === 'bg'
@@ -2298,7 +2297,7 @@ function OrderPageContent() {
                   >
                     {submitting ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-[#f5f0e6] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-5 h-5 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                         <span>{locale === 'bg' ? 'Изпращане...' : locale === 'en' ? 'Sending...' : 'Se trimite...'}</span>
                       </>
                     ) : (

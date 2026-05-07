@@ -12,6 +12,7 @@ import { eventCardImageUrl } from '@/lib/event-images';
 import { applyPromotionsToProductRow, indexActivePromotionsByProductId } from '@/lib/pricing';
 import { Rampart_One } from 'next/font/google';
 import { getPromotionsUiSettings } from '@/lib/promotions-ui-settings';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -48,11 +49,14 @@ export default async function HomePage({
   const locationSettings = await getLocationSettings();
 
   // Fetch homepage settings and cards
-  const [homepageSettings, homepageCards, promotionsUiSettings] = await Promise.all([
+  const [homepageSettings, homepageCards, promotionsUiSettings, brandAppearance] = await Promise.all([
     getHomepageSettings(),
     getHomepageOfferingCards(),
     getPromotionsUiSettings(),
+    getBrandAppearanceSettings().catch(() => null),
   ]);
+
+  const heroLogoSrc = (brandAppearance?.heroLogoUrl || '').trim() || '/malts-logo-hero.webp';
 
   const highlightsLabel =
     locale === 'bg'
@@ -334,7 +338,7 @@ export default async function HomePage({
             {/* Logo — glow clearance; леко нагоре и по-малък от преди */}
             <div className="-mt-1 mb-6 flex justify-center px-4 py-3 animate-fade-in md:-mt-2 md:mb-10 md:py-5">
               <Image
-                src="/malts-logo-hero.webp"
+                src={heroLogoSrc}
                 alt="Malt's"
                 width={834}
                 height={812}
@@ -346,7 +350,7 @@ export default async function HomePage({
 
             {/* Tagline — red frame + glow; един ред (размерът се смалява леко на тесен екран) */}
             <div className="mb-8 md:mb-12 flex justify-center px-3 py-6 md:py-8">
-              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[#f5f0e6] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
+              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[var(--malts-accent-contrast)] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
                 {moodText}
               </p>
             </div>
