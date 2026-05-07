@@ -42,7 +42,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
         <ServiceWorkerUpdater />
         <AdminNav locale={locale} />
         {/* Push all content below the fixed AdminNav (without adding extra space between banner and content). */}
-        <div className="pt-16 md:pt-20">
+        <div className="pt-16 md:pt-20 xl:pt-24 2xl:pt-28">
           <GlobalApprovalsBanner locale={locale} />
           <main className="px-4 pb-8 md:px-8">
             {children}
