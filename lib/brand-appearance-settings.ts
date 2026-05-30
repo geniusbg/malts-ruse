@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getDefaultBrandId } from '@/lib/brand';
+import { sanitizeGoogleFontsCssUrl } from '@/lib/brand-fonts';
 
 export type BrandAppearanceSettings = {
   id: string;
@@ -17,6 +18,7 @@ export type BrandAppearanceSettings = {
   accent: string | null;
   accentHover: string | null;
   accentContrast: string | null;
+  accentContrastHover: string | null;
 
   success: string | null;
   warning: string | null;
@@ -24,6 +26,15 @@ export type BrandAppearanceSettings = {
   info: string | null;
 
   themeColor: string | null;
+  siteTitle: string | null;
+  siteShortName: string | null;
+  siteDescription: string | null;
+
+  googleFontsCssUrl: string | null;
+  fontDisplayFamily: string | null;
+  fontButtonsFamily: string | null;
+  fontNavFamily: string | null;
+  fontBodyFamily: string | null;
 
   navLogoUrl: string | null;
   heroLogoUrl: string | null;
@@ -51,6 +62,7 @@ function sanitize(row: any): BrandAppearanceSettings {
     accent: row.accent ?? null,
     accentHover: row.accentHover ?? null,
     accentContrast: row.accentContrast ?? null,
+    accentContrastHover: row.accentContrastHover ?? null,
 
     success: row.success ?? null,
     warning: row.warning ?? null,
@@ -58,6 +70,15 @@ function sanitize(row: any): BrandAppearanceSettings {
     info: row.info ?? null,
 
     themeColor: row.themeColor ?? null,
+    siteTitle: row.siteTitle ?? null,
+    siteShortName: row.siteShortName ?? null,
+    siteDescription: row.siteDescription ?? null,
+
+    googleFontsCssUrl: row.googleFontsCssUrl ?? null,
+    fontDisplayFamily: row.fontDisplayFamily ?? null,
+    fontButtonsFamily: row.fontButtonsFamily ?? null,
+    fontNavFamily: row.fontNavFamily ?? null,
+    fontBodyFamily: row.fontBodyFamily ?? null,
 
     navLogoUrl: row.navLogoUrl ?? null,
     heroLogoUrl: row.heroLogoUrl ?? null,
@@ -100,11 +121,20 @@ type UpdateDto = Partial<
     | 'accent'
     | 'accentHover'
     | 'accentContrast'
+    | 'accentContrastHover'
     | 'success'
     | 'warning'
     | 'danger'
     | 'info'
     | 'themeColor'
+    | 'siteTitle'
+    | 'siteShortName'
+    | 'siteDescription'
+    | 'googleFontsCssUrl'
+    | 'fontDisplayFamily'
+    | 'fontButtonsFamily'
+    | 'fontNavFamily'
+    | 'fontBodyFamily'
     | 'navLogoUrl'
     | 'heroLogoUrl'
     | 'appIconUrl'
@@ -138,6 +168,7 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         accent: cleanText(dto.accent),
         accentHover: cleanText(dto.accentHover),
         accentContrast: cleanText(dto.accentContrast),
+        accentContrastHover: cleanText(dto.accentContrastHover),
 
         success: cleanText(dto.success),
         warning: cleanText(dto.warning),
@@ -145,6 +176,15 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         info: cleanText(dto.info),
 
         themeColor: cleanText(dto.themeColor),
+        siteTitle: cleanText(dto.siteTitle),
+        siteShortName: cleanText(dto.siteShortName),
+        siteDescription: cleanText(dto.siteDescription),
+
+        googleFontsCssUrl: sanitizeGoogleFontsCssUrl(cleanText(dto.googleFontsCssUrl) ?? undefined),
+        fontDisplayFamily: cleanText(dto.fontDisplayFamily),
+        fontButtonsFamily: cleanText(dto.fontButtonsFamily),
+        fontNavFamily: cleanText(dto.fontNavFamily),
+        fontBodyFamily: cleanText(dto.fontBodyFamily),
 
         navLogoUrl: cleanText(dto.navLogoUrl),
         heroLogoUrl: cleanText(dto.heroLogoUrl),
@@ -170,6 +210,7 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       accent: cleanText(dto.accent),
       accentHover: cleanText(dto.accentHover),
       accentContrast: cleanText(dto.accentContrast),
+      accentContrastHover: cleanText(dto.accentContrastHover),
 
       success: cleanText(dto.success),
       warning: cleanText(dto.warning),
@@ -177,6 +218,15 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       info: cleanText(dto.info),
 
       themeColor: cleanText(dto.themeColor),
+      siteTitle: cleanText(dto.siteTitle),
+      siteShortName: cleanText(dto.siteShortName),
+      siteDescription: cleanText(dto.siteDescription),
+
+      googleFontsCssUrl: sanitizeGoogleFontsCssUrl(cleanText(dto.googleFontsCssUrl) ?? undefined),
+      fontDisplayFamily: cleanText(dto.fontDisplayFamily),
+      fontButtonsFamily: cleanText(dto.fontButtonsFamily),
+      fontNavFamily: cleanText(dto.fontNavFamily),
+      fontBodyFamily: cleanText(dto.fontBodyFamily),
 
       navLogoUrl: cleanText(dto.navLogoUrl),
       heroLogoUrl: cleanText(dto.heroLogoUrl),

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useBrandAppearance } from '@/lib/use-brand-appearance';
+import { resolveNavLogoUrl } from '@/lib/brand-defaults';
 
 // Translations
 const translations: Record<string, Record<string, string>> = {
@@ -29,12 +30,19 @@ const translations: Record<string, Record<string, string>> = {
   }
 };
 
-export default function Navigation() {
+export default function Navigation({
+  initialNavLogoUrl = null,
+  initialSiteShortName = null,
+}: {
+  initialNavLogoUrl?: string | null;
+  initialSiteShortName?: string | null;
+}) {
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'bg';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const appearance = useBrandAppearance();
-  const navLogoSrc = appearance?.navLogoUrl || '/malts-logo-nav.webp';
+  const navLogoSrc = resolveNavLogoUrl(appearance?.navLogoUrl, initialNavLogoUrl);
+  const brandLabel = (initialSiteShortName || '').trim() || 'Menu';
 
   const t = translations[locale] || translations.bg;
 
@@ -74,7 +82,7 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--malts-paper)]/95 backdrop-blur-md border-b border-[var(--malts-hairline)] shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--theme-paper)]/95 backdrop-blur-md border-b border-[var(--theme-hairline)] shadow-sm">
       <div className="container mx-auto max-w-full px-3 sm:px-4 py-1">
         {/* flex-1 | nav | flex-1 keeps logo at the start of the bar and langs at the end
             (justify-between with a wide center cluster was squeezing the sides inward on md–lg). */}
@@ -84,21 +92,27 @@ export default function Navigation() {
               href={`/${locale}`}
               className="flex h-16 max-h-16 shrink-0 items-center sm:h-20 sm:max-h-20"
             >
-              <Image
-                src={navLogoSrc}
-                alt="Malt's"
-                width={400}
-                height={331}
-                sizes="(max-width: 768px) 240px, 300px"
-                className="malts-brand-filter h-full w-auto max-h-16 min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-20"
-                priority
-              />
+              {navLogoSrc ? (
+                <Image
+                  src={navLogoSrc}
+                  alt={brandLabel}
+                  width={400}
+                  height={331}
+                  sizes="(max-width: 768px) 240px, 300px"
+                  className="theme-brand-filter h-full w-auto max-h-16 min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-20"
+                  priority
+                />
+              ) : (
+                <span className="theme-display text-lg font-semibold text-[var(--theme-ink)] sm:text-xl">
+                  {brandLabel}
+                </span>
+              )}
             </Link>
           </div>
 
           {/* Desktop Navigation Links */}
           <div
-            className={`hidden shrink-0 items-center gap-3 md:flex lg:gap-6 malts-nav-font malts-nav-links ${locale === 'bg' ? 'malts-nav-links--bg' : ''}`}
+            className={`hidden shrink-0 items-center gap-3 md:flex lg:gap-6 theme-nav-font theme-nav-links ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
           >
             {navLinks.map((link) => (
               <Link
@@ -107,8 +121,8 @@ export default function Navigation() {
                 onClick={(e) => onNavLinkClick(e, link.href, link.fullReloadIfActive)}
                 className={`whitespace-nowrap transition-colors font-medium ${
                   isActive(link.href, link.exact)
-                    ? 'text-[var(--malts-accent)] border-b-2 border-[var(--malts-accent)]'
-                    : 'text-[var(--malts-ink)] hover:text-[var(--malts-accent)]'
+                    ? 'text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]'
+                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-accent)]'
                 }`}
               >
                 {link.label}
@@ -125,7 +139,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="shrink-0 md:hidden text-[var(--malts-ink)] hover:text-[var(--malts-accent)] p-2"
+              className="shrink-0 md:hidden text-[var(--theme-ink)] hover:text-[var(--theme-accent)] p-2"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -146,7 +160,7 @@ export default function Navigation() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div
-            className={`md:hidden py-4 border-t border-[var(--malts-hairline)] mt-2 malts-nav-font malts-nav-links ${locale === 'bg' ? 'malts-nav-links--bg' : ''}`}
+            className={`md:hidden py-4 border-t border-[var(--theme-hairline)] mt-2 theme-nav-font theme-nav-links ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
           >
             {navLinks.map((link) => (
               <Link
@@ -158,8 +172,8 @@ export default function Navigation() {
                 }}
                 className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
                   isActive(link.href, link.exact)
-                    ? 'text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border-l-4 border-[var(--malts-accent)]'
-                    : 'text-[var(--malts-ink)] hover:text-[var(--malts-accent)] hover:bg-[var(--malts-card-hover)]'
+                    ? 'text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border-l-4 border-[var(--theme-accent)]'
+                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-card-hover)]'
                 }`}
               >
                 {link.label}

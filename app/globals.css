@@ -5,30 +5,31 @@
 
 :root {
   /* Beerhouse paper system (public + admin + staff) — по-тъмна „преработена хартия“ */
-  --malts-paper: #d8cfbf;
-  --malts-ink: #1a1810;
-  --malts-muted: #4a4437;
-  --malts-subtle: #6b6255;
+  --theme-paper: #d8cfbf;
+  --theme-ink: #1a1810;
+  --theme-muted: #4a4437;
+  --theme-subtle: #6b6255;
 
-  --malts-card: #ebe4d6;
-  --malts-card-hover: #e4dcc8;
-  --malts-inset: #dfd4c4;
-  --malts-hairline: #c9bda8;
+  --theme-card: #ebe4d6;
+  --theme-card-hover: #e4dcc8;
+  --theme-inset: #dfd4c4;
+  --theme-hairline: #c9bda8;
 
-  --malts-accent: #b0162f;
-  --malts-accent-hover: #921226;
-  --malts-accent-contrast: #f5f0e6;
-  --malts-accent-tint: rgba(176, 22, 47, 0.1);
-  --malts-accent-tint-border: rgba(176, 22, 47, 0.25);
+  --theme-accent: #b0162f;
+  --theme-accent-hover: #921226;
+  --theme-accent-contrast: #f5f0e6;
+  --theme-accent-contrast-hover: var(--theme-accent-contrast);
+  --theme-accent-tint: rgba(176, 22, 47, 0.1);
+  --theme-accent-tint-border: rgba(176, 22, 47, 0.25);
 
-  --malts-success: #166534;
-  --malts-warning: #92400e;
-  --malts-danger: #991b1b;
-  --malts-info: #1d4ed8;
+  --theme-success: #166534;
+  --theme-warning: #92400e;
+  --theme-danger: #991b1b;
+  --theme-info: #1d4ed8;
 
   /* App-level fallbacks */
-  --background: var(--malts-paper);
-  --foreground: var(--malts-ink);
+  --background: var(--theme-paper);
+  --foreground: var(--theme-ink);
 }
 
 @theme inline {
@@ -39,51 +40,51 @@
 }
 
 /* Admin headings — Ruslan Display via Google Fonts @import (same as homepage section label) */
-.malts-admin-panel-title,
-.malts-admin-heading-font {
-  font-family: 'Ruslan Display', 'Inter', system-ui, sans-serif;
+.theme-admin-panel-title,
+.theme-admin-heading-font {
+  font-family: var(--brand-font-display, 'Ruslan Display'), var(--font-theme-display), 'Inter', system-ui, sans-serif;
   font-weight: 400;
   font-style: normal;
-  color: var(--malts-ink);
+  color: var(--theme-ink);
   letter-spacing: 0.02em;
   line-height: 1.2;
 }
 
 /* Единна големина за H1 под админ навигацията (main вече има pt-28) */
-.malts-admin-page-title {
+.theme-admin-page-title {
   font-size: 1.75rem;
   line-height: 1.2;
 }
 @media (min-width: 768px) {
-  .malts-admin-page-title {
+  .theme-admin-page-title {
     font-size: 2rem;
   }
 }
 
 /* H2 секции в админ (напр. „Бързи действия“) */
-.malts-admin-section-title {
+.theme-admin-section-title {
   font-size: 1.375rem;
   line-height: 1.2;
 }
 @media (min-width: 768px) {
-  .malts-admin-section-title {
+  .theme-admin-section-title {
     font-size: 1.5rem;
   }
 }
 
 /* Етикет под иконата в табовете на AdminNav */
-.malts-admin-nav-tab-label {
+.theme-admin-nav-tab-label {
   font-size: 0.9375rem;
   line-height: 1.25;
   font-weight: 600;
 }
 
-.malts-display {
-  font-family: var(--font-malts-display), 'Inter', system-ui, -apple-system, sans-serif;
+.theme-display {
+  font-family: var(--brand-font-display, var(--font-theme-display)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.01em;
 }
 
-.malts-display-outline {
+.theme-display-outline {
   /* Bold black outline (logo-like). Works best on large headings. */
   -webkit-text-stroke: 2px rgba(0, 0, 0, 0.88);
   paint-order: stroke fill;
@@ -99,19 +100,19 @@
     -1px -1px rgba(0, 0, 0, 0.65);
 }
 
-.malts-display-secondary {
+.theme-display-secondary {
   /* “Next tier” display font. If glyphs are missing (e.g. BG), it falls back gracefully. */
-  font-family: 'WDXL Lubrifont TC', var(--font-malts-display), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'WDXL Lubrifont TC', var(--font-theme-display), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.01em;
 }
 
-.malts-nav-font {
+.theme-nav-font {
   /* Navigation font. If glyphs are missing (e.g. BG), it falls back gracefully. */
-  font-family: var(--font-malts-nav), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--brand-font-nav, var(--font-theme-nav)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.01em;
 }
 
-.malts-nav-links {
+.theme-nav-links {
   /* Latin (EN/RO): keep readable tracking. Cyrillic (BG): optional slight tightening via Navigation locale class */
   letter-spacing: 0.02em;
   font-size: 1.25rem;
@@ -119,29 +120,33 @@
 }
 
 /* Tighter tracking only for Bulgarian nav labels — avoids crushing Latin “Home / Menu / …” */
-.malts-nav-links--bg {
+.theme-nav-links--bg {
   letter-spacing: -0.04em;
 }
 
-.malts-breadcrumb-font {
-  font-family: var(--font-malts-nav), 'Inter', system-ui, -apple-system, sans-serif;
+.theme-breadcrumb-font {
+  font-family: var(--brand-font-nav, var(--font-theme-nav)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0;
 }
 
-.malts-section-label-font {
-  font-family: 'Ruslan Display', 'Inter', system-ui, -apple-system, sans-serif;
+.theme-section-label-font {
+  font-family: var(--brand-font-display, 'Ruslan Display'), var(--font-theme-display), 'Inter', system-ui, sans-serif;
   letter-spacing: 0.02em;
 }
 
-.malts-lang-font {
-  font-family: var(--font-malts-lang), 'Inter', system-ui, -apple-system, sans-serif;
+.theme-lang-font {
+  font-family: var(--brand-font-body, var(--font-theme-lang)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.01em;
 }
 
+html {
+  background: var(--theme-paper);
+}
+
 body {
-  background: var(--malts-paper);
-  color: var(--malts-ink);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--theme-paper);
+  color: var(--theme-ink);
+  font-family: var(--brand-font-body, 'Inter'), system-ui, -apple-system, sans-serif;
   font-weight: 400;
   line-height: 1.6;
 }
@@ -167,24 +172,24 @@ button:disabled {
 
 /* Select defaults (paper theme) */
 select {
-  color: var(--malts-ink);
-  background-color: var(--malts-inset);
-  border: 1px solid var(--malts-hairline);
+  color: var(--theme-ink);
+  background-color: var(--theme-inset);
+  border: 1px solid var(--theme-hairline);
 }
 
 select option {
-  color: var(--malts-ink);
-  background-color: var(--malts-card);
+  color: var(--theme-ink);
+  background-color: var(--theme-card);
   padding: 8px;
 }
 
 /* Marketing CTA glow (home hero, etc.) */
-.malts-soft-glow {
+.theme-soft-glow {
   transition: all 0.3s ease-in-out;
   position: relative;
 }
 
-.malts-soft-glow:hover {
+.theme-soft-glow:hover {
   box-shadow:
     0 0 20px rgba(245, 245, 245, 0.3),
     0 0 40px rgba(245, 245, 245, 0.2),
@@ -192,111 +197,112 @@ select option {
   transform: translateY(-2px);
 }
 
-.malts-hero-glow {
+.theme-hero-glow {
   box-shadow:
     0 0 25px rgba(255, 255, 255, 0.6),
     0 0 50px rgba(255, 255, 255, 0.4),
     0 0 80px rgba(255, 255, 255, 0.3);
 }
 
-.malts-hero-glow:hover {
+.theme-hero-glow:hover {
   box-shadow:
     0 0 40px rgba(255, 255, 255, 0.8),
     0 0 70px rgba(255, 255, 255, 0.6),
     0 0 110px rgba(255, 255, 255, 0.4);
 }
 
-.malts-outline-glow {
-  border: 1px solid var(--malts-hairline);
+.theme-outline-glow {
+  border: 1px solid var(--theme-hairline);
   transition: all 0.25s ease-in-out;
 }
 
-.malts-outline-glow:hover {
-  border-color: var(--malts-accent-tint-border);
+.theme-outline-glow:hover {
+  border-color: var(--theme-accent-tint-border);
 }
 
 /* Universal paper primitives */
-.malts-card {
-  background: var(--malts-card);
-  border: 1px solid var(--malts-hairline);
+.theme-card {
+  background: var(--theme-card);
+  border: 1px solid var(--theme-hairline);
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(26, 24, 16, 0.08);
 }
 
-.malts-card:hover {
-  background: var(--malts-card-hover);
-  border-color: var(--malts-accent-tint-border);
+.theme-card:hover {
+  background: var(--theme-card-hover);
+  border-color: var(--theme-accent-tint-border);
 }
 
-.malts-inset {
-  background: var(--malts-inset);
-  border: 1px solid var(--malts-hairline);
+.theme-inset {
+  background: var(--theme-inset);
+  border: 1px solid var(--theme-hairline);
   border-radius: 12px;
-  color: var(--malts-ink);
+  color: var(--theme-ink);
 }
 
-.malts-muted {
-  color: var(--malts-muted);
+.theme-muted {
+  color: var(--theme-muted);
 }
 
-.malts-subtle {
-  color: var(--malts-subtle);
+.theme-subtle {
+  color: var(--theme-subtle);
 }
 
-.malts-btn-primary {
-  background: var(--malts-accent);
-  color: var(--malts-accent-contrast);
+.theme-btn-primary {
+  background: var(--theme-accent);
+  color: var(--theme-accent-contrast);
   border-radius: 14px;
-  transition: background-color 0.2s ease;
-  font-family: var(--font-malts-buttons), 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--brand-font-buttons, var(--font-theme-buttons)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.02em;
   font-size: 1.3rem;
   line-height: 1.2;
 }
 
-.malts-btn-primary:hover {
-  background: var(--malts-accent-hover);
+.theme-btn-primary:hover {
+  background: var(--theme-accent-hover);
+  color: var(--theme-accent-contrast-hover, var(--theme-accent-contrast));
 }
 
-.malts-btn-secondary {
-  background: var(--malts-card);
-  color: var(--malts-ink);
-  border: 1px solid var(--malts-hairline);
+.theme-btn-secondary {
+  background: var(--theme-card);
+  color: var(--theme-ink);
+  border: 1px solid var(--theme-hairline);
   border-radius: 14px;
   transition: background-color 0.2s ease, border-color 0.2s ease;
-  font-family: var(--font-malts-buttons), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--brand-font-buttons, var(--font-theme-buttons)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.02em;
   font-size: 1.3rem;
   line-height: 1.2;
 }
 
-.malts-btn-secondary:hover {
-  background: var(--malts-card-hover);
-  border-color: var(--malts-accent-tint-border);
+.theme-btn-secondary:hover {
+  background: var(--theme-card-hover);
+  border-color: var(--theme-accent-tint-border);
 }
 
-.malts-btn-danger {
-  background: var(--malts-danger);
+.theme-btn-danger {
+  background: var(--theme-danger);
   color: #fff;
   border-radius: 14px;
   transition: filter 0.2s ease;
-  font-family: var(--font-malts-buttons), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--brand-font-buttons, var(--font-theme-buttons)), 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: 0.02em;
   font-size: 1.3rem;
   line-height: 1.2;
 }
 
-.malts-btn-danger:hover {
+.theme-btn-danger:hover {
   filter: brightness(0.95);
 }
 
 /*
- * Admin primary/secondary/danger CTAs: base .malts-btn-* uses 1.3rem — too large on phones.
- * Add malts-btn-admin-compact next to malts-btn-primary|secondary|danger (omit px-/py- Tailwind on that button).
+ * Admin primary/secondary/danger CTAs: base .theme-btn-* uses 1.3rem — too large on phones.
+ * Add theme-btn-admin-compact next to theme-btn-primary|secondary|danger (omit px-/py- Tailwind on that button).
  */
-.malts-btn-primary.malts-btn-admin-compact,
-.malts-btn-secondary.malts-btn-admin-compact,
-.malts-btn-danger.malts-btn-admin-compact {
+.theme-btn-primary.theme-btn-admin-compact,
+.theme-btn-secondary.theme-btn-admin-compact,
+.theme-btn-danger.theme-btn-admin-compact {
   font-size: 0.875rem;
   line-height: 1.3;
   padding: 0.45rem 0.75rem;
@@ -304,104 +310,104 @@ select option {
 }
 
 @media (min-width: 640px) {
-  .malts-btn-primary.malts-btn-admin-compact,
-  .malts-btn-secondary.malts-btn-admin-compact,
-  .malts-btn-danger.malts-btn-admin-compact {
+  .theme-btn-primary.theme-btn-admin-compact,
+  .theme-btn-secondary.theme-btn-admin-compact,
+  .theme-btn-danger.theme-btn-admin-compact {
     font-size: 1rem;
     padding: 0.5rem 1rem;
   }
 }
 
 @media (min-width: 768px) {
-  .malts-btn-primary.malts-btn-admin-compact,
-  .malts-btn-secondary.malts-btn-admin-compact,
-  .malts-btn-danger.malts-btn-admin-compact {
+  .theme-btn-primary.theme-btn-admin-compact,
+  .theme-btn-secondary.theme-btn-admin-compact,
+  .theme-btn-danger.theme-btn-admin-compact {
     font-size: 1.1rem;
     padding: 0.6rem 1.2rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .malts-btn-primary.malts-btn-admin-compact,
-  .malts-btn-secondary.malts-btn-admin-compact,
-  .malts-btn-danger.malts-btn-admin-compact {
+  .theme-btn-primary.theme-btn-admin-compact,
+  .theme-btn-secondary.theme-btn-admin-compact,
+  .theme-btn-danger.theme-btn-admin-compact {
     font-size: 1.2rem;
     padding: 0.65rem 1.35rem;
   }
 }
 
-.malts-field {
+.theme-field {
   width: 100%;
   padding: 12px 16px;
-  background: var(--malts-inset);
-  border: 1px solid var(--malts-hairline);
+  background: var(--theme-inset);
+  border: 1px solid var(--theme-hairline);
   border-radius: 12px;
-  color: var(--malts-ink);
+  color: var(--theme-ink);
   outline: none;
 }
 
-.malts-field::placeholder {
+.theme-field::placeholder {
   color: rgba(107, 98, 85, 0.75);
 }
 
-.malts-field:focus {
+.theme-field:focus {
   box-shadow: 0 0 0 2px rgba(176, 22, 47, 0.22);
-  border-color: var(--malts-accent-tint-border);
+  border-color: var(--theme-accent-tint-border);
 }
 
-.malts-label {
+.theme-label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: var(--malts-subtle);
+  color: var(--theme-subtle);
 }
 
-.malts-help {
-  color: var(--malts-muted);
+.theme-help {
+  color: var(--theme-muted);
   font-size: 12px;
 }
 
-.malts-alert {
+.theme-alert {
   border-radius: 12px;
   padding: 12px 16px;
-  border: 1px solid var(--malts-hairline);
-  background: var(--malts-card);
-  color: var(--malts-ink);
+  border: 1px solid var(--theme-hairline);
+  background: var(--theme-card);
+  color: var(--theme-ink);
 }
 
-.malts-alert-error {
+.theme-alert-error {
   border-color: rgba(153, 27, 27, 0.35);
   background: rgba(153, 27, 27, 0.08);
   color: #3b0a0a;
 }
 
-.malts-alert-warning {
+.theme-alert-warning {
   border-color: rgba(146, 64, 14, 0.35);
   background: rgba(146, 64, 14, 0.08);
   color: #3b1b06;
 }
 
-.malts-alert-success {
+.theme-alert-success {
   border-color: rgba(22, 101, 52, 0.28);
   background: rgba(22, 101, 52, 0.08);
   color: #05210f;
 }
 
-.malts-badge {
-  background: var(--malts-accent-tint);
-  border: 1px solid var(--malts-accent-tint-border);
-  color: var(--malts-accent);
+.theme-badge {
+  background: var(--theme-accent-tint);
+  border: 1px solid var(--theme-accent-tint-border);
+  color: var(--theme-accent);
   border-radius: 9999px;
 }
 
 /* Brand wordmark: SVG reads too warm/reddish on cream paper — pull toward neutral brown */
 img[src='/malts.svg'],
 img[src='/malts-logo-landscape.svg'],
-.malts-brand-filter {
+.theme-brand-filter {
   filter: saturate(0.72) hue-rotate(6deg) brightness(1.03);
 }
 
-@keyframes malts-hero-logo-red-pulse {
+@keyframes theme-hero-logo-red-pulse {
   0%,
   100% {
     filter: saturate(0.72) hue-rotate(6deg) brightness(1.03)
@@ -418,13 +424,13 @@ img[src='/malts-logo-landscape.svg'],
 }
 
 /* Homepage hero logo: trim + pulsing red glow. drop-shadow() следва алфа на картинката (без квадратен glow от псевдо+box-shadow). */
-.malts-hero-logo {
-  animation: malts-hero-logo-red-pulse 1.35s ease-in-out infinite;
+.theme-hero-logo {
+  animation: theme-hero-logo-red-pulse 1.35s ease-in-out infinite;
 }
 
 /* Анимиран `filter` + няколко drop-shadow е костенурка на iOS Safari — под ~lg само статичен ореол (като 0% кадър), без пулс. */
 @media (max-width: 1023px) {
-  .malts-hero-logo {
+  .theme-hero-logo {
     animation: none !important;
     filter: saturate(0.72) hue-rotate(6deg) brightness(1.03)
       drop-shadow(0 0 18px rgba(176, 22, 47, 0.28))
@@ -434,8 +440,8 @@ img[src='/malts-logo-landscape.svg'],
 }
 
 /* Hero mood pill: статичен червен ореол (без пулс) */
-.malts-mood-banner {
-  border: 4px solid var(--malts-accent);
+.theme-mood-banner {
+  border: 4px solid var(--theme-accent);
   border-radius: 9999px;
   background: rgba(0, 0, 0, 0.88);
   box-shadow:
@@ -447,16 +453,16 @@ img[src='/malts-logo-landscape.svg'],
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .malts-hero-logo,
-  .malts-mood-banner,
-  .malts-order-category-btn-blink {
+  .theme-hero-logo,
+  .theme-mood-banner,
+  .theme-order-category-btn-blink {
     animation: none !important;
   }
 }
 
 /* /order: мигане на чиповете за категории (5×) — правим го с pseudo-element + opacity.
    Това е много по-стабилно на Safari от outline/box-shadow анимации при нисък FPS. */
-@keyframes malts-order-category-btn-blink {
+@keyframes theme-order-category-btn-blink {
   0% { opacity: 0; }
   6% { opacity: 1; }
   12% { opacity: 0; }
@@ -471,7 +477,7 @@ img[src='/malts-logo-landscape.svg'],
   100% { opacity: 0; }
 }
 
-.malts-order-category-btn-blink {
+.theme-order-category-btn-blink {
   /* transition-all на чиповете + ring/box-shadow често правят blink-a „калпав“ на Safari. */
   transition-property: none !important;
   position: relative;
@@ -479,7 +485,7 @@ img[src='/malts-logo-landscape.svg'],
   isolation: isolate;
 }
 
-.malts-order-category-btn-blink::after {
+.theme-order-category-btn-blink::after {
   content: '';
   position: absolute;
   inset: -3px;
@@ -488,7 +494,7 @@ img[src='/malts-logo-landscape.svg'],
   border: 2px solid rgba(176, 22, 47, 0.95);
   box-shadow: 0 0 0 1px rgba(176, 22, 47, 0.35), 0 0 16px rgba(176, 22, 47, 0.18);
   opacity: 0;
-  animation: malts-order-category-btn-blink 1.25s steps(1, end) 1 both;
+  animation: theme-order-category-btn-blink 1.25s steps(1, end) 1 both;
 }
 
 /* Logo optimizations */
@@ -713,7 +719,7 @@ img[src='/malts-logo-landscape.svg'],
 }
 
 /* Malts loading — beer mug */
-@keyframes malts-beer-liquid {
+@keyframes theme-beer-liquid {
   0%,
   100% {
     transform: scaleY(1);
@@ -723,12 +729,12 @@ img[src='/malts-logo-landscape.svg'],
   }
 }
 
-.malts-beer-liquid {
+.theme-beer-liquid {
   transform-origin: center bottom;
-  animation: malts-beer-liquid 1.6s ease-in-out infinite;
+  animation: theme-beer-liquid 1.6s ease-in-out infinite;
 }
 
-@keyframes malts-beer-foam {
+@keyframes theme-beer-foam {
   0%,
   100% {
     opacity: 0.92;
@@ -740,21 +746,21 @@ img[src='/malts-logo-landscape.svg'],
   }
 }
 
-.malts-beer-foam {
-  animation: malts-beer-foam 1.2s ease-in-out infinite;
+.theme-beer-foam {
+  animation: theme-beer-foam 1.2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .malts-beer-liquid,
-  .malts-beer-foam {
+  .theme-beer-liquid,
+  .theme-beer-foam {
     animation: none !important;
   }
 }
 
 /** Public marketing / menu — recycled paper */
-.malts-surface {
+.theme-surface {
   min-height: 100vh;
-  background-color: var(--malts-paper);
+  background-color: var(--theme-paper);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 48%),
     repeating-linear-gradient(
       90deg,
@@ -763,7 +769,7 @@ img[src='/malts-logo-landscape.svg'],
       rgba(0, 0, 0, 0.022) 24px,
       rgba(0, 0, 0, 0.022) 25px
     );
-  color: var(--malts-ink);
+  color: var(--theme-ink);
 }
 
 /* Hide scrollbar but keep functionality */

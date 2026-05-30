@@ -35,7 +35,7 @@ async function publishToLocalPath(destination: Record<string, unknown>, sourceFi
   const basePath = String((destination.config as Record<string, unknown>)?.basePath || '').trim();
   if (!basePath) throw new Error('LOCAL_PATH destination requires config.basePath');
   await fs.mkdir(basePath, { recursive: true });
-  const targetName = `malts-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
+  const targetName = `theme-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
   const targetPath = join(basePath, targetName);
   await fs.copyFile(sourceFilePath, targetPath);
   return targetPath;
@@ -107,7 +107,7 @@ export async function executeBackupJob(
     data: { status: 'RUNNING', startedAt: new Date() },
   });
 
-  const tempDir = process.env.BACKUP_TEMP_DIR || join(tmpdir(), 'malts-backups');
+  const tempDir = process.env.BACKUP_TEMP_DIR || join(tmpdir(), 'theme-backups');
   let tempFilePath = '';
   try {
     await fs.mkdir(tempDir, { recursive: true });

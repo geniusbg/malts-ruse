@@ -23,9 +23,11 @@ import {
   getNotificationPermission,
   unsubscribePushIfPermissionRevoked,
 } from '@/lib/push-notifications';
+import { useSiteDisplayName } from '@/lib/use-site-display-name';
 import { formatBulgarianDateTime, formatBulgarianTime } from '@/lib/date-utils';
 
 export default function StaffDashboard() {
+  const siteName = useSiteDisplayName();
   const [orders, setOrders] = useState<any[]>([]);
   const [waiterCalls, setWaiterCalls] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -357,7 +359,7 @@ export default function StaffDashboard() {
       case 'completed':
         return 'bg-[rgba(22,101,52,0.12)] text-[#14532d] border border-[rgba(22,101,52,0.28)]';
       default:
-        return 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]';
+        return 'bg-[var(--theme-inset)] text-[var(--theme-ink)] border border-[var(--theme-hairline)]';
     }
   };
 
@@ -599,7 +601,7 @@ export default function StaffDashboard() {
       setToast({
         type: 'info',
         message: details.isIOS
-          ? 'Safari вече е отказал известия за този сайт — iOS няма отделно „Malts“ меню като при Android. Отвори Настройки и провери секциите за Safari и/или известията за приложението от началния екран; при нужда премахни иконата и я добави отново от Safari, за да се появи питането за известия.'
+          ? `Safari вече е отказал известия за този сайт — iOS няма отделно „${siteName}“ меню като при Android. Отвори Настройки и провери секциите за Safari и/или известията за приложението от началния екран; при нужда премахни иконата и я добави отново от Safari, за да се появи питането за известия.`
           : 'Браузърът помни отказ за известия за този сайт. Отвори настройките на сайта от адресната лента (често икона 🔒 или ⋮) и разреши известията, после опитай пак.',
       });
       return;
@@ -721,40 +723,40 @@ export default function StaffDashboard() {
 
       {/* Cancel Order Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="malts-card w-full max-w-md">
-            <div className="p-6 border-b border-[var(--malts-hairline)]">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="theme-card w-full max-w-md">
+            <div className="p-6 border-b border-[var(--theme-hairline)]">
               <h2 className="text-2xl font-bold">Откажи поръчка</h2>
-              <p className="malts-muted text-sm mt-1">Можете да посочите причина (незадължително)</p>
+              <p className="theme-muted text-sm mt-1">Можете да посочите причина (незадължително)</p>
             </div>
             
             <div className="p-6">
-              <label className="block text-sm font-medium malts-subtle mb-2">
+              <label className="block text-sm font-medium theme-subtle mb-2">
                 Причина за отказ (незадължително)
               </label>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Например: Клиентът отмени поръчката, няма наличност, и т.н."
-                className="w-full px-4 py-3 malts-inset rounded-lg placeholder-[var(--malts-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)] resize-none"
+                className="w-full px-4 py-3 theme-inset rounded-lg placeholder-[var(--theme-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)] resize-none"
                 rows={4}
               />
             </div>
 
-            <div className="p-6 border-t border-[var(--malts-hairline)] flex gap-3 justify-end">
+            <div className="p-6 border-t border-[var(--theme-hairline)] flex gap-3 justify-end">
               <button
                 onClick={() => {
                   setShowCancelModal(false);
                   setCancelOrderId(null);
                   setCancelReason('');
                 }}
-                className="px-4 py-2 malts-btn-secondary rounded-lg font-semibold transition-all"
+                className="px-4 py-2 theme-btn-secondary rounded-lg font-semibold transition-all"
               >
                 Откажи
               </button>
               <button
                 onClick={confirmCancelOrder}
-                className="px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-all"
+                className="px-4 py-2 theme-btn-danger rounded-lg font-semibold transition-all"
               >
                 Потвърди отказ
               </button>
@@ -765,7 +767,7 @@ export default function StaffDashboard() {
 
       {/* Notification Popups - Stacked on Mobile, Grid on Desktop */}
       {notifications.length > 0 && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--malts-paper)]/80 backdrop-blur-md p-2 md:p-8">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--theme-paper)]/80 backdrop-blur-md p-2 md:p-8">
           <div className={`flex flex-col md:grid gap-2 md:gap-4 w-full max-h-full overflow-y-auto md:overflow-visible ${
             notifications.length === 1 ? 'md:grid-cols-1' :
             notifications.length === 2 ? 'md:grid-cols-2' :
@@ -786,14 +788,14 @@ export default function StaffDashboard() {
                 <div className={`relative rounded-xl shadow-2xl border-2 md:border-4 p-4 md:p-8 ${
                   notif.urgent
                     ? 'bg-red-600 border-red-400 animate-pulse'
-                    : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border-[var(--malts-hairline)]'
+                    : 'bg-[var(--theme-card)] text-[var(--theme-ink)] border-[var(--theme-hairline)]'
                 }`}>
                   {/* Badge showing position in queue */}
                   {notifications.length > 1 && (
                     <div className={`absolute top-2 md:top-3 right-2 md:right-3 px-2 md:px-3 py-1 rounded-full font-bold text-xs md:text-sm ${
                       notif.urgent
-                        ? 'bg-[rgba(245,240,230,0.25)] text-[var(--malts-accent-contrast)]'
-                        : 'bg-[var(--malts-inset)] text-[var(--malts-ink)] border border-[var(--malts-hairline)]'
+                        ? 'bg-[rgba(245,240,230,0.25)] text-[var(--theme-accent-contrast)]'
+                        : 'bg-[var(--theme-inset)] text-[var(--theme-ink)] border border-[var(--theme-hairline)]'
                     }`}>
                       {index + 1}/{notifications.length}
                     </div>
@@ -805,13 +807,13 @@ export default function StaffDashboard() {
                         {notif.type === 'order' ? '🔔' : '🚨'}
                       </div>
                       <h3 className={`font-bold leading-tight flex-1 ${
-                        notif.urgent ? 'text-[var(--malts-accent-contrast)]' : 'text-[var(--malts-ink)]'
+                        notif.urgent ? 'text-[var(--theme-accent-contrast)]' : 'text-[var(--theme-ink)]'
                       } text-base md:text-2xl`}>
                         {notif.title}
                       </h3>
                     </div>
                     <p className={`font-semibold leading-tight ${
-                      notif.urgent ? 'text-[var(--malts-accent-contrast)]' : 'text-[var(--malts-ink)]'
+                      notif.urgent ? 'text-[var(--theme-accent-contrast)]' : 'text-[var(--theme-ink)]'
                     } text-sm md:text-lg`}>
                       {notif.message}
                     </p>
@@ -822,8 +824,8 @@ export default function StaffDashboard() {
                       onClick={() => dismissNotification(notif.id)}
                       className={`flex-1 rounded-lg font-bold transition-all shadow-lg px-4 py-3 text-base md:text-lg ${
                         notif.urgent 
-                          ? 'bg-[rgba(245,240,230,0.92)] text-[var(--malts-danger)] hover:bg-[rgba(245,240,230,1)]' 
-                          : 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] hover:bg-[var(--malts-accent-hover)]'
+                          ? 'bg-[rgba(245,240,230,0.92)] text-[var(--theme-danger)] hover:bg-[rgba(245,240,230,1)]' 
+                          : 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:bg-[var(--theme-accent-hover)]'
                       }`}
                     >
                       ✓ OK
@@ -834,8 +836,8 @@ export default function StaffDashboard() {
                         onClick={() => setNotifications([])}
                         className={`rounded-lg font-bold transition-all whitespace-nowrap px-3 py-3 text-sm md:text-base ${
                           notif.urgent 
-                            ? 'bg-[rgba(245,240,230,0.22)] text-[var(--malts-accent-contrast)] hover:bg-[rgba(245,240,230,0.30)]' 
-                            : 'bg-[var(--malts-accent-tint)] text-[var(--malts-ink)] border border-[var(--malts-accent-tint-border)]'
+                            ? 'bg-[rgba(245,240,230,0.22)] text-[var(--theme-accent-contrast)] hover:bg-[rgba(245,240,230,0.30)]' 
+                            : 'bg-[var(--theme-accent-tint)] text-[var(--theme-ink)] border border-[var(--theme-accent-tint-border)]'
                         }`}
                       >
                         Всички
@@ -860,11 +862,11 @@ export default function StaffDashboard() {
           >
             <Image
               src="/malts-logo-nav.webp"
-              alt="Malt's"
+              alt={siteName}
               width={400}
               height={331}
               sizes="(max-width: 768px) 200px, 260px"
-              className="malts-brand-filter h-full w-auto max-h-14 min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-16 md:max-h-[4.25rem]"
+              className="theme-brand-filter h-full w-auto max-h-14 min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-16 md:max-h-[4.25rem]"
               priority
             />
           </Link>
@@ -873,7 +875,7 @@ export default function StaffDashboard() {
           <div className="flex items-center gap-3 md:gap-4">
             <div className="text-right">
               <h1 className="text-xl md:text-4xl font-bold">Staff Dashboard</h1>
-              <p className="malts-muted text-sm">Real-time поръчки и известия</p>
+              <p className="theme-muted text-sm">Real-time поръчки и известия</p>
             </div>
 
             <div className="hidden md:flex gap-3">
@@ -881,7 +883,7 @@ export default function StaffDashboard() {
               {!isPWA && showPWAPrompt && (
               <button
                 onClick={handleInstallPWA}
-                className="px-6 py-3 malts-btn-secondary rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2"
+                className="px-6 py-3 theme-btn-secondary rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2"
               >
                 📱 Инсталирай App
               </button>
@@ -890,7 +892,7 @@ export default function StaffDashboard() {
             {!pushEnabled && isPushSupported() && vapidPublicConfigured && (
               <button
                 onClick={handleEnablePush}
-                className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex shrink-0 items-center gap-2 animate-pulse"
+                className="px-6 py-3 theme-btn-primary rounded-xl font-semibold transition-all shadow-lg flex shrink-0 items-center gap-2 animate-pulse"
               >
                 🔔 Активирай нотификации
               </button>
@@ -900,25 +902,25 @@ export default function StaffDashboard() {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-4 py-3 bg-[var(--malts-card)] rounded-xl hover:bg-[var(--malts-card-hover)] transition-colors border border-[var(--malts-hairline)]"
+                  className="flex items-center gap-2 px-4 py-3 bg-[var(--theme-card)] rounded-xl hover:bg-[var(--theme-card-hover)] transition-colors border border-[var(--theme-hairline)]"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] flex items-center justify-center font-bold">
                     {(session?.user as any)?.name?.[0] || 'S'}
                   </div>
-                  <span className="text-[var(--malts-ink)] font-medium hidden lg:block">
+                  <span className="text-[var(--theme-ink)] font-medium hidden lg:block">
                     {(session?.user as any)?.name || 'Staff'}
                   </span>
-                  <svg className="w-4 h-4 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[var(--theme-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[var(--malts-card)] border border-[var(--malts-hairline)] rounded-lg shadow-xl">
-                    <div className="p-4 border-b border-[var(--malts-hairline)]">
-                      <p className="text-[var(--malts-ink)] font-semibold">{(session?.user as any)?.name}</p>
-                      <p className="text-sm malts-muted">{(session?.user as any)?.email}</p>
-                      <span className="mt-2 inline-flex items-center px-2.5 py-1 text-xs rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] text-[var(--malts-accent)]">
+                  <div className="absolute right-0 mt-2 w-56 bg-[var(--theme-card)] border border-[var(--theme-hairline)] rounded-lg shadow-xl">
+                    <div className="p-4 border-b border-[var(--theme-hairline)]">
+                      <p className="text-[var(--theme-ink)] font-semibold">{(session?.user as any)?.name}</p>
+                      <p className="text-sm theme-muted">{(session?.user as any)?.email}</p>
+                      <span className="mt-2 inline-flex items-center px-2.5 py-1 text-xs rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] text-[var(--theme-accent)]">
                         {(session?.user as any)?.role}
                       </span>
                     </div>
@@ -927,7 +929,7 @@ export default function StaffDashboard() {
                         setShowUserMenu(false);
                         setShowLogoutConfirm(true);
                       }}
-                      className="w-full text-left px-4 py-3 text-[var(--malts-danger)] hover:bg-[var(--malts-accent-tint)] transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-3 text-[var(--theme-danger)] hover:bg-[var(--theme-accent-tint)] transition-colors flex items-center gap-2"
                     >
                       <span>🚪</span>
                       Изход
@@ -942,7 +944,7 @@ export default function StaffDashboard() {
         {/* Mobile PWA Buttons & User Menu */}
         <div className="md:hidden flex flex-col gap-2">
           {!isPWA && isAppleMobile && !showPWAPrompt && (
-            <p className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2 text-xs text-[var(--malts-ink)]">
+            <p className="rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-2 text-xs text-[var(--theme-ink)]">
               <strong className="font-semibold">iPhone/iPad:</strong> Safari → бутон Споделяне →{' '}
               <em>Добави към началния екран</em> (Chrome на iOS често няма пълна PWA инсталация).
             </p>
@@ -950,7 +952,7 @@ export default function StaffDashboard() {
           {!isPWA && showPWAPrompt && (
             <button
               onClick={handleInstallPWA}
-              className="w-full px-4 py-3 malts-btn-secondary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 text-sm"
+              className="w-full px-4 py-3 theme-btn-secondary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 text-sm"
             >
               📱 Инсталирай App
             </button>
@@ -959,7 +961,7 @@ export default function StaffDashboard() {
           {!pushEnabled && isPushSupported() && vapidPublicConfigured && (
             <button
               onClick={handleEnablePush}
-              className="w-full px-4 py-3 malts-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 animate-pulse text-sm"
+              className="w-full px-4 py-3 theme-btn-primary rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 animate-pulse text-sm"
             >
               🔔 Активирай нотификации
             </button>
@@ -969,27 +971,27 @@ export default function StaffDashboard() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-full flex items-center gap-2 px-4 py-3 bg-[var(--malts-card)] rounded-xl hover:bg-[var(--malts-card-hover)] transition-colors border border-[var(--malts-hairline)] justify-between"
+              className="w-full flex items-center gap-2 px-4 py-3 bg-[var(--theme-card)] rounded-xl hover:bg-[var(--theme-card-hover)] transition-colors border border-[var(--theme-hairline)] justify-between"
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] flex items-center justify-center font-bold">
                   {(session?.user as any)?.name?.[0] || 'S'}
                 </div>
-                <span className="text-[var(--malts-ink)] font-medium">
+                <span className="text-[var(--theme-ink)] font-medium">
                   {(session?.user as any)?.name || 'Staff'}
                 </span>
               </div>
-              <svg className="w-4 h-4 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-[var(--theme-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {showUserMenu && (
-              <div className="mt-2 bg-[var(--malts-card)] border border-[var(--malts-hairline)] rounded-lg shadow-xl p-4">
-                <div className="mb-3 pb-3 border-b border-[var(--malts-hairline)]">
-                  <p className="text-[var(--malts-ink)] font-semibold">{(session?.user as any)?.name}</p>
-                  <p className="text-sm malts-muted">{(session?.user as any)?.email}</p>
-                  <span className="mt-1 inline-block px-2 py-1 text-xs rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] text-[var(--malts-accent)]">
+              <div className="mt-2 bg-[var(--theme-card)] border border-[var(--theme-hairline)] rounded-lg shadow-xl p-4">
+                <div className="mb-3 pb-3 border-b border-[var(--theme-hairline)]">
+                  <p className="text-[var(--theme-ink)] font-semibold">{(session?.user as any)?.name}</p>
+                  <p className="text-sm theme-muted">{(session?.user as any)?.email}</p>
+                  <span className="mt-1 inline-block px-2 py-1 text-xs rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] text-[var(--theme-accent)]">
                     {(session?.user as any)?.role}
                   </span>
                 </div>
@@ -998,7 +1000,7 @@ export default function StaffDashboard() {
                     setShowUserMenu(false);
                     setShowLogoutConfirm(true);
                   }}
-                  className="w-full text-left px-4 py-3 text-[var(--malts-danger)] hover:bg-[var(--malts-accent-tint)] rounded-lg transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-3 text-[var(--theme-danger)] hover:bg-[var(--theme-accent-tint)] rounded-lg transition-colors flex items-center gap-2"
                 >
                   <span>🚪</span>
                   Изход
@@ -1031,13 +1033,13 @@ export default function StaffDashboard() {
           </h2>
           
           {/* Tabs for Calls */}
-          <div className="flex gap-2 bg-[var(--malts-inset)] p-1 rounded-lg w-full sm:w-auto border border-[var(--malts-hairline)]">
+          <div className="flex gap-2 bg-[var(--theme-inset)] p-1 rounded-lg w-full sm:w-auto border border-[var(--theme-hairline)]">
             <button
               onClick={() => setCallsTab('active')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 callsTab === 'active'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
               }`}
             >
               Активни ({waiterCalls.filter(c => c.status !== 'completed').length})
@@ -1046,8 +1048,8 @@ export default function StaffDashboard() {
               onClick={() => setCallsTab('completed')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 callsTab === 'completed'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
               }`}
             >
               Завършени ({waiterCalls.filter(c => c.status === 'completed').length})
@@ -1057,8 +1059,8 @@ export default function StaffDashboard() {
         
         {callsTab === 'active' && (
           waiterCalls.filter(call => call.status !== 'completed').length === 0 ? (
-            <div className="text-center py-20 malts-card">
-              <p className="malts-muted text-xl">Няма активни повиквания</p>
+            <div className="text-center py-20 theme-card">
+              <p className="theme-muted text-xl">Няма активни повиквания</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1074,11 +1076,11 @@ export default function StaffDashboard() {
                     <h3 className="text-xl md:text-2xl font-bold">
                       Маса {call.tableNumber}
                     </h3>
-                    <p className="text-base md:text-lg malts-muted">
+                    <p className="text-base md:text-lg theme-muted">
                       {call.message}
                     </p>
                     {call.createdAt && (
-                      <p className="text-xs md:text-sm malts-muted mt-1">
+                      <p className="text-xs md:text-sm theme-muted mt-1">
                         {formatBulgarianDateTime(call.createdAt)}
                       </p>
                     )}
@@ -1092,11 +1094,11 @@ export default function StaffDashboard() {
                     <button
                       onClick={() => acknowledgeCall(call.id)}
                       disabled={loadingActions[call.id]}
-                      className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                      className="px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                     >
                       {loadingActions[call.id] ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           <span className="hidden sm:inline">...</span>
                         </>
                       ) : (
@@ -1106,11 +1108,11 @@ export default function StaffDashboard() {
                     <button
                       onClick={() => completeCall(call.id)}
                       disabled={loadingActions[`complete_${call.id}`]}
-                      className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                      className="px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                     >
                       {loadingActions[`complete_${call.id}`] ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           <span className="hidden sm:inline">...</span>
                         </>
                       ) : (
@@ -1123,11 +1125,11 @@ export default function StaffDashboard() {
                   <button
                     onClick={() => completeCall(call.id)}
                     disabled={loadingActions[`complete_${call.id}`]}
-                    className="w-full px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                   >
                     {loadingActions[`complete_${call.id}`] ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                         <span className="hidden sm:inline">...</span>
                       </>
                     ) : (
@@ -1149,18 +1151,18 @@ export default function StaffDashboard() {
               .map(call => (
               <div
                 key={call.id}
-                className="rounded-xl p-6 border-2 bg-[var(--malts-inset)] border-green-500/30 opacity-90"
+                className="rounded-xl p-6 border-2 bg-[var(--theme-inset)] border-green-500/30 opacity-90"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-2xl font-bold">
                       Маса {call.tableNumber}
                     </h3>
-                    <p className="text-lg malts-muted">
+                    <p className="text-lg theme-muted">
                       {call.message}
                     </p>
                     {call.createdAt && (
-                      <p className="text-sm malts-muted mt-1">
+                      <p className="text-sm theme-muted mt-1">
                         Заявено: {formatBulgarianDateTime(call.createdAt)}
                       </p>
                     )}
@@ -1175,7 +1177,7 @@ export default function StaffDashboard() {
                   </span>
                 </div>
                 {call.completedAt && (
-                  <p className="text-sm malts-muted mt-2 text-center">
+                  <p className="text-sm theme-muted mt-2 text-center">
                     Завършено: {formatBulgarianDateTime(call.completedAt)}
                   </p>
                 )}
@@ -1193,13 +1195,13 @@ export default function StaffDashboard() {
           </h2>
           
           {/* Tabs */}
-          <div className="flex gap-2 bg-[var(--malts-inset)] p-1 rounded-lg w-full sm:w-auto border border-[var(--malts-hairline)]">
+          <div className="flex gap-2 bg-[var(--theme-inset)] p-1 rounded-lg w-full sm:w-auto border border-[var(--theme-hairline)]">
             <button
               onClick={() => setOrdersTab('active')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 ordersTab === 'active'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
               }`}
             >
               Активни ({orders.filter((o: any) => o.status !== 'completed').length})
@@ -1208,8 +1210,8 @@ export default function StaffDashboard() {
               onClick={() => setOrdersTab('completed')}
               className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base ${
                 ordersTab === 'completed'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
               }`}
             >
               Завършени ({orders.filter((o: any) => o.status === 'completed').length})
@@ -1220,8 +1222,8 @@ export default function StaffDashboard() {
         {/* Active Orders */}
         {ordersTab === 'active' && (
           orders.filter((o: any) => o.status !== 'completed').length === 0 ? (
-            <div className="text-center py-20 malts-card">
-              <p className="malts-muted text-xl">Няма активни поръчки</p>
+            <div className="text-center py-20 theme-card">
+              <p className="theme-muted text-xl">Няма активни поръчки</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1230,18 +1232,18 @@ export default function StaffDashboard() {
                 .map((order: any) => (
                 <div
                   key={`active-${order.id}`}
-                  className="malts-card rounded-xl p-4 md:p-6 border-2 border-[var(--malts-hairline)]"
+                  className="theme-card rounded-xl p-4 md:p-6 border-2 border-[var(--theme-hairline)]"
                 >
                   <div className="flex justify-between items-start mb-3 md:mb-4">
                     <div className="flex-1 min-w-0">
-                      <div className="text-lg md:text-2xl font-bold text-[var(--malts-ink)]">
+                      <div className="text-lg md:text-2xl font-bold text-[var(--theme-ink)]">
                         Поръчка #{order.orderNumber}
                       </div>
-                      <div className="text-base md:text-lg malts-muted">
+                      <div className="text-base md:text-lg theme-muted">
                         Маса {order.tableNumber}
                       </div>
                       {order.createdAt && (
-                        <div className="text-xs md:text-sm malts-muted mt-1">
+                        <div className="text-xs md:text-sm theme-muted mt-1">
                           {formatBulgarianDateTime(order.createdAt)}
                         </div>
                       )}
@@ -1257,17 +1259,17 @@ export default function StaffDashboard() {
                   {/* Order Items */}
                   <div className="mb-3 md:mb-4 space-y-1 md:space-y-2">
                     {order.items && order.items.map((item: any, itemIdx: number) => (
-                      <div key={`${order.id}-item-${item.id || itemIdx}`} className="flex justify-between text-[var(--malts-ink)] text-sm md:text-base">
+                      <div key={`${order.id}-item-${item.id || itemIdx}`} className="flex justify-between text-[var(--theme-ink)] text-sm md:text-base">
                         <span className="truncate mr-2">{item.quantity}x {item.productName}</span>
-                        <Price priceBgn={Number(item.priceBgn)} className="text-[var(--malts-ink)] whitespace-nowrap" />
+                        <Price priceBgn={Number(item.priceBgn)} className="text-[var(--theme-ink)] whitespace-nowrap" />
                       </div>
                     ))}
                   </div>
 
-                  <div className="border-t border-[var(--malts-hairline)] pt-2 md:pt-3 mb-3 md:mb-4">
-                    <div className="flex justify-between text-base md:text-xl font-bold text-[var(--malts-ink)]">
+                  <div className="border-t border-[var(--theme-hairline)] pt-2 md:pt-3 mb-3 md:mb-4">
+                    <div className="flex justify-between text-base md:text-xl font-bold text-[var(--theme-ink)]">
                       <span>Общо:</span>
-                      <Price priceBgn={Number(order.totalBgn)} className="text-base md:text-xl font-bold text-[var(--malts-ink)]" />
+                      <Price priceBgn={Number(order.totalBgn)} className="text-base md:text-xl font-bold text-[var(--theme-ink)]" />
                     </div>
                   </div>
 
@@ -1278,10 +1280,10 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => updateOrderStatus(order.id, 'preparing')}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             <span>Приготвяме</span>
                           )}
@@ -1289,7 +1291,7 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => handleCancelOrder(order.id)}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           ✗ Откажи
                         </button>
@@ -1300,10 +1302,10 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => updateOrderStatus(order.id, 'ready')}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             <span>Готова</span>
                           )}
@@ -1311,7 +1313,7 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => handleCancelOrder(order.id)}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           ✗ Откажи
                         </button>
@@ -1322,10 +1324,10 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => updateOrderStatus(order.id, 'completed')}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-primary rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           {loadingActions[order.id] ? (
-                            <div className="w-4 h-4 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                           ) : (
                             '✓ Завърши'
                           )}
@@ -1333,7 +1335,7 @@ export default function StaffDashboard() {
                         <button
                           onClick={() => handleCancelOrder(order.id)}
                           disabled={loadingActions[order.id]}
-                          className="px-3 md:px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
+                          className="px-3 md:px-4 py-2 theme-btn-danger rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
                         >
                           ✗ Откажи
                         </button>
@@ -1349,8 +1351,8 @@ export default function StaffDashboard() {
         {/* Completed Orders */}
         {ordersTab === 'completed' && (
           orders.filter((o: any) => o.status === 'completed').length === 0 ? (
-            <div className="text-center py-20 malts-card">
-              <p className="malts-muted text-xl">Няма завършени поръчки днес</p>
+            <div className="text-center py-20 theme-card">
+              <p className="theme-muted text-xl">Няма завършени поръчки днес</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1359,14 +1361,14 @@ export default function StaffDashboard() {
                 .map((order: any) => (
                 <div
                   key={`completed-${order.id}`}
-                  className="malts-card rounded-xl p-6 border-2 border-green-500/50 opacity-75"
+                  className="theme-card rounded-xl p-6 border-2 border-green-500/50 opacity-75"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <div className="text-2xl font-bold text-[var(--malts-ink)]">
+                      <div className="text-2xl font-bold text-[var(--theme-ink)]">
                         Поръчка #{order.orderNumber}
                       </div>
-                      <div className="text-lg malts-muted">
+                      <div className="text-lg theme-muted">
                         Маса {order.tableNumber}
                       </div>
                     </div>
@@ -1378,20 +1380,20 @@ export default function StaffDashboard() {
                   {/* Order Items */}
                   <div className="mb-4 space-y-2">
                     {order.items && order.items.map((item: any, itemIdx: number) => (
-                      <div key={`${order.id}-item-${item.id || itemIdx}`} className="flex justify-between text-[var(--malts-ink)]">
+                      <div key={`${order.id}-item-${item.id || itemIdx}`} className="flex justify-between text-[var(--theme-ink)]">
                         <span>{item.quantity}x {item.productName}</span>
-                        <Price priceBgn={Number(item.priceBgn)} className="text-[var(--malts-ink)]" />
+                        <Price priceBgn={Number(item.priceBgn)} className="text-[var(--theme-ink)]" />
                       </div>
                     ))}
                   </div>
 
-                  <div className="border-t border-[var(--malts-hairline)] pt-3">
-                    <div className="flex justify-between text-xl font-bold text-[var(--malts-ink)]">
+                  <div className="border-t border-[var(--theme-hairline)] pt-3">
+                    <div className="flex justify-between text-xl font-bold text-[var(--theme-ink)]">
                       <span>Общо:</span>
-                      <Price priceBgn={Number(order.totalBgn)} className="text-xl font-bold text-[var(--malts-ink)]" />
+                      <Price priceBgn={Number(order.totalBgn)} className="text-xl font-bold text-[var(--theme-ink)]" />
                     </div>
                     {order.completedAt && (
-                      <p className="text-sm malts-muted mt-2">
+                      <p className="text-sm theme-muted mt-2">
                         Завършена: {formatBulgarianTime(order.completedAt)}
                       </p>
                     )}
@@ -1406,28 +1408,28 @@ export default function StaffDashboard() {
 
       {/* Approval Modal */}
       {showApprovalModal && selectedApproval && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="malts-card p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="theme-card p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-6">
               Поръчка изисква одобрение
             </h2>
 
             <div className="space-y-4 mb-6">
-              <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4">
+              <div className="bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-lg p-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="malts-subtle">Поръчка #:</span>
+                  <span className="theme-subtle">Поръчка #:</span>
                   <span className="font-semibold">
                     {selectedApproval.order?.orderNumber || 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="malts-subtle">Маса:</span>
+                  <span className="theme-subtle">Маса:</span>
                   <span className="font-semibold">
                     {selectedApproval.tableNumber}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="malts-subtle">Дата/Час:</span>
+                  <span className="theme-subtle">Дата/Час:</span>
                   <span className="font-semibold">
                     {selectedApproval.order?.createdAt 
                       ? formatBulgarianDateTime(selectedApproval.order.createdAt)
@@ -1435,7 +1437,7 @@ export default function StaffDashboard() {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm mt-2">
-                  <span className="malts-subtle">Общо:</span>
+                  <span className="theme-subtle">Общо:</span>
                   <span className="font-semibold text-lg">
                     {selectedApproval.order?.totalBgn != null ? (
                       <Price priceBgn={Number(selectedApproval.order.totalBgn)} />
@@ -1451,7 +1453,7 @@ export default function StaffDashboard() {
                   <h4 className="text-md font-semibold mb-3">Артикули:</h4>
                   <div className="space-y-2">
                     {selectedApproval.order.items.map((item: any, idx: number) => (
-                      <div key={`${selectedApproval.orderId}-item-${item.id || idx}`} className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-3 flex justify-between">
+                      <div key={`${selectedApproval.orderId}-item-${item.id || idx}`} className="bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-lg p-3 flex justify-between">
                         <span>{item.productName} x {item.quantity}</span>
                         <span className="font-semibold">
                           <Price priceBgn={Number(item.priceBgn) * item.quantity} />
@@ -1474,14 +1476,14 @@ export default function StaffDashboard() {
                 <button
                   onClick={() => handleApproveOrder(selectedApproval.orderId)}
                   disabled={processingApproval}
-                  className="flex-1 px-6 py-3 malts-btn-primary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-6 py-3 theme-btn-primary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processingApproval ? 'Обработване...' : '✅ Одобри'}
                 </button>
                 <button
                   onClick={() => handleRejectOrder(selectedApproval.orderId)}
                   disabled={processingApproval}
-                  className="flex-1 px-6 py-3 malts-btn-danger rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-6 py-3 theme-btn-danger rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processingApproval ? 'Обработване...' : '❌ Откажи'}
                 </button>
@@ -1491,7 +1493,7 @@ export default function StaffDashboard() {
                     setSelectedApproval(null);
                   }}
                   disabled={processingApproval}
-                  className="px-6 py-3 malts-btn-secondary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 theme-btn-secondary rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Затвори
                 </button>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 type AuditRow = {
   id: string;
@@ -100,8 +100,8 @@ export default function OperationalSettingsPage({
   if (!isSuper) {
     return (
       <div className="p-6 md:p-8 max-w-2xl mx-auto w-full">
-        <div className="malts-card p-6">
-          <p className="malts-muted">Само Super Admin може да редактира тези настройки.</p>
+        <div className="theme-card p-6">
+          <p className="theme-muted">Само Super Admin може да редактира тези настройки.</p>
         </div>
       </div>
     );
@@ -109,32 +109,32 @@ export default function OperationalSettingsPage({
 
   return (
     <div className="max-w-2xl mx-auto w-full">
-      <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Оперативни настройки</h1>
-      <p className="malts-muted text-sm mb-8">
+      <h1 className="theme-admin-heading-font theme-admin-page-title mb-2">Оперативни настройки</h1>
+      <p className="theme-muted text-sm mb-8">
         Лимит на маси за QR, активиране на поръчки и повикване на сервитьор (сървърна проверка).
       </p>
 
       {msg && (
-        <MaltsInlineFeedback tone="success" className="mb-4">
+        <ThemeInlineFeedback tone="success" className="mb-4">
           {msg}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
       {err && (
-        <MaltsInlineFeedback tone="error" className="mb-4">
+        <ThemeInlineFeedback tone="error" className="mb-4">
           {err}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
 
-      <div className="space-y-6 malts-card p-6">
+      <div className="space-y-6 theme-card p-6">
         <div>
-          <label className="block malts-subtle mb-2">Максимален брой маси (QR)</label>
+          <label className="block theme-subtle mb-2">Максимален брой маси (QR)</label>
           <input
             type="number"
             min={1}
             max={500}
             value={maxQrTables}
             onChange={(e) => setMaxQrTables(parseInt(e.target.value, 10) || 1)}
-            className="w-full malts-inset px-4 py-2"
+            className="w-full theme-inset px-4 py-2"
           />
         </div>
 
@@ -162,7 +162,7 @@ export default function OperationalSettingsPage({
           type="button"
           onClick={save}
           disabled={saving}
-          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold disabled:opacity-50"
+          className="theme-btn-primary theme-btn-admin-compact w-full font-semibold disabled:opacity-50"
         >
           {saving ? 'Запис…' : 'Запази'}
         </button>
@@ -174,22 +174,22 @@ export default function OperationalSettingsPage({
           <button
             type="button"
             onClick={loadAudit}
-            className="text-sm malts-muted hover:text-[var(--malts-ink)]"
+            className="text-sm theme-muted hover:text-[var(--theme-ink)]"
           >
             Обнови
           </button>
         </div>
 
         {auditErr && (
-          <MaltsInlineFeedback tone="error" className="mb-3">
+          <ThemeInlineFeedback tone="error" className="mb-3">
             {auditErr}
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         )}
 
-        <div className="overflow-x-auto border border-[var(--malts-hairline)] rounded-xl">
+        <div className="overflow-x-auto border border-[var(--theme-hairline)] rounded-xl">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--malts-hairline)] text-left malts-subtle">
+              <tr className="border-b border-[var(--theme-hairline)] text-left theme-subtle">
                 <th className="p-3 whitespace-nowrap">Кога</th>
                 <th className="p-3 whitespace-nowrap">Кой</th>
                 <th className="p-3 whitespace-nowrap">Промяна</th>
@@ -197,27 +197,27 @@ export default function OperationalSettingsPage({
             </thead>
             <tbody>
               {audit.map((row) => (
-                <tr key={row.id} className="border-b border-[var(--malts-hairline)] align-top">
+                <tr key={row.id} className="border-b border-[var(--theme-hairline)] align-top">
                   <td className="p-3 whitespace-nowrap">{new Date(row.createdAt).toLocaleString('bg')}</td>
                   <td className="p-3">{row.actorEmail || '—'}</td>
                   <td className="p-3">
                     <div className="grid gap-1">
                       <div>
-                        <span className="malts-subtle">maxQrTables:</span>{' '}
-                        <span className="malts-muted">{row.before.maxQrTables}</span>{' '}
-                        <span className="malts-subtle">→</span>{' '}
+                        <span className="theme-subtle">maxQrTables:</span>{' '}
+                        <span className="theme-muted">{row.before.maxQrTables}</span>{' '}
+                        <span className="theme-subtle">→</span>{' '}
                         <span className="font-medium">{row.after.maxQrTables}</span>
                       </div>
                       <div>
-                        <span className="malts-subtle">ordersEnabled:</span>{' '}
-                        <span className="malts-muted">{String(row.before.ordersEnabled)}</span>{' '}
-                        <span className="malts-subtle">→</span>{' '}
+                        <span className="theme-subtle">ordersEnabled:</span>{' '}
+                        <span className="theme-muted">{String(row.before.ordersEnabled)}</span>{' '}
+                        <span className="theme-subtle">→</span>{' '}
                         <span className="font-medium">{String(row.after.ordersEnabled)}</span>
                       </div>
                       <div>
-                        <span className="malts-subtle">waiterCallEnabled:</span>{' '}
-                        <span className="malts-muted">{String(row.before.waiterCallEnabled)}</span>{' '}
-                        <span className="malts-subtle">→</span>{' '}
+                        <span className="theme-subtle">waiterCallEnabled:</span>{' '}
+                        <span className="theme-muted">{String(row.before.waiterCallEnabled)}</span>{' '}
+                        <span className="theme-subtle">→</span>{' '}
                         <span className="font-medium">{String(row.after.waiterCallEnabled)}</span>
                       </div>
                     </div>
@@ -227,7 +227,7 @@ export default function OperationalSettingsPage({
             </tbody>
           </table>
           {audit.length === 0 && !auditErr && (
-            <p className="p-6 malts-muted text-center">Няма записани промени.</p>
+            <p className="p-6 theme-muted text-center">Няма записани промени.</p>
           )}
         </div>
       </div>

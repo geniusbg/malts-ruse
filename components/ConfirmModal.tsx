@@ -35,7 +35,7 @@ export default function ConfirmModal({
 
   if (!open) return null;
 
-  const confirmClass = tone === 'danger' ? 'malts-btn-danger' : 'malts-btn-primary';
+  const confirmClass = tone === 'danger' ? 'theme-btn-danger' : 'theme-btn-primary';
 
   return (
     <div
@@ -43,7 +43,7 @@ export default function ConfirmModal({
       role="presentation"
     >
       <div
-        className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm"
+        className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm"
         onClick={onCancel}
         aria-hidden
       />
@@ -53,18 +53,18 @@ export default function ConfirmModal({
       >
         <div
           data-modal-scroll
-          className="malts-card w-full max-w-md max-h-[min(88dvh,92svh)] overflow-y-auto overscroll-contain rounded-2xl p-4 shadow-lg touch-pan-y sm:p-6"
+          className="theme-card w-full max-w-md max-h-[min(88dvh,92svh)] overflow-y-auto overscroll-contain rounded-2xl p-4 shadow-lg touch-pan-y sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={title}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-3 flex items-start justify-between gap-3">
-            <h3 className="min-w-0 text-lg font-bold text-[var(--malts-ink)] sm:text-xl">{title}</h3>
+            <h3 className="min-w-0 text-lg font-bold text-[var(--theme-ink)] sm:text-xl">{title}</h3>
             <button
               type="button"
               onClick={onCancel}
-              className="shrink-0 text-2xl leading-none text-[var(--malts-subtle)] transition-colors hover:text-[var(--malts-ink)]"
+              className="shrink-0 text-2xl leading-none text-[var(--theme-subtle)] transition-colors hover:text-[var(--theme-ink)]"
               aria-label="Затвори"
             >
               ×
@@ -72,7 +72,7 @@ export default function ConfirmModal({
           </div>
 
           {typeof message === 'string' ? (
-            <div className="malts-muted mb-4 space-y-3 sm:mb-6">
+            <div className="theme-muted mb-4 space-y-3 sm:mb-6">
               {message
                 .trim()
                 .split(/\n+/)
@@ -84,7 +84,7 @@ export default function ConfirmModal({
                 ))}
             </div>
           ) : (
-            <div className="malts-muted mb-4 sm:mb-6">{message}</div>
+            <div className="theme-muted mb-4 sm:mb-6">{message}</div>
           )}
 
           {renderFooter ? (
@@ -97,7 +97,7 @@ export default function ConfirmModal({
                   void Promise.resolve(onConfirm?.());
                   onCancel();
                 }}
-                className={`${confirmClass} malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
+                className={`${confirmClass} theme-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
               >
                 {confirmLabel}
               </button>
@@ -107,14 +107,14 @@ export default function ConfirmModal({
               <button
                 type="button"
                 onClick={onCancel}
-                className="malts-btn-secondary malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1"
+                className="theme-btn-secondary theme-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1"
               >
                 {cancelLabel}
               </button>
               <button
                 type="button"
                 onClick={() => void Promise.resolve(onConfirm?.())}
-                className={`${confirmClass} malts-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
+                className={`${confirmClass} theme-btn-admin-compact w-full rounded-lg font-semibold sm:flex-1`}
               >
                 {confirmLabel}
               </button>

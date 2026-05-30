@@ -150,7 +150,7 @@ export default function LoadingScreen({
     <div className="text-center px-4">
       <div className="mx-auto mb-8 flex flex-col items-center justify-center gap-2">
         {framedMedia}
-        <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
+        <span className="text-sm theme-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
         <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
           <div
             className="h-full rounded-full bg-[#d8c400] transition-[width] duration-300 ease-out"
@@ -169,7 +169,7 @@ export default function LoadingScreen({
       <div className="text-center">
         <div className="flex flex-col items-center justify-center gap-2">
           {framedMedia}
-          <span className="text-sm malts-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
+          <span className="text-sm theme-muted tabular-nums">{Math.round(resolvedProgress)}%</span>
           <div className="h-2 w-40 overflow-hidden rounded-full bg-black/10">
             <div
               className="h-full rounded-full bg-[#d8c400] transition-[width] duration-300 ease-out"
@@ -184,7 +184,7 @@ export default function LoadingScreen({
 
   return (
     <div 
-      className="fixed z-50 flex items-center justify-center malts-surface"
+      className="fixed z-50 flex items-center justify-center theme-surface"
       style={{
         top: 0,
         left: 0,

@@ -38,10 +38,10 @@ export default function LanguageSwitcher() {
         <button
           key={locale}
           onClick={() => switchLocale(locale)}
-          className={`px-3 py-1 rounded-md transition-all malts-lang-font ${
+          className={`px-3 py-1 rounded-md transition-all theme-lang-font ${
             currentLocale === locale
-              ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] font-semibold'
-              : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
+              ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] font-semibold'
+              : 'bg-[var(--theme-card)] text-[var(--theme-ink)] border border-[var(--theme-hairline)] hover:bg-[var(--theme-card-hover)]'
           }`}
         >
           {languageNames[locale]}

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 export default function LocationSettingsPage({
   params
@@ -180,29 +180,29 @@ export default function LocationSettingsPage({
           <button
             type="button"
             onClick={() => router.push(`/${locale}/admin`)}
-            className="mb-4 flex items-center gap-2 malts-muted hover:text-[var(--malts-ink)] transition-colors"
+            className="mb-4 flex items-center gap-2 theme-muted hover:text-[var(--theme-ink)] transition-colors"
           >
             <span aria-hidden>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="malts-admin-heading-font malts-admin-page-title">Контакти</h1>
-          <p className="mt-2 malts-muted max-w-2xl">
+          <h1 className="theme-admin-heading-font theme-admin-page-title">Контакти</h1>
+          <p className="mt-2 theme-muted max-w-2xl">
             Настрой контактите на заведението. Те се показват в страницата „Контакти“ и на началната страница.
           </p>
         </div>
 
         {/* Settings Form */}
-        <div className="malts-card p-6 md:p-8">
+        <div className="theme-card p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div />
             <button
               type="button"
               onClick={handleSaveSettings}
               disabled={settingsLoading || savingSettings}
-              className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+              className={`theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                 settingsLoading || savingSettings
-                  ? 'malts-btn-secondary cursor-not-allowed opacity-50'
-                  : 'malts-btn-primary'
+                  ? 'theme-btn-secondary cursor-not-allowed opacity-50'
+                  : 'theme-btn-primary'
               }`}
             >
               {savingSettings ? 'Запазване...' : 'Запази настройките'}
@@ -210,20 +210,20 @@ export default function LocationSettingsPage({
           </div>
 
           {settingsMessage && (
-            <MaltsInlineFeedback tone="success" className="mb-4" role="status">
+            <ThemeInlineFeedback tone="success" className="mb-4" role="status">
               {settingsMessage}
-            </MaltsInlineFeedback>
+            </ThemeInlineFeedback>
           )}
           {settingsError && (
-            <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+            <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
               {settingsError}
-            </MaltsInlineFeedback>
+            </ThemeInlineFeedback>
           )}
 
           <div className="grid grid-cols-1 gap-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="malts-label">Latitude</label>
+                <label className="theme-label">Latitude</label>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -231,13 +231,13 @@ export default function LocationSettingsPage({
                   value={locationSettings.latitude}
                   onChange={(e) => handleSettingsChange('latitude' as any, e.target.value)}
                   disabled={settingsLoading}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="43.851234"
                 />
-                <p className="malts-help">Диапазон: -90..90</p>
+                <p className="theme-help">Диапазон: -90..90</p>
               </div>
               <div className="space-y-2">
-                <label className="malts-label">Longitude</label>
+                <label className="theme-label">Longitude</label>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -245,77 +245,77 @@ export default function LocationSettingsPage({
                   value={locationSettings.longitude}
                   onChange={(e) => handleSettingsChange('longitude' as any, e.target.value)}
                   disabled={settingsLoading}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="25.954321"
                 />
-                <p className="malts-help">Диапазон: -180..180</p>
+                <p className="theme-help">Диапазон: -180..180</p>
               </div>
               <div className="space-y-2">
-                <div className="malts-label">Карта</div>
-                <p className="malts-help">
+                <div className="theme-label">Карта</div>
+                <p className="theme-help">
                   Ако попълниш и двете координати, Google Maps в „Контакти“ ще ползва точна локация (по-точно от адрес).
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="malts-label">Телефон</label>
+                <label className="theme-label">Телефон</label>
                 <input
                   type="tel"
                   value={locationSettings.phone}
                   onChange={(e) => handleSettingsChange('phone', e.target.value)}
                   disabled={settingsLoading}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="089 853 6542"
                 />
-                <p className="malts-help">Показва се като линк за набиране.</p>
+                <p className="theme-help">Показва се като линк за набиране.</p>
               </div>
 
               <div className="space-y-2">
-                <label className="malts-label">Instagram URL</label>
+                <label className="theme-label">Instagram URL</label>
                 <input
                   type="url"
                   value={locationSettings.instagramUrl}
                   onChange={(e) => handleSettingsChange('instagramUrl', e.target.value)}
                   disabled={settingsLoading}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="https://instagram.com/yourpage"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="malts-label">Facebook URL</label>
+                <label className="theme-label">Facebook URL</label>
                 <input
                   type="url"
                   value={locationSettings.facebookUrl}
                   onChange={(e) => handleSettingsChange('facebookUrl', e.target.value)}
                   disabled={settingsLoading}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="https://facebook.com/yourpage"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="malts-label">
+              <label className="theme-label">
                 Адрес (български)
               </label>
               <textarea
                 value={locationSettings.addressBg}
                 onChange={(e) => handleSettingsChange('addressBg', e.target.value)}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
                 rows={3}
                 placeholder="Русе, ул. Александровска 97"
               />
-              <p className="malts-help">
+              <p className="theme-help">
                 Адресът, който се показва на българската версия на сайта. Използвай „Авто превод“ в EN/RO от този текст.
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <label className="malts-label">
+                <label className="theme-label">
                   Address (English)
                 </label>
                 <AutoTranslateButton
@@ -331,17 +331,17 @@ export default function LocationSettingsPage({
                 value={locationSettings.addressEn}
                 onChange={(e) => handleSettingsChange('addressEn', e.target.value)}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Ruse, 97 Alexandrovska St"
               />
-              <p className="malts-help">
+              <p className="theme-help">
                 The address displayed on the English version of the site.
               </p>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <label className="malts-label">
+                <label className="theme-label">
                   Address (Romanian)
                 </label>
                 <AutoTranslateButton
@@ -357,19 +357,19 @@ export default function LocationSettingsPage({
                 value={locationSettings.addressRo}
                 onChange={(e) => handleSettingsChange('addressRo', e.target.value)}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Ruse, Alexandrovska Str. 97"
               />
-              <p className="malts-help">
+              <p className="theme-help">
                 Adresa afișată pe versiunea română a site-ului.
               </p>
             </div>
           </div>
 
           {translationError && (
-            <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+            <ThemeInlineFeedback tone="error" className="mt-2" role="alert">
               {translationError}
-            </MaltsInlineFeedback>
+            </ThemeInlineFeedback>
           )}
         </div>
       </div>

@@ -7,7 +7,7 @@ import ImageUpload from '@/components/ImageUpload';
 import Toast from '@/components/Toast';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 interface MenuSettings {
   id: string;
@@ -167,15 +167,15 @@ export default function MenuSettingsPage({
       <div className="mb-8">
         <button
           onClick={() => router.push(`/${locale}/admin`)}
-          className="malts-muted hover:text-[var(--malts-ink)] mb-4 flex items-center gap-2 transition-colors"
+          className="theme-muted hover:text-[var(--theme-ink)] mb-4 flex items-center gap-2 transition-colors"
         >
           <span>←</span>
           <span>Назад към Dashboard</span>
         </button>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки на меню</h1>
-            <p className="malts-muted mt-2">
+            <h1 className="theme-admin-heading-font theme-admin-page-title">Настройки на меню</h1>
+            <p className="theme-muted mt-2">
               Настрой заглавието, подзаглавието и фоновото изображение на меню страницата.
             </p>
           </div>
@@ -183,7 +183,7 @@ export default function MenuSettingsPage({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="malts-btn-primary malts-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="theme-btn-primary theme-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving ? 'Запазване...' : 'Запази'}
           </button>
@@ -191,19 +191,19 @@ export default function MenuSettingsPage({
       </div>
 
         {translationError && (
-          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+          <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
             {translationError}
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         )}
 
         {/* Settings Form */}
-      <div className="malts-card rounded-xl p-6 md:p-8 space-y-8">
+      <div className="theme-card rounded-xl p-6 md:p-8 space-y-8">
         {/* Titles */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Заглавие</h2>
+          <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Заглавие</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Цвят на заглавие</label>
+              <label className="theme-label">Цвят на заглавие</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -216,26 +216,26 @@ export default function MenuSettingsPage({
                   value={settings.titleColor || ''}
                   onChange={(e) => setSettings({ ...settings!, titleColor: e.target.value || null })}
                   placeholder="напр. #b91c1c или празно за default"
-                  className="malts-field"
+                  className="theme-field"
                 />
               </div>
-              <p className="malts-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
+              <p className="theme-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Заглавие (БГ) *</label>
+              <label className="theme-label">Заглавие (БГ) *</label>
               <input
                 type="text"
                 value={settings?.titleBg || ''}
                 onChange={(e) => setSettings({ ...settings!, titleBg: e.target.value })}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="malts-label">Title (EN) *</label>
+                <label className="theme-label">Title (EN) *</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={settings?.titleBg || ''}
@@ -248,13 +248,13 @@ export default function MenuSettingsPage({
                 type="text"
                 value={settings?.titleEn || ''}
                 onChange={(e) => setSettings({ ...settings!, titleEn: e.target.value })}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="malts-label">Titlu (RO) *</label>
+                <label className="theme-label">Titlu (RO) *</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={settings?.titleBg || ''}
@@ -267,7 +267,7 @@ export default function MenuSettingsPage({
                 type="text"
                 value={settings?.titleRo || ''}
                 onChange={(e) => setSettings({ ...settings!, titleRo: e.target.value })}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
@@ -276,10 +276,10 @@ export default function MenuSettingsPage({
 
         {/* Subtitles */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Подзаглавие</h2>
+          <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Подзаглавие</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Цвят на подзаглавие</label>
+              <label className="theme-label">Цвят на подзаглавие</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -292,26 +292,26 @@ export default function MenuSettingsPage({
                   value={settings.subtitleColor || ''}
                   onChange={(e) => setSettings({ ...settings!, subtitleColor: e.target.value || null })}
                   placeholder="напр. #6b7280 или празно за default"
-                  className="malts-field"
+                  className="theme-field"
                 />
               </div>
-              <p className="malts-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
+              <p className="theme-muted mt-2 text-sm">Остави празно за стандартния цвят.</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Подзаглавие (БГ) *</label>
+              <label className="theme-label">Подзаглавие (БГ) *</label>
               <textarea
                 value={settings?.subtitleBg || ''}
                 onChange={(e) => setSettings({ ...settings!, subtitleBg: e.target.value })}
                 rows={3}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="malts-label">Subtitle (EN) *</label>
+                <label className="theme-label">Subtitle (EN) *</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={settings?.subtitleBg || ''}
@@ -324,13 +324,13 @@ export default function MenuSettingsPage({
                 value={settings?.subtitleEn || ''}
                 onChange={(e) => setSettings({ ...settings!, subtitleEn: e.target.value })}
                 rows={3}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <label className="malts-label">Subtitlu (RO) *</label>
+                <label className="theme-label">Subtitlu (RO) *</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={settings?.subtitleBg || ''}
@@ -343,7 +343,7 @@ export default function MenuSettingsPage({
                 value={settings?.subtitleRo || ''}
                 onChange={(e) => setSettings({ ...settings!, subtitleRo: e.target.value })}
                 rows={3}
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
@@ -352,12 +352,12 @@ export default function MenuSettingsPage({
 
         {/* Background Image */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Фоново изображение</h2>
-          <div className="bg-[var(--malts-inset)] p-6 rounded-xl border border-[var(--malts-hairline)]">
-            <p className="malts-muted mb-4">
-              Препоръчителни размери: <span className="font-semibold text-[var(--malts-ink)]">1920x600px</span> (широк формат за hero секция)
+          <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Фоново изображение</h2>
+          <div className="bg-[var(--theme-inset)] p-6 rounded-xl border border-[var(--theme-hairline)]">
+            <p className="theme-muted mb-4">
+              Препоръчителни размери: <span className="font-semibold text-[var(--theme-ink)]">1920x600px</span> (широк формат за hero секция)
             </p>
-            <p className="malts-muted text-sm mb-4">
+            <p className="theme-muted text-sm mb-4">
               Изображението ще се показва като фон в hero секцията на меню страницата. За най-добър резултат използвайте широко изображение с височина около 600px.
             </p>
             <ImageUpload

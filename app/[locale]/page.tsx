@@ -13,6 +13,9 @@ import { applyPromotionsToProductRow, indexActivePromotionsByProductId } from '@
 import { Rampart_One } from 'next/font/google';
 import { getPromotionsUiSettings } from '@/lib/promotions-ui-settings';
 import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
+import { resolveHeroLogoUrl } from '@/lib/brand-defaults';
+import { resolveSiteDisplayName } from '@/lib/site-display-name';
+import { upcomingEventsIntro } from '@/lib/brand-copy';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -27,6 +30,7 @@ export default async function HomePage({
   const { locale } = await params;
 
   const brandId = await getDefaultBrandId();
+  const siteName = await resolveSiteDisplayName();
 
   // Fetch next 3 upcoming published events (same tenant as admin API)
   const events = await prisma.event.findMany({
@@ -56,7 +60,7 @@ export default async function HomePage({
     getBrandAppearanceSettings().catch(() => null),
   ]);
 
-  const heroLogoSrc = (brandAppearance?.heroLogoUrl || '').trim() || '/malts-logo-hero.webp';
+  const heroLogoSrc = resolveHeroLogoUrl(brandAppearance?.heroLogoUrl);
 
   const highlightsLabel =
     locale === 'bg'
@@ -330,7 +334,7 @@ export default async function HomePage({
     : offerings.ctaSecondary;
 
   return (
-    <main className="min-h-screen malts-surface">
+    <main className="min-h-screen theme-surface">
       {/* Hero: overflow-visible so logo drop-shadow / glow is not clipped */}
       <div className="relative overflow-visible">
         <div className="relative container mx-auto px-4 pt-8 pb-14 md:pt-12 md:pb-20">
@@ -339,18 +343,18 @@ export default async function HomePage({
             <div className="-mt-1 mb-6 flex justify-center px-4 py-3 animate-fade-in md:-mt-2 md:mb-10 md:py-5">
               <Image
                 src={heroLogoSrc}
-                alt="Malt's"
+                alt={siteName}
                 width={834}
                 height={812}
                 sizes="(max-width: 768px) 90vw, 440px"
-                className="malts-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[440px]"
+                className="theme-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[440px]"
                 priority
               />
             </div>
 
             {/* Tagline — red frame + glow; един ред (размерът се смалява леко на тесен екран) */}
             <div className="mb-8 md:mb-12 flex justify-center px-3 py-6 md:py-8">
-              <p className="malts-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[var(--malts-accent-contrast)] font-normal tracking-wide malts-display px-8 py-4 md:px-14 md:py-5">
+              <p className="theme-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[var(--theme-accent-contrast)] font-normal tracking-wide theme-display px-8 py-4 md:px-14 md:py-5">
                 {moodText}
               </p>
             </div>
@@ -359,7 +363,7 @@ export default async function HomePage({
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10 md:mb-16">
               <Link 
                 href={`/${locale}/menu`}
-                className="group relative px-8 py-4 malts-btn-primary rounded-xl font-bold text-lg transition-all duration-300 overflow-hidden w-full sm:w-auto"
+                className="group relative px-8 py-4 theme-btn-primary rounded-xl font-bold text-lg transition-all duration-300 overflow-hidden w-full sm:w-auto"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   🍸 {locale === 'bg' ? 'Виж менюто' : locale === 'en' ? 'View Menu' : 'Vezi meniul'}
@@ -367,7 +371,7 @@ export default async function HomePage({
               </Link>
               <Link 
                 href={`/${locale}/events`}
-                className="px-8 py-4 malts-btn-secondary rounded-xl font-bold text-lg border-2 transition-all duration-300 w-full sm:w-auto"
+                className="px-8 py-4 theme-btn-secondary rounded-xl font-bold text-lg border-2 transition-all duration-300 w-full sm:w-auto"
               >
                 🎉 {locale === 'bg' ? 'Събития' : locale === 'en' ? 'Events' : 'Evenimente'}
               </Link>
@@ -375,7 +379,7 @@ export default async function HomePage({
             
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               {/* Location with enhanced styling */}
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--malts-card)]/80 border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--theme-card)]/80 border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] backdrop-blur-sm">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -389,7 +393,7 @@ export default async function HomePage({
               
               {/* Today's working hours */}
               {todayHours && todayHours.isOpen && todayHours.openTime && todayHours.closeTime && (
-                <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--malts-card)]/80 border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] backdrop-blur-sm">
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--theme-card)]/80 border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] backdrop-blur-sm">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -407,26 +411,26 @@ export default async function HomePage({
 
         {/* Offerings Section */}
         <section className="mt-16 md:mt-24 relative">
-          <div className="relative overflow-hidden malts-card px-6 py-12 md:px-16 md:py-16">
+          <div className="relative overflow-hidden theme-card px-6 py-12 md:px-16 md:py-16">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--malts-accent-tint)] blur-3xl opacity-60"></div>
+              <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--theme-accent-tint)] blur-3xl opacity-60"></div>
               <div className="absolute -bottom-10 left-10 w-56 h-56 bg-[rgba(22,101,52,0.10)] blur-3xl opacity-60"></div>
             </div>
 
             <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
-              <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] malts-section-label-font">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] theme-section-label-font">
                 {sectionLabel}
               </span>
-              <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight malts-display">
+              <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight theme-display">
                 {offeringsTitle}
               </h2>
-              <p className="mt-4 text-lg md:text-xl malts-muted malts-display-secondary">
+              <p className="mt-4 text-lg md:text-xl theme-muted theme-display-secondary">
                 {offeringsSubtitle}
               </p>
-              <p className="mt-6 text-base md:text-lg malts-muted leading-relaxed max-w-3xl whitespace-pre-line">
+              <p className="mt-6 text-base md:text-lg theme-muted leading-relaxed max-w-3xl whitespace-pre-line">
                 {offeringsDescription}
               </p>
-              <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl malts-muted whitespace-pre-line">
+              <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl theme-muted whitespace-pre-line">
                 {offeringsNote}
               </p>
             </div>
@@ -435,10 +439,10 @@ export default async function HomePage({
               {stats.map(stat => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-6 py-5 text-center"
+                  className="rounded-2xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-6 py-5 text-center"
                 >
                   <div className="text-3xl md:text-4xl font-semibold">{stat.value}</div>
-                  <div className="mt-2 text-sm uppercase tracking-[0.2em] malts-subtle">{stat.label}</div>
+                  <div className="mt-2 text-sm uppercase tracking-[0.2em] theme-subtle">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -450,7 +454,7 @@ export default async function HomePage({
 
             {cardsHeading?.trim() ? (
               <div className="relative mt-10 text-center">
-                <p className="text-2xl md:text-4xl font-semibold tracking-tight malts-display">
+                <p className="text-2xl md:text-4xl font-semibold tracking-tight theme-display">
                   {cardsHeading}
                 </p>
               </div>
@@ -460,43 +464,43 @@ export default async function HomePage({
               {cards.map(card => (
                 <div
                   key={card.title}
-                  className="group flex flex-col malts-card p-6 md:p-7 hover:-translate-y-[6px] transition-all duration-300"
+                  className="group flex flex-col theme-card p-6 md:p-7 hover:-translate-y-[6px] transition-all duration-300"
                 >
                   <div className="flex items-center justify-between">
                     <div className="relative group/icon">
                       {/* Icon circle with glow */}
-                      <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
-                      <div className="relative w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] flex items-center justify-center transition-all duration-300">
+                      <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                      <div className="relative w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] flex items-center justify-center transition-all duration-300">
                         <div className="flex items-center justify-center transform group-hover/icon:scale-110 transition-transform duration-300">
                           <OfferingCardIcon icon={card.icon} />
                         </div>
                       </div>
                       {/* Micro interaction - hover tooltip with suggestions */}
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 opacity-0 group-hover/icon:opacity-100 pointer-events-none transition-opacity duration-300 z-10">
-                        <div className="bg-[var(--malts-card)]/92 backdrop-blur-sm border border-[var(--malts-hairline)] rounded-lg px-4 py-2 whitespace-nowrap">
-                          <p className="text-xs text-[var(--malts-ink)] font-medium">
+                        <div className="bg-[var(--theme-card)]/92 backdrop-blur-sm border border-[var(--theme-hairline)] rounded-lg px-4 py-2 whitespace-nowrap">
+                          <p className="text-xs text-[var(--theme-ink)] font-medium">
                             {card.highlights.slice(0, 3).join(' • ')}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
+                    <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
                       {card.badge}
                     </span>
                   </div>
                   <h3 className="mt-6 text-2xl font-semibold transition-colors">{card.title}</h3>
-                  <p className="mt-3 malts-muted text-sm md:text-base leading-relaxed transition-colors">
+                  <p className="mt-3 theme-muted text-sm md:text-base leading-relaxed transition-colors">
                     {card.description}
                   </p>
 
                   <div className="mt-6">
-                    <p className="text-xs uppercase tracking-[0.3em] malts-subtle mb-3 transition-colors">
+                    <p className="text-xs uppercase tracking-[0.3em] theme-subtle mb-3 transition-colors">
                       {highlightsLabel}
                     </p>
-                    <ul className="space-y-2 text-sm md:text-base text-[var(--malts-ink)]">
+                    <ul className="space-y-2 text-sm md:text-base text-[var(--theme-ink)]">
                       {card.highlights.map((item, index) => (
                         <li key={`${card.title}-${index}`} className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200" style={{ transitionDelay: `${index * 50}ms` }}>
-                          <span className="inline-block h-[2px] w-6 bg-[var(--malts-hairline)] group-hover:bg-[var(--malts-accent-tint-border)] group-hover:w-8 transition-all"></span>
+                          <span className="inline-block h-[2px] w-6 bg-[var(--theme-hairline)] group-hover:bg-[var(--theme-accent-tint-border)] group-hover:w-8 transition-all"></span>
                           <span className="truncate transition-colors">{item}</span>
                         </li>
                       ))}
@@ -509,7 +513,7 @@ export default async function HomePage({
             <div className="relative mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href={`/${locale}/menu`}
-                className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-primary px-8 py-3 font-semibold tracking-wide transition"
+                className="inline-flex items-center justify-center gap-2 rounded-full theme-btn-primary px-8 py-3 font-semibold tracking-wide transition"
               >
                 {ctaPrimary}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -518,7 +522,7 @@ export default async function HomePage({
               </Link>
               <Link
                 href={`/${locale}/contact`}
-                className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
+                className="inline-flex items-center justify-center gap-2 rounded-full theme-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
               >
                 {ctaSecondary}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -562,20 +566,16 @@ export default async function HomePage({
           <div className="mt-16 md:mt-24">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 md:mb-12 gap-4">
               <div>
-                <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
+                <h2 className="text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-2">
                   {locale === 'bg' ? 'Предстоящи събития' : locale === 'en' ? 'Upcoming Events' : 'Evenimente viitoare'}
                 </h2>
-                <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
-                  {locale === 'bg'
-                    ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
-                    : locale === 'en'
-                      ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
-                      : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
+                <p className="text-lg md:text-xl theme-muted theme-display-secondary max-w-3xl">
+                  {upcomingEventsIntro(locale, siteName)}
                 </p>
               </div>
               <Link 
                 href={`/${locale}/events`}
-                className="group px-6 py-3 malts-btn-secondary rounded-xl font-semibold border-2 transition-all flex items-center gap-2"
+                className="group px-6 py-3 theme-btn-secondary rounded-xl font-semibold border-2 transition-all flex items-center gap-2"
               >
                 {locale === 'bg' ? 'Виж всички' : locale === 'en' ? 'View all' : 'Alle ansehen'}
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -595,10 +595,10 @@ export default async function HomePage({
                   <Link
                     key={event.id}
                     href={`/${locale}/events/${event.id}`}
-                    className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block"
+                    className="group theme-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block"
                   >
                     {cardImageSrc && (
-                      <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                      <div className="relative h-56 w-full overflow-hidden bg-[var(--theme-inset)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={cardImageSrc}
@@ -612,11 +612,11 @@ export default async function HomePage({
                     )}
                     
                     <div className="p-6">
-                      <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] rounded-full w-fit backdrop-blur-sm">
-                        <svg className="w-4 h-4 text-[var(--malts-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] rounded-full w-fit backdrop-blur-sm">
+                        <svg className="w-4 h-4 text-[var(--theme-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span className="text-[var(--malts-ink)] text-sm font-medium">
+                        <span className="text-[var(--theme-ink)] text-sm font-medium">
                           {formatDateForLocale(eventDate, locale as 'bg' | 'en' | 'ro')}
                         </span>
                       </div>
@@ -626,12 +626,12 @@ export default async function HomePage({
                       </h3>
                       
                       {eventDesc && (
-                        <p className="malts-muted text-sm md:text-base line-clamp-2 mb-4">
+                        <p className="theme-muted text-sm md:text-base line-clamp-2 mb-4">
                           {eventDesc}
                         </p>
                       )}
 
-                      <div className="flex items-center text-[var(--malts-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
+                      <div className="flex items-center text-[var(--theme-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
                         {locale === 'bg' ? 'Научи повече' : locale === 'en' ? 'Learn more' : 'Află mai mult'}
                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

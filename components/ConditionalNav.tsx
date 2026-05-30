@@ -7,7 +7,15 @@ import { SessionProvider } from 'next-auth/react';
 import OfflineBanner from '@/components/OfflineBanner';
 import AppLoadingOverlay from '@/components/AppLoadingOverlay';
 
-export default function ConditionalNav({ children }: { children?: ReactNode }) {
+export default function ConditionalNav({
+  children,
+  initialNavLogoUrl = null,
+  initialSiteShortName = null,
+}: {
+  children?: ReactNode;
+  initialNavLogoUrl?: string | null;
+  initialSiteShortName?: string | null;
+}) {
   const pathname = usePathname();
   const [isOffline, setIsOffline] = useState(false);
   const [swVersion, setSwVersion] = useState<string | null>(null);
@@ -70,13 +78,18 @@ export default function ConditionalNav({ children }: { children?: ReactNode }) {
       <OfflineBanner onStatusChange={handleStatusChange} />
       <AppLoadingOverlay />
       <div className={isOffline ? 'pointer-events-none opacity-50' : ''}>
-        {!hideNav && <Navigation />}
+        {!hideNav && (
+          <Navigation
+            initialNavLogoUrl={initialNavLogoUrl}
+            initialSiteShortName={initialSiteShortName}
+          />
+        )}
         <div className={hideNav ? '' : 'pt-16'}>
           {children}
         </div>
       </div>
       <footer
-        className={`malts-muted border-t border-[var(--malts-hairline)] bg-[var(--malts-paper)]/80 py-4 text-center text-sm ${
+        className={`theme-muted border-t border-[var(--theme-hairline)] bg-[var(--theme-paper)]/80 py-4 text-center text-sm ${
           orderFooterClearance ? 'max-md:mb-28' : ''
         }`}
       >
@@ -85,12 +98,12 @@ export default function ConditionalNav({ children }: { children?: ReactNode }) {
             href="https://gsoft.bg" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-[var(--malts-accent)] transition-colors"
+            className="hover:text-[var(--theme-accent)] transition-colors"
           >
             Реализирано от GSoft.bg
           </a>
           {swVersion && (
-            <span className="text-xs text-[var(--malts-subtle)] font-mono">
+            <span className="text-xs text-[var(--theme-subtle)] font-mono">
               версия - {swVersion}
             </span>
           )}

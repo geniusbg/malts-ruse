@@ -19,14 +19,14 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
     }
   }, [onClose, duration, persistent]);
 
-  /* Opaque surfaces — floating toast must read clearly over any page bg (malts-alert-* tints are too transparent). */
+  /* Opaque surfaces — floating toast must read clearly over any page bg (theme-alert-* tints are too transparent). */
   const colors = {
     success:
       'border border-[rgba(22,101,52,0.38)] bg-[#cde8d8] text-[#05210f] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
     error:
       'border border-[rgba(153,27,27,0.42)] bg-[#f0d9d9] text-[#3b0a0a] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
     info:
-      'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
+      'border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] shadow-[0_12px_40px_rgba(0,0,0,0.12)]',
   };
 
   const icons = {
@@ -50,8 +50,8 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
             onClick={onClose}
             className={`shrink-0 font-semibold transition-colors ${
               persistent
-                ? 'rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-paper)] px-4 py-2 text-base text-[var(--malts-ink)] shadow-sm hover:bg-[var(--malts-card-hover)]'
-                : 'text-3xl leading-none text-[var(--malts-ink)] hover:opacity-75'
+                ? 'rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-paper)] px-4 py-2 text-base text-[var(--theme-ink)] shadow-sm hover:bg-[var(--theme-card-hover)]'
+                : 'text-3xl leading-none text-[var(--theme-ink)] hover:opacity-75'
             }`}
           >
             {persistent 
@@ -62,9 +62,9 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
         
         {/* Progress bar - only show if not persistent */}
         {!persistent && (
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--malts-ink)]/12">
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--theme-ink)]/12">
             <div
-              className="h-full animate-progress bg-[var(--malts-ink)]/35"
+              className="h-full animate-progress bg-[var(--theme-ink)]/35"
               style={{ animationDuration: `${duration}ms` }}
             />
           </div>

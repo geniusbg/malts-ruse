@@ -11,13 +11,19 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import Toast from '@/components/Toast';
 import { getPusherClient } from '@/lib/pusher-client';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import ChefsPicksCarousel from '@/components/ChefsPicksCarousel';
 import OrderTierHorizontalScroll from '@/components/OrderTierHorizontalScroll';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import { formatDateForLocale } from '@/lib/date-utils';
 import { eventCardImageUrl, eventDetailImageUrl } from '@/lib/event-images';
+import {
+  atVenueBadgeShort,
+  partnerEventBadgeShort,
+  upcomingEventsIntro,
+} from '@/lib/brand-copy';
+import { useSiteDisplayName } from '@/lib/use-site-display-name';
 import { Rampart_One } from 'next/font/google';
 import type { PromotionsUiSettings } from '@/lib/promotions-ui-settings';
 import {
@@ -57,6 +63,7 @@ function OrderPageContent() {
   
   // Get locale from URL path
   const locale = pathname.split('/')[1] || 'bg';
+  const siteName = useSiteDisplayName();
 
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -985,19 +992,19 @@ function OrderPageContent() {
 
   return (
     <main
-      className={`min-h-screen malts-surface ${
+      className={`min-h-screen theme-surface ${
         tableNumber && waiterCallEnabled ? 'pb-16 max-md:pb-24 md:pb-8' : 'pb-8'
       }`}
     >
       {/* Variant Picker */}
       {variantPicker.open && variantPicker.product ? (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 md:items-center">
-          <div className="w-full max-w-md rounded-2xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] p-5 shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] p-5 shadow-2xl">
             <div className="mb-3">
-              <div className="text-sm malts-muted">
+              <div className="text-sm theme-muted">
                 {locale === 'bg' ? 'Избери вариант' : locale === 'en' ? 'Choose variant' : 'Alege variantă'}
               </div>
-              <div className="mt-1 text-lg font-semibold text-[var(--malts-ink)]">
+              <div className="mt-1 text-lg font-semibold text-[var(--theme-ink)]">
                 {locale === 'bg'
                   ? variantPicker.product.nameBg
                   : locale === 'en'
@@ -1015,8 +1022,8 @@ function OrderPageContent() {
                     onClick={() => setVariantPicker((p) => ({ ...p, selected: opt }))}
                     className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${
                       active
-                        ? 'border-[var(--malts-accent)] bg-[var(--malts-accent-tint)] text-[var(--malts-ink)]'
-                        : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] hover:bg-[var(--malts-card-hover)] text-[var(--malts-ink)]'
+                        ? 'border-[var(--theme-accent)] bg-[var(--theme-accent-tint)] text-[var(--theme-ink)]'
+                        : 'border-[var(--theme-hairline)] bg-[var(--theme-paper)] hover:bg-[var(--theme-card-hover)] text-[var(--theme-ink)]'
                     }`}
                   >
                     {opt}
@@ -1028,7 +1035,7 @@ function OrderPageContent() {
               <button
                 type="button"
                 onClick={() => setVariantPicker({ open: false, product: null, options: [], selected: null })}
-                className="flex-1 malts-btn-secondary rounded-xl px-4 py-2 font-semibold"
+                className="flex-1 theme-btn-secondary rounded-xl px-4 py-2 font-semibold"
               >
                 {locale === 'bg' ? 'Отказ' : locale === 'en' ? 'Cancel' : 'Anulează'}
               </button>
@@ -1040,7 +1047,7 @@ function OrderPageContent() {
                   setVariantPicker({ open: false, product: null, options: [], selected: null });
                   addToCartResolved(p, v || null);
                 }}
-                className="flex-1 malts-btn-primary rounded-xl px-4 py-2 font-semibold"
+                className="flex-1 theme-btn-primary rounded-xl px-4 py-2 font-semibold"
               >
                 {locale === 'bg' ? 'Добави' : locale === 'en' ? 'Add' : 'Adaugă'}
               </button>
@@ -1080,40 +1087,40 @@ function OrderPageContent() {
                     : `Au fost plasate ${approvalThresholdValue} comenzi în ultimele ${approvalWindowValue} minute. Din motive de securitate și ca măsură preventivă împotriva acțiunilor neautorizate și a atacurilor, această comandă necesită aprobare.`}
                 </p>
                 {approvalStatus === 'pending' && (
-                  <MaltsInlineFeedback tone="warning" className="mt-2" role="status">
+                  <ThemeInlineFeedback tone="warning" className="mt-2" role="status">
                     {locale === 'bg'
                       ? '⏳ Очакване на одобрение от администратор...'
                       : locale === 'en'
                         ? '⏳ Waiting for admin approval...'
                         : '⏳ Se așteaptă aprobarea administratorului...'}
-                  </MaltsInlineFeedback>
+                  </ThemeInlineFeedback>
                 )}
                 {approvalStatus === 'approved' && (
-                  <MaltsInlineFeedback tone="success" className="mt-2" role="status">
+                  <ThemeInlineFeedback tone="success" className="mt-2" role="status">
                     {locale === 'bg'
                       ? '✅ Поръчката е одобрена!'
                       : locale === 'en'
                         ? '✅ Order approved!'
                         : '✅ Comanda a fost aprobată!'}
-                  </MaltsInlineFeedback>
+                  </ThemeInlineFeedback>
                 )}
                 {approvalStatus === 'rejected' && (
-                  <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+                  <ThemeInlineFeedback tone="error" className="mt-2" role="alert">
                     {locale === 'bg'
                       ? '❌ Поръчката е отхвърлена'
                       : locale === 'en'
                         ? '❌ Order rejected'
                         : '❌ Comanda a fost respinsă'}
-                  </MaltsInlineFeedback>
+                  </ThemeInlineFeedback>
                 )}
                 {approvalStatus === 'auto-rejected' && (
-                  <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+                  <ThemeInlineFeedback tone="error" className="mt-2" role="alert">
                     {locale === 'bg'
                       ? `⏱️ Поръчката беше автоматично отхвърлена след ${autoRejectMinutesValue} минути`
                       : locale === 'en'
                         ? `⏱️ Order was automatically rejected after ${autoRejectMinutesValue} minutes`
                         : `⏱️ Comanda a fost respinsă automat după ${autoRejectMinutesValue} minute`}
-                  </MaltsInlineFeedback>
+                  </ThemeInlineFeedback>
                 )}
               </div>
             </div>
@@ -1122,7 +1129,7 @@ function OrderPageContent() {
       )}
 
       {/* Header */}
-      <div className="bg-[var(--malts-paper)]/92 backdrop-blur-lg border-b border-[var(--malts-hairline)] sticky top-0 z-40">
+      <div className="bg-[var(--theme-paper)]/92 backdrop-blur-lg border-b border-[var(--theme-hairline)] sticky top-0 z-40">
         <div className="container mx-auto px-4 py-2">
           <div className="flex justify-between items-center gap-4">
             <Link
@@ -1131,11 +1138,11 @@ function OrderPageContent() {
             >
               <Image
                 src="/malts-logo-nav.webp"
-                alt="Malt's"
+                alt={siteName}
                 width={400}
                 height={331}
                 sizes="(max-width: 640px) 360px, 320px"
-                className="malts-brand-filter h-full w-auto max-h-[6.25rem] min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-[5.75rem]"
+                className="theme-brand-filter h-full w-auto max-h-[6.25rem] min-h-0 min-w-0 shrink-0 object-contain object-left sm:max-h-[5.75rem]"
                 priority
               />
             </Link>
@@ -1143,8 +1150,8 @@ function OrderPageContent() {
             <div className="flex flex-col items-end gap-2">
               <div className="flex items-center gap-2 md:gap-3">
                 {tableNumber && (
-                  <div className="bg-[var(--malts-accent-tint)] px-3 py-1 rounded-full border border-[var(--malts-accent-tint-border)] -ml-2 md:ml-0">
-                    <p className="text-[var(--malts-ink)] font-semibold text-sm whitespace-nowrap">
+                  <div className="bg-[var(--theme-accent-tint)] px-3 py-1 rounded-full border border-[var(--theme-accent-tint-border)] -ml-2 md:ml-0">
+                    <p className="text-[var(--theme-ink)] font-semibold text-sm whitespace-nowrap">
                       {locale === 'bg' ? 'Маса' : locale === 'en' ? 'Table' : 'Masă'} {tableNumber}
                     </p>
                   </div>
@@ -1155,11 +1162,11 @@ function OrderPageContent() {
                   <button
                     type="button"
                     onClick={() => setShowCart(!showCart)}
-                    className="relative px-4 py-2.5 malts-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
+                    className="relative px-4 py-2.5 theme-btn-secondary rounded-lg font-semibold transition-all text-sm md:text-base"
                   >
                     🛒 {locale === 'bg' ? 'Количка' : locale === 'en' ? 'Cart' : 'Coș'}
                     {cartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-[var(--malts-danger)] text-[var(--malts-accent-contrast)] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
+                      <span className="absolute -top-2 -right-2 bg-[var(--theme-danger)] text-[var(--theme-accent-contrast)] rounded-full w-5 h-5 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold">
                         {cartCount}
                       </span>
                     )}
@@ -1177,7 +1184,7 @@ function OrderPageContent() {
       {/* Category Filter — мобилен: сгъваем панел + ограничена височина; десктоп: пълен ред */}
       <div
         id="order-category-nav"
-        className="border-b border-[var(--malts-hairline)] bg-[var(--malts-paper)]/92 py-2 backdrop-blur-lg lg:py-4 scroll-mt-32"
+        className="border-b border-[var(--theme-hairline)] bg-[var(--theme-paper)]/92 py-2 backdrop-blur-lg lg:py-4 scroll-mt-32"
       >
         <div className="container mx-auto px-4">
           {(() => {
@@ -1186,24 +1193,24 @@ function OrderPageContent() {
                 ? depth === 0
                   ? `rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-200 whitespace-nowrap sm:px-5 sm:py-3 sm:text-base ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-md ring-2 ring-[var(--malts-accent)]/30'
-                        : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card-hover)]'
+                        ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] shadow-md ring-2 ring-[var(--theme-accent)]/30'
+                        : 'border-2 border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:border-[var(--theme-accent)]/40 hover:bg-[var(--theme-card-hover)]'
                     }`
                   : `rounded-lg px-3.5 py-2 text-sm font-semibold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2.5 sm:text-[15px] ${
                       isActive
-                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-sm'
-                        : 'border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card-hover)]'
+                        ? 'border-2 border-[var(--theme-accent)] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] shadow-sm'
+                        : 'border-2 border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:border-[var(--theme-accent)]/35 hover:bg-[var(--theme-card-hover)]'
                     }`
                 : depth === 0
                   ? `rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 whitespace-nowrap sm:px-4 sm:py-2 sm:text-sm lg:rounded-xl lg:px-6 lg:py-3 lg:text-base ${
                       isActive
-                        ? 'scale-[1.02] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-lg lg:scale-105'
-                        : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                        ? 'scale-[1.02] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] shadow-lg lg:scale-105'
+                        : 'border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
                     }`
                   : `rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 whitespace-nowrap sm:px-3 sm:py-1.5 sm:text-sm lg:rounded-lg lg:px-4 lg:py-2 ${
                       isActive
-                        ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                        : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                        ? 'border-2 border-[var(--theme-accent)] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                        : 'border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
                     }`;
 
             const tierScrollLeftAria =
@@ -1266,7 +1273,7 @@ function OrderPageContent() {
                     }}
                     className={
                       tierBtnClass(depth, isActive, sheet) +
-                      (categoryNavHighlight ? ' malts-order-category-btn-blink' : '')
+                      (categoryNavHighlight ? ' theme-order-category-btn-blink' : '')
                     }
                   >
                     {name}
@@ -1331,7 +1338,7 @@ function OrderPageContent() {
                 return (
                   <span key={`${id}-${idx}`} className="inline-flex max-w-full shrink-0 items-center gap-0.5">
                     {idx > 0 ? (
-                      <span className="text-[var(--malts-subtle)]" aria-hidden>
+                      <span className="text-[var(--theme-subtle)]" aria-hidden>
                         ›
                       </span>
                     ) : null}
@@ -1344,8 +1351,8 @@ function OrderPageContent() {
                       {...(isPathPivot ? { 'data-order-path-pivot': '' } : {})}
                       className={
                         variant === 'mobile'
-                          ? 'rounded-md border border-[var(--malts-hairline)]/70 bg-[var(--malts-card)]/80 px-2 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-accent)]/40 hover:bg-[var(--malts-card)]'
-                          : 'rounded-md border border-transparent px-1.5 py-0.5 text-left text-xs font-medium text-[var(--malts-muted)] transition-colors hover:border-[var(--malts-hairline)] hover:bg-[var(--malts-inset)]/50'
+                          ? 'rounded-md border border-[var(--theme-hairline)]/70 bg-[var(--theme-card)]/80 px-2 py-0.5 text-left text-xs font-medium text-[var(--theme-muted)] transition-colors hover:border-[var(--theme-accent)]/40 hover:bg-[var(--theme-card)]'
+                          : 'rounded-md border border-transparent px-1.5 py-0.5 text-left text-xs font-medium text-[var(--theme-muted)] transition-colors hover:border-[var(--theme-hairline)] hover:bg-[var(--theme-inset)]/50'
                       }
                     >
                       {name}
@@ -1369,10 +1376,10 @@ function OrderPageContent() {
 
             return (
               <>
-                <div className="mb-0 flex w-full flex-col gap-1.5 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)]/50 px-3 py-2.5 lg:hidden">
+                <div className="mb-0 flex w-full flex-col gap-1.5 rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)]/50 px-3 py-2.5 lg:hidden">
                   <div className="flex w-full min-w-0 items-center justify-between gap-2">
                     <div className="min-w-0 flex-1 pr-1">
-                      <p className="text-base font-bold leading-snug text-[var(--malts-ink)] sm:text-lg">
+                      <p className="text-base font-bold leading-snug text-[var(--theme-ink)] sm:text-lg">
                         {menuPickHeading}
                       </p>
                     </div>
@@ -1380,28 +1387,28 @@ function OrderPageContent() {
                       <button
                         type="button"
                         onClick={() => openCategoryPicker()}
-                        className="malts-btn-secondary rounded-md px-2.5 py-1 text-xs font-semibold"
+                        className="theme-btn-secondary rounded-md px-2.5 py-1 text-xs font-semibold"
                       >
                         {pickActionLabel}
                       </button>
                       <button
                         type="button"
                         onClick={() => openCategoryPicker()}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--malts-subtle)] transition-colors hover:bg-[var(--malts-inset)]"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--theme-subtle)] transition-colors hover:bg-[var(--theme-inset)]"
                         aria-label={openSheetAria}
                       >
                         <span aria-hidden>▼</span>
                       </button>
                     </div>
                   </div>
-                  <p className="text-[11px] leading-snug text-[var(--malts-muted)] sm:text-xs">{menuPickHint}</p>
+                  <p className="text-[11px] leading-snug text-[var(--theme-muted)] sm:text-xs">{menuPickHint}</p>
                   {categoryPath.length > 0 ? (
                     renderPathSegmentButtons('mobile')
                   ) : (
                     <button
                       type="button"
                       onClick={() => openCategoryPicker()}
-                      className="w-full rounded-lg border border-dashed border-[var(--malts-hairline)] bg-transparent px-3 py-2.5 text-left text-sm font-semibold text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent)]/35 hover:bg-[var(--malts-card)]/40 sm:text-base"
+                      className="w-full rounded-lg border border-dashed border-[var(--theme-hairline)] bg-transparent px-3 py-2.5 text-left text-sm font-semibold text-[var(--theme-ink)] transition-colors hover:border-[var(--theme-accent)]/35 hover:bg-[var(--theme-card)]/40 sm:text-base"
                     >
                       {menuPickHeading}
                     </button>
@@ -1425,17 +1432,17 @@ function OrderPageContent() {
                           role="dialog"
                           aria-modal="true"
                           aria-labelledby="order-category-sheet-title"
-                          className="fixed inset-x-0 bottom-0 z-[101] flex max-h-[min(calc(100dvh-7.5rem),540px)] flex-col rounded-t-2xl border border-[var(--malts-hairline)] border-b-0 bg-[var(--malts-card)] shadow-[0_-12px_40px_rgba(0,0,0,0.18)] lg:hidden"
+                          className="fixed inset-x-0 bottom-0 z-[101] flex max-h-[min(calc(100dvh-7.5rem),540px)] flex-col rounded-t-2xl border border-[var(--theme-hairline)] border-b-0 bg-[var(--theme-card)] shadow-[0_-12px_40px_rgba(0,0,0,0.18)] lg:hidden"
                         >
                       <div className="flex shrink-0 flex-col items-center pt-2">
-                        <div className="h-1 w-12 rounded-full bg-[var(--malts-hairline)]" aria-hidden />
+                        <div className="h-1 w-12 rounded-full bg-[var(--theme-hairline)]" aria-hidden />
                       </div>
-                      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--malts-hairline)] px-4 pb-3 pt-2">
+                      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--theme-hairline)] px-4 pb-3 pt-2">
                         <div className="min-w-0 flex-1">
-                          <p id="order-category-sheet-title" className="text-lg font-bold leading-snug text-[var(--malts-ink)] sm:text-xl">
+                          <p id="order-category-sheet-title" className="text-lg font-bold leading-snug text-[var(--theme-ink)] sm:text-xl">
                             {menuPickHeading}
                           </p>
-                          <p className="mt-1 text-xs leading-snug text-[var(--malts-muted)] sm:text-sm">{menuPickHint}</p>
+                          <p className="mt-1 text-xs leading-snug text-[var(--theme-muted)] sm:text-sm">{menuPickHint}</p>
                           {categoryPath.length > 0 ? (
                             <div className="mt-2">{renderPathSegmentButtons('sheet')}</div>
                           ) : null}
@@ -1443,7 +1450,7 @@ function OrderPageContent() {
                         <button
                           type="button"
                           onClick={() => setCategorySheetOpen(false)}
-                          className="malts-btn-secondary shrink-0 rounded-lg px-3 py-1.5 text-lg leading-none"
+                          className="theme-btn-secondary shrink-0 rounded-lg px-3 py-1.5 text-lg leading-none"
                           aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
                         >
                           ×
@@ -1459,8 +1466,8 @@ function OrderPageContent() {
                             depth === 0
                               ? 'overflow-x-auto pb-1 [scrollbar-width:thin]'
                               : depth >= 2
-                                ? 'overflow-x-auto border-t border-[var(--malts-hairline)]/60 pt-2 [scrollbar-width:thin]'
-                                : 'overflow-x-auto border-t border-[var(--malts-hairline)]/60 pt-2 [scrollbar-width:thin]',
+                                ? 'overflow-x-auto border-t border-[var(--theme-hairline)]/60 pt-2 [scrollbar-width:thin]'
+                                : 'overflow-x-auto border-t border-[var(--theme-hairline)]/60 pt-2 [scrollbar-width:thin]',
                             `flex min-w-max justify-start ${depth === 0 ? 'gap-2' : 'gap-1.5'} sm:gap-2`,
                             { closeCategorySheet: true, markHorizontalTier: true }
                           )
@@ -1585,7 +1592,7 @@ function OrderPageContent() {
                     <button
                       type="button"
                       onClick={() => openCategoryPicker()}
-                      className="malts-muted hover:text-[var(--malts-ink)] mx-auto max-w-xl text-balance text-xl underline-offset-4 transition-colors hover:underline"
+                      className="theme-muted hover:text-[var(--theme-ink)] mx-auto max-w-xl text-balance text-xl underline-offset-4 transition-colors hover:underline"
                     >
                       {categoryPath.length === 0
                         ? locale === 'bg'
@@ -1615,7 +1622,7 @@ function OrderPageContent() {
                       <BrandedHeroLogo
                         width={320}
                         height={311}
-                        className="malts-brand-filter h-auto w-[210px] max-w-[70vw] object-contain opacity-95"
+                        className="theme-brand-filter h-auto w-[210px] max-w-[70vw] object-contain opacity-95"
                         priority={false}
                       />
                     </div>
@@ -1626,9 +1633,9 @@ function OrderPageContent() {
                   <div className="mb-8">
                     {/* Category Header */}
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="h-1 w-8 bg-[var(--malts-accent)] rounded-full"></div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">{categoryName}</h2>
-                      <div className="flex-1 h-px bg-[var(--malts-hairline)]"></div>
+                      <div className="h-1 w-8 bg-[var(--theme-accent)] rounded-full"></div>
+                      <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-ink)]">{categoryName}</h2>
+                      <div className="flex-1 h-px bg-[var(--theme-hairline)]"></div>
                     </div>
 
                     {/* Products Grid */}
@@ -1643,10 +1650,10 @@ function OrderPageContent() {
                         return (
                           <div
                             key={product.id}
-                            className="group relative malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent-tint-border)] hover:shadow-lg transition-all duration-300"
+                            className="group relative theme-card rounded-2xl overflow-hidden hover:border-[var(--theme-accent-tint-border)] hover:shadow-lg transition-all duration-300"
                           >
                             {product.isPromoted && (
-                              <div className="absolute top-3 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
+                              <div className="absolute top-3 left-3 z-10 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
                                 {product.promotionLabel?.trim()
                                   ? product.promotionLabel
                                   : locale === 'bg'
@@ -1658,7 +1665,7 @@ function OrderPageContent() {
                             )}
                             {/* Product Image */}
                             {product.imageUrl && (
-                              <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                              <div className="relative h-56 w-full overflow-hidden bg-[var(--theme-inset)]">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={product.imageUrl}
@@ -1674,7 +1681,7 @@ function OrderPageContent() {
                             <div
                               className={`p-4 ${product.isPromoted && !product.imageUrl ? 'pt-11' : ''}`}
                             >
-                              <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--malts-ink)] transition-colors group-hover:text-[var(--malts-accent)] md:text-xl">
+                              <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--theme-ink)] transition-colors group-hover:text-[var(--theme-accent)] md:text-xl">
                                 {productName}
                               </h3>
                               {variants.length > 0 ? (
@@ -1683,7 +1690,7 @@ function OrderPageContent() {
                                     {variants.map((v: string) => (
                                       <span
                                         key={v}
-                                        className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                                        className="inline-flex items-center rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--theme-ink)]"
                                       >
                                         {v}
                                       </span>
@@ -1693,7 +1700,7 @@ function OrderPageContent() {
                               ) : null}
 
                               {product.descriptionBg || product.descriptionEn || product.descriptionRo ? (
-                                <p className="malts-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
+                                <p className="theme-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
                                   {locale === 'bg' && product.descriptionBg ? product.descriptionBg :
                                    locale === 'en' && product.descriptionEn ? product.descriptionEn :
                                    locale === 'ro' && product.descriptionRo ? product.descriptionRo :
@@ -1706,10 +1713,10 @@ function OrderPageContent() {
                                 ''
                               ).trim() ? (
                                 <div className="mb-4">
-                                  <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                                  <div className="text-[11px] uppercase tracking-wide theme-muted mb-1">
                                     {locale === 'bg' ? 'Алергени' : locale === 'en' ? 'Allergens' : 'Alergeni'}
                                   </div>
-                                  <p className="text-sm text-[var(--malts-ink)]/85 leading-relaxed whitespace-pre-line break-words">
+                                  <p className="text-sm text-[var(--theme-ink)]/85 leading-relaxed whitespace-pre-line break-words">
                                     {locale === 'bg'
                                       ? product.allergensBg
                                       : locale === 'en'
@@ -1719,20 +1726,20 @@ function OrderPageContent() {
                                 </div>
                               ) : null}
 
-                              <div className="flex justify-between items-end gap-2 border-t border-[var(--malts-hairline)] pt-4">
+                              <div className="flex justify-between items-end gap-2 border-t border-[var(--theme-hairline)] pt-4">
                                 <div className="flex min-w-0 flex-col items-start gap-0.5">
                                   {product.basePriceBgn != null && (
-                                    <span className="inline-block text-xs text-[var(--malts-subtle)] line-through md:text-sm">
+                                    <span className="inline-block text-xs text-[var(--theme-subtle)] line-through md:text-sm">
                                       <Price
                                         priceBgn={Number(product.basePriceBgn)}
                                         inline
-                                        className="text-[var(--malts-subtle)]"
+                                        className="text-[var(--theme-subtle)]"
                                       />
                                     </span>
                                   )}
                                   <Price
                                     priceBgn={Number(product.priceBgn)}
-                                    className="text-sm font-semibold text-[var(--malts-ink)] md:text-lg lg:text-xl md:font-bold"
+                                    className="text-sm font-semibold text-[var(--theme-ink)] md:text-lg lg:text-xl md:font-bold"
                                     showBoth={true}
                                     inline={true}
                                     unit={product.unit}
@@ -1743,7 +1750,7 @@ function OrderPageContent() {
                                   <button
                                     type="button"
                                     onClick={() => addToCart(product)}
-                                    className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary md:px-6 md:py-2 md:text-base"
+                                    className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all theme-btn-primary md:px-6 md:py-2 md:text-base"
                                   >
                                     {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
                                   </button>
@@ -1758,7 +1765,7 @@ function OrderPageContent() {
                       <button
                         type="button"
                         onClick={() => openCategoryPicker()}
-                        className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[var(--malts-hairline)] bg-[var(--malts-card)] px-6 py-3 text-sm font-semibold text-[var(--malts-ink)] shadow-sm transition hover:border-[var(--malts-accent)]/50 hover:bg-[var(--malts-card-hover)] sm:px-8 sm:text-base"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[var(--theme-hairline)] bg-[var(--theme-card)] px-6 py-3 text-sm font-semibold text-[var(--theme-ink)] shadow-sm transition hover:border-[var(--theme-accent)]/50 hover:bg-[var(--theme-card-hover)] sm:px-8 sm:text-base"
                       >
                         <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                           <path
@@ -1783,29 +1790,29 @@ function OrderPageContent() {
                   {/* Offerings Section */}
                   {homepageSettings && (
                     <section className="mt-10 md:mt-14 relative">
-                      <div className="relative overflow-hidden malts-card px-6 py-10 md:px-16 md:py-14">
+                      <div className="relative overflow-hidden theme-card px-6 py-10 md:px-16 md:py-14">
                         <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--malts-accent-tint)] blur-3xl opacity-60"></div>
+                          <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--theme-accent-tint)] blur-3xl opacity-60"></div>
                           <div className="absolute -bottom-10 left-10 w-56 h-56 bg-[rgba(22,101,52,0.10)] blur-3xl opacity-60"></div>
                         </div>
 
                         <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
-                          <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] malts-section-label-font">
+                          <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] theme-section-label-font">
                             {sectionLabel}
                           </span>
-                          <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight malts-display">
+                          <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight theme-display">
                             {offeringsTitle}
                           </h2>
-                          <p className="mt-4 text-lg md:text-xl malts-muted malts-display-secondary">
+                          <p className="mt-4 text-lg md:text-xl theme-muted theme-display-secondary">
                             {offeringsSubtitle}
                           </p>
                           {offeringsDescription ? (
-                            <p className="mt-6 text-base md:text-lg malts-muted leading-relaxed max-w-3xl whitespace-pre-line">
+                            <p className="mt-6 text-base md:text-lg theme-muted leading-relaxed max-w-3xl whitespace-pre-line">
                               {offeringsDescription}
                             </p>
                           ) : null}
                           {offeringsNote ? (
-                            <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl malts-muted whitespace-pre-line">
+                            <p className="mt-8 text-lg md:text-xl font-light italic max-w-3xl theme-muted whitespace-pre-line">
                               {offeringsNote}
                             </p>
                           ) : null}
@@ -1816,10 +1823,10 @@ function OrderPageContent() {
                             {stats.map((stat) => (
                               <div
                                 key={stat.label}
-                                className="rounded-2xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-6 py-5 text-center"
+                                className="rounded-2xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-6 py-5 text-center"
                               >
                                 <div className="text-3xl md:text-4xl font-semibold">{stat.value}</div>
-                                <div className="mt-2 text-sm uppercase tracking-[0.2em] malts-subtle">
+                                <div className="mt-2 text-sm uppercase tracking-[0.2em] theme-subtle">
                                   {stat.label}
                                 </div>
                               </div>
@@ -1853,8 +1860,8 @@ function OrderPageContent() {
                                   .map((s: any) => String(s || '').trim())
                                   .filter(Boolean);
                                 return (
-                                  <div key={p.id} className="group malts-card rounded-2xl overflow-hidden relative">
-                                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                                  <div key={p.id} className="group theme-card rounded-2xl overflow-hidden relative">
+                                    <div className="absolute top-4 left-3 z-10 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
                                       {p.promotionLabel?.trim()
                                         ? p.promotionLabel
                                         : locale === 'bg'
@@ -1862,7 +1869,7 @@ function OrderPageContent() {
                                           : 'Promo'}
                                     </div>
                                     {p.imageUrl ? (
-                                      <div className="relative h-48 w-full overflow-hidden bg-[var(--malts-inset)]">
+                                      <div className="relative h-48 w-full overflow-hidden bg-[var(--theme-inset)]">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                           src={p.imageUrl}
@@ -1875,13 +1882,13 @@ function OrderPageContent() {
                                     ) : null}
                                     <div className="p-4">
                                       <div className="min-w-0">
-                                        <p className="font-semibold text-[var(--malts-ink)] truncate">{name}</p>
+                                        <p className="font-semibold text-[var(--theme-ink)] truncate">{name}</p>
                                         {variants.length > 0 ? (
                                           <div className="mt-2 flex flex-wrap gap-2">
                                             {variants.map((v: string) => (
                                               <span
                                                 key={v}
-                                                className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                                                className="inline-flex items-center rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--theme-ink)]"
                                               >
                                                 {v}
                                               </span>
@@ -1889,17 +1896,17 @@ function OrderPageContent() {
                                           </div>
                                         ) : null}
                                         {desc ? (
-                                          <p className="mt-2 text-xs malts-muted whitespace-pre-line">{desc}</p>
+                                          <p className="mt-2 text-xs theme-muted whitespace-pre-line">{desc}</p>
                                         ) : null}
                                       </div>
                                         <div className="mt-3 flex items-end justify-between gap-3">
                                         <div className="min-w-0">
                                           {p.basePriceBgn != null && (
-                                            <div className="text-xs text-[var(--malts-subtle)] line-through">
+                                            <div className="text-xs text-[var(--theme-subtle)] line-through">
                                               <Price priceBgn={Number(p.basePriceBgn)} inline />
                                             </div>
                                           )}
-                                            <div className="text-sm font-semibold text-[var(--malts-ink)] whitespace-nowrap">
+                                            <div className="text-sm font-semibold text-[var(--theme-ink)] whitespace-nowrap">
                                             <Price
                                               priceBgn={Number(p.priceBgn)}
                                               inline
@@ -1913,7 +1920,7 @@ function OrderPageContent() {
                                           <button
                                             type="button"
                                             onClick={() => addToCart(p)}
-                                            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all malts-btn-primary"
+                                            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all theme-btn-primary"
                                           >
                                             {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
                                           </button>
@@ -1931,7 +1938,7 @@ function OrderPageContent() {
                           <>
                             {cardsHeading?.trim() ? (
                               <div className="relative mt-10 text-center">
-                                <p className="text-2xl md:text-4xl font-semibold tracking-tight malts-display">
+                                <p className="text-2xl md:text-4xl font-semibold tracking-tight theme-display">
                                   {cardsHeading}
                                 </p>
                               </div>
@@ -1940,46 +1947,46 @@ function OrderPageContent() {
                             {cards.map((card: any) => (
                               <div
                                 key={card.id}
-                                className="group flex flex-col malts-card p-6 md:p-7 hover:-translate-y-[6px] transition-all duration-300"
+                                className="group flex flex-col theme-card p-6 md:p-7 hover:-translate-y-[6px] transition-all duration-300"
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="relative group/icon">
-                                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
-                                    <div className="relative w-16 h-16 rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] flex items-center justify-center transition-all duration-300">
+                                    <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                                    <div className="relative w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] flex items-center justify-center transition-all duration-300">
                                       <div className="flex items-center justify-center transform group-hover/icon:scale-110 transition-transform duration-300">
                                         <OfferingCardIcon icon={card.icon} />
                                       </div>
                                     </div>
                                     <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 opacity-0 group-hover/icon:opacity-100 pointer-events-none transition-opacity duration-300 z-10">
-                                      <div className="bg-[var(--malts-card)]/92 backdrop-blur-sm border border-[var(--malts-hairline)] rounded-lg px-4 py-2 whitespace-nowrap">
-                                        <p className="text-xs text-[var(--malts-ink)] font-medium">
+                                      <div className="bg-[var(--theme-card)]/92 backdrop-blur-sm border border-[var(--theme-hairline)] rounded-lg px-4 py-2 whitespace-nowrap">
+                                        <p className="text-xs text-[var(--theme-ink)] font-medium">
                                           {Array.isArray(card.highlights) ? card.highlights.slice(0, 3).join(' • ') : ''}
                                         </p>
                                       </div>
                                     </div>
                                   </div>
-                                  <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--malts-accent)] bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
+                                  <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
                                     {card.badge}
                                   </span>
                                 </div>
                                 <h3 className="mt-6 text-2xl font-semibold transition-colors">{card.title}</h3>
-                                <p className="mt-3 malts-muted text-sm md:text-base leading-relaxed transition-colors">
+                                <p className="mt-3 theme-muted text-sm md:text-base leading-relaxed transition-colors">
                                   {card.description}
                                 </p>
 
                                 {Array.isArray(card.highlights) && card.highlights.length > 0 ? (
                                   <div className="mt-6">
-                                    <p className="text-xs uppercase tracking-[0.3em] malts-subtle mb-3 transition-colors">
+                                    <p className="text-xs uppercase tracking-[0.3em] theme-subtle mb-3 transition-colors">
                                       {highlightsLabel}
                                     </p>
-                                    <ul className="space-y-2 text-sm md:text-base text-[var(--malts-ink)]">
+                                    <ul className="space-y-2 text-sm md:text-base text-[var(--theme-ink)]">
                                       {card.highlights.map((item: string, index: number) => (
                                         <li
                                           key={`${card.id}-${index}`}
                                           className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200"
                                           style={{ transitionDelay: `${index * 50}ms` }}
                                         >
-                                          <span className="inline-block h-[2px] w-6 bg-[var(--malts-hairline)] group-hover:bg-[var(--malts-accent-tint-border)] group-hover:w-8 transition-all"></span>
+                                          <span className="inline-block h-[2px] w-6 bg-[var(--theme-hairline)] group-hover:bg-[var(--theme-accent-tint-border)] group-hover:w-8 transition-all"></span>
                                           <span className="truncate transition-colors">{item}</span>
                                         </li>
                                       ))}
@@ -1996,7 +2003,7 @@ function OrderPageContent() {
                           <button
                             type="button"
                             onClick={() => openCategoryPicker()}
-                            className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-primary px-8 py-3 font-semibold tracking-wide transition"
+                            className="inline-flex items-center justify-center gap-2 rounded-full theme-btn-primary px-8 py-3 font-semibold tracking-wide transition"
                           >
                             {locale === 'bg'
                               ? homepageSettings?.ctaPrimaryBg ?? 'Разгледай менюто'
@@ -2010,7 +2017,7 @@ function OrderPageContent() {
                           <button
                             type="button"
                             onClick={() => setContactModalOpen(true)}
-                            className="inline-flex items-center justify-center gap-2 rounded-full malts-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
+                            className="inline-flex items-center justify-center gap-2 rounded-full theme-btn-secondary px-8 py-3 font-semibold tracking-wide transition"
                           >
                             {locale === 'bg'
                               ? homepageSettings?.ctaSecondaryBg ?? 'Резервации'
@@ -2068,19 +2075,15 @@ function OrderPageContent() {
                   {upcomingEventsPreview.length > 0 && (
                     <div className="mt-16 md:mt-24">
                       <div className="mb-10 md:mb-12">
-                        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-2">
+                        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-2">
                           {locale === 'bg'
                             ? 'Предстоящи събития'
                             : locale === 'en'
                               ? 'Upcoming Events'
                               : 'Evenimente viitoare'}
                         </h2>
-                        <p className="text-lg md:text-xl malts-muted malts-display-secondary max-w-3xl">
-                          {locale === 'bg'
-                            ? "Не пропускайте предстоящи събития — при нас в MALT'S или при наши партньори."
-                            : locale === 'en'
-                              ? "Don’t miss upcoming events — with us at MALT'S or with our partners."
-                              : "Nu ratați evenimentele viitoare — la MALT'S sau la partenerii noștri."}
+                        <p className="text-lg md:text-xl theme-muted theme-display-secondary max-w-3xl">
+                          {upcomingEventsIntro(locale, siteName)}
                         </p>
                       </div>
 
@@ -2102,10 +2105,10 @@ function OrderPageContent() {
                               key={event.id}
                               type="button"
                               onClick={() => setEventDetailModal(event)}
-                              className="group malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block w-full text-left cursor-pointer"
+                              className="group theme-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block w-full text-left cursor-pointer"
                             >
                               {cardImageSrc && (
-                                <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                                <div className="relative h-56 w-full overflow-hidden bg-[var(--theme-inset)]">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={cardImageSrc}
@@ -2119,11 +2122,11 @@ function OrderPageContent() {
                               )}
 
                               <div className="p-6">
-                                <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] rounded-full w-fit backdrop-blur-sm">
-                                  <svg className="w-4 h-4 text-[var(--malts-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="flex items-center gap-2 mb-3 px-3 py-1.5 bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] rounded-full w-fit backdrop-blur-sm">
+                                  <svg className="w-4 h-4 text-[var(--theme-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
-                                  <span className="text-[var(--malts-ink)] text-sm font-medium">
+                                  <span className="text-[var(--theme-ink)] text-sm font-medium">
                                     {formatDateForLocale(eventDate, locale as 'bg' | 'en' | 'ro')}
                                   </span>
                                 </div>
@@ -2133,12 +2136,12 @@ function OrderPageContent() {
                                 </h3>
 
                                 {eventDesc && (
-                                  <p className="malts-muted text-sm md:text-base line-clamp-2 mb-4">
+                                  <p className="theme-muted text-sm md:text-base line-clamp-2 mb-4">
                                     {eventDesc}
                                   </p>
                                 )}
 
-                                <div className="flex items-center text-[var(--malts-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
+                                <div className="flex items-center text-[var(--theme-accent)] font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
                                   {locale === 'bg' ? 'Научи повече' : locale === 'en' ? 'Learn more' : 'Află mai mult'}
                                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -2159,15 +2162,15 @@ function OrderPageContent() {
 
       {/* Cart Modal */}
       {showCart && ordersEnabled && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
-          <div className="malts-card rounded-t-3xl md:rounded-3xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-[var(--malts-hairline)] flex justify-between items-center sticky top-0 bg-[var(--malts-card)]/95 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm z-50 flex items-end md:items-center justify-center">
+          <div className="theme-card rounded-t-3xl md:rounded-3xl w-full md:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-[var(--theme-hairline)] flex justify-between items-center sticky top-0 bg-[var(--theme-card)]/95 backdrop-blur-sm">
               <h2 className="text-2xl font-bold">
                 {locale === 'bg' ? 'Вашата поръчка' : locale === 'en' ? 'Your Order' : 'Comanda ta'}
               </h2>
               <button
                 onClick={() => setShowCart(false)}
-                className="text-[var(--malts-ink)] text-3xl hover:text-[var(--malts-accent)]"
+                className="text-[var(--theme-ink)] text-3xl hover:text-[var(--theme-accent)]"
               >
                 ×
               </button>
@@ -2175,7 +2178,7 @@ function OrderPageContent() {
 
             <div className="p-6">
               {cart.length === 0 ? (
-                <p className="malts-muted text-center py-8">
+                <p className="theme-muted text-center py-8">
                   {locale === 'bg' ? 'Количката е празна' : locale === 'en' ? 'Cart is empty' : 'Coșul este gol'}
                 </p>
               ) : (
@@ -2199,31 +2202,31 @@ function OrderPageContent() {
                               : `Au fost plasate ${approvalThresholdValue} comenzi în ultimele ${approvalWindowValue} minute. Din motive de securitate și ca măsură preventivă împotriva acțiunilor neautorizate și a atacurilor, această comandă necesită aprobare.`}
                           </p>
                           {approvalStatus === 'pending' && (
-                            <MaltsInlineFeedback tone="warning" className="mt-2" role="status">
+                            <ThemeInlineFeedback tone="warning" className="mt-2" role="status">
                               {locale === 'bg'
                                 ? '⏳ Очакване на одобрение от администратор...'
                                 : locale === 'en'
                                   ? '⏳ Waiting for admin approval...'
                                   : '⏳ Se așteaptă aprobarea administratorului...'}
-                            </MaltsInlineFeedback>
+                            </ThemeInlineFeedback>
                           )}
                           {approvalStatus === 'approved' && (
-                            <MaltsInlineFeedback tone="success" className="mt-2" role="status">
+                            <ThemeInlineFeedback tone="success" className="mt-2" role="status">
                               {locale === 'bg'
                                 ? '✅ Поръчката е одобрена!'
                                 : locale === 'en'
                                   ? '✅ Order approved!'
                                   : '✅ Comanda a fost aprobată!'}
-                            </MaltsInlineFeedback>
+                            </ThemeInlineFeedback>
                           )}
                           {approvalStatus === 'rejected' && (
-                            <MaltsInlineFeedback tone="error" className="mt-2" role="alert">
+                            <ThemeInlineFeedback tone="error" className="mt-2" role="alert">
                               {locale === 'bg'
                                 ? '❌ Поръчката е отхвърлена'
                                 : locale === 'en'
                                   ? '❌ Order rejected'
                                   : '❌ Comanda a fost respinsă'}
-                            </MaltsInlineFeedback>
+                            </ThemeInlineFeedback>
                           )}
                         </div>
                       </div>
@@ -2237,31 +2240,31 @@ function OrderPageContent() {
                       return (
                       <div
                         key={`${item.productId}::${String(item.variantLabel || '')}`}
-                        className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4 flex flex-col"
+                        className="bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-lg p-4 flex flex-col"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-semibold">{itemName}</h4>
                           {item.unit && item.productQuantity && (
-                            <span className="text-sm malts-muted">
+                            <span className="text-sm theme-muted">
                               {item.productQuantity} {item.unit === 'pcs' ? 'бр.' : item.unit}
                             </span>
                           )}
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="malts-muted">
-                            <Price priceBgn={item.priceBgn} inline className="malts-muted" />
+                          <p className="theme-muted">
+                            <Price priceBgn={item.priceBgn} inline className="theme-muted" />
                           </p>
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => updateQuantity(item.productId, item.quantity - 1, item.variantLabel)}
-                              className="w-8 h-8 bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-lg font-bold"
+                              className="w-8 h-8 bg-[var(--theme-card)] hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)] rounded-lg font-bold"
                             >
                               −
                             </button>
                             <span className="font-bold w-8 text-center">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantLabel)}
-                              className="w-8 h-8 malts-btn-primary rounded-lg font-bold"
+                              className="w-8 h-8 theme-btn-primary rounded-lg font-bold"
                             >
                               +
                             </button>
@@ -2272,7 +2275,7 @@ function OrderPageContent() {
                                     !(x.productId === item.productId && String(x.variantLabel || '') === String(item.variantLabel || ''))
                                 )
                               )}
-                              className="ml-2 text-[var(--malts-danger)]"
+                              className="ml-2 text-[var(--theme-danger)]"
                             >
                               🗑️
                             </button>
@@ -2283,7 +2286,7 @@ function OrderPageContent() {
                     })}
                   </div>
 
-                  <div className="border-t border-[var(--malts-hairline)] pt-4 mb-6">
+                  <div className="border-t border-[var(--theme-hairline)] pt-4 mb-6">
                     <div className="flex justify-between items-center text-xl font-bold">
                       <span>{locale === 'bg' ? 'Общо:' : locale === 'en' ? 'Total:' : 'Total:'}</span>
                       <Price priceBgn={cartTotal} className="text-2xl" />
@@ -2293,11 +2296,11 @@ function OrderPageContent() {
                   <button
                     onClick={submitOrder}
                     disabled={submitting || cart.length === 0}
-                    className="w-full px-8 py-4 malts-btn-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+                    className="w-full px-8 py-4 theme-btn-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
                   >
                     {submitting ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-5 h-5 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                         <span>{locale === 'bg' ? 'Изпращане...' : locale === 'en' ? 'Sending...' : 'Se trimite...'}</span>
                       </>
                     ) : (
@@ -2307,7 +2310,7 @@ function OrderPageContent() {
                     )}
                   </button>
 
-                  <p className="malts-muted text-sm text-center mt-4">
+                  <p className="theme-muted text-sm text-center mt-4">
                     {locale === 'bg' ? 'Поръчката ще бъде изпратена към персонала' : 
                      locale === 'en' ? 'Order will be sent to staff' : 
                      'Comanda va fi trimisă către personal'}
@@ -2324,7 +2327,7 @@ function OrderPageContent() {
         <div className="fixed bottom-4 left-4 right-4 z-40 max-md:bottom-[max(1rem,env(safe-area-inset-bottom))] md:left-auto md:right-4">
           <a
             href={`/${locale}/order/call-waiter?table=${tableNumber}`}
-            className="block w-full rounded-xl px-6 py-3 text-center text-base font-bold shadow-2xl transition-all malts-btn-danger md:w-auto md:px-8 md:py-4 md:text-lg"
+            className="block w-full rounded-xl px-6 py-3 text-center text-base font-bold shadow-2xl transition-all theme-btn-danger md:w-auto md:px-8 md:py-4 md:text-lg"
           >
             🔔 {locale === 'bg' ? 'Повикай сервитьор' : 
                  locale === 'en' ? 'Call Waiter' : 
@@ -2336,7 +2339,7 @@ function OrderPageContent() {
       {/* Контакти / резервации — същите данни като страницата Контакти */}
       {contactModalOpen && (
         <div
-          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--malts-paper)]/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--theme-paper)]/70 backdrop-blur-sm p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="order-contact-modal-title"
@@ -2347,15 +2350,15 @@ function OrderPageContent() {
             aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
             onClick={() => setContactModalOpen(false)}
           />
-          <div className="relative malts-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--malts-hairline)] px-5 py-4 shrink-0 bg-[var(--malts-card)]">
+          <div className="relative theme-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--theme-hairline)] px-5 py-4 shrink-0 bg-[var(--theme-card)]">
               <h2 id="order-contact-modal-title" className="text-xl font-bold pr-8">
                 {locale === 'bg' ? 'Контакти' : locale === 'en' ? 'Contact' : 'Date de contact'}
               </h2>
               <button
                 type="button"
                 onClick={() => setContactModalOpen(false)}
-                className="text-3xl leading-none text-[var(--malts-ink)] hover:text-[var(--malts-accent)] shrink-0"
+                className="text-3xl leading-none text-[var(--theme-ink)] hover:text-[var(--theme-accent)] shrink-0"
                 aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
               >
                 ×
@@ -2366,7 +2369,7 @@ function OrderPageContent() {
                 <>
                   <div className="flex items-start gap-4">
                     <svg
-                      className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0"
+                      className="w-6 h-6 text-[var(--theme-subtle)] mt-1 shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -2385,10 +2388,10 @@ function OrderPageContent() {
                       />
                     </svg>
                     <div>
-                      <p className="text-[var(--malts-ink)] font-semibold">
+                      <p className="text-[var(--theme-ink)] font-semibold">
                         {locale === 'bg' ? 'Адрес' : locale === 'en' ? 'Address' : 'Adres'}
                       </p>
-                      <p className="malts-muted whitespace-pre-line">
+                      <p className="theme-muted whitespace-pre-line">
                         {locale === 'bg'
                           ? orderLocationSettings.addressBg
                           : locale === 'en'
@@ -2399,7 +2402,7 @@ function OrderPageContent() {
                   </div>
                   <div className="flex items-start gap-4">
                     <svg
-                      className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0"
+                      className="w-6 h-6 text-[var(--theme-subtle)] mt-1 shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -2412,60 +2415,60 @@ function OrderPageContent() {
                       />
                     </svg>
                     <div>
-                      <p className="text-[var(--malts-ink)] font-semibold">
+                      <p className="text-[var(--theme-ink)] font-semibold">
                         {locale === 'bg' ? 'Телефон' : locale === 'en' ? 'Phone' : 'Telefon'}
                       </p>
                       {orderLocationSettings.phone?.trim() ? (
                         <a
                           href={`tel:${String(orderLocationSettings.phone).replace(/[^\d+]/g, '')}`}
-                          className="text-[var(--malts-ink)] hover:text-[var(--malts-accent)] transition-colors"
+                          className="text-[var(--theme-ink)] hover:text-[var(--theme-accent)] transition-colors"
                         >
                           {orderLocationSettings.phone}
                         </a>
                       ) : (
-                        <p className="malts-muted text-sm">
+                        <p className="theme-muted text-sm">
                           {locale === 'bg' ? '—' : locale === 'en' ? '—' : '—'}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <svg className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-[var(--theme-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                     </svg>
                     <div className="min-w-0">
-                      <p className="text-[var(--malts-ink)] font-semibold">Instagram</p>
+                      <p className="text-[var(--theme-ink)] font-semibold">Instagram</p>
                       {orderLocationSettings.instagramUrl?.trim() ? (
                         <a
                           href={orderLocationSettings.instagramUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[var(--malts-accent)] break-all hover:underline"
+                          className="text-[var(--theme-accent)] break-all hover:underline"
                         >
                           {orderLocationSettings.instagramUrl}
                         </a>
                       ) : (
-                        <p className="malts-muted text-sm">—</p>
+                        <p className="theme-muted text-sm">—</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <svg className="w-6 h-6 text-[var(--malts-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-[var(--theme-subtle)] mt-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                     </svg>
                     <div className="min-w-0">
-                      <p className="text-[var(--malts-ink)] font-semibold">Facebook</p>
+                      <p className="text-[var(--theme-ink)] font-semibold">Facebook</p>
                       {orderLocationSettings.facebookUrl?.trim() ? (
                         <a
                           href={orderLocationSettings.facebookUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[var(--malts-accent)] break-all hover:underline"
+                          className="text-[var(--theme-accent)] break-all hover:underline"
                         >
                           {orderLocationSettings.facebookUrl}
                         </a>
                       ) : (
-                        <p className="malts-muted text-sm">—</p>
+                        <p className="theme-muted text-sm">—</p>
                       )}
                     </div>
                   </div>
@@ -2490,7 +2493,7 @@ function OrderPageContent() {
                         ? `https://www.google.com/maps?q=${encodeURIComponent(mapQueryAddress)}&output=embed`
                         : 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2889.8!2d25.95!3d43.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDPCsDUxJzAwLjAiTiAyNcKwNTcnMDAuMCJF!5e0!3m2!1sen!2sbg!4v1234567890';
                     return (
-                      <div className="malts-card rounded-xl overflow-hidden border border-[var(--malts-hairline)]">
+                      <div className="theme-card rounded-xl overflow-hidden border border-[var(--theme-hairline)]">
                         <iframe
                           src={mapSrc}
                           width="100%"
@@ -2506,11 +2509,11 @@ function OrderPageContent() {
                   })()}
                 </>
               ) : loading ? (
-                <p className="malts-muted text-center py-8">
+                <p className="theme-muted text-center py-8">
                   {locale === 'bg' ? 'Зареждане…' : locale === 'en' ? 'Loading…' : 'Se încarcă…'}
                 </p>
               ) : (
-                <p className="malts-muted text-center py-8">
+                <p className="theme-muted text-center py-8">
                   {locale === 'bg'
                     ? 'Информацията не е налична.'
                     : locale === 'en'
@@ -2519,11 +2522,11 @@ function OrderPageContent() {
                 </p>
               )}
             </div>
-            <div className="border-t border-[var(--malts-hairline)] p-4 shrink-0 bg-[var(--malts-card)]">
+            <div className="border-t border-[var(--theme-hairline)] p-4 shrink-0 bg-[var(--theme-card)]">
               <button
                 type="button"
                 onClick={() => setContactModalOpen(false)}
-                className="w-full rounded-xl malts-btn-primary py-3 font-semibold"
+                className="w-full rounded-xl theme-btn-primary py-3 font-semibold"
               >
                 {locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
               </button>
@@ -2534,7 +2537,7 @@ function OrderPageContent() {
 
       {eventDetailModal && (
         <div
-          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--malts-paper)]/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[55] flex items-end md:items-center justify-center bg-[var(--theme-paper)]/70 backdrop-blur-sm p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="order-event-modal-title"
@@ -2545,8 +2548,8 @@ function OrderPageContent() {
             aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
             onClick={() => setEventDetailModal(null)}
           />
-          <div className="relative malts-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--malts-hairline)] px-5 py-4 shrink-0 bg-[var(--malts-card)]">
+          <div className="relative theme-card w-full max-w-lg md:max-w-2xl max-h-[90vh] overflow-hidden rounded-t-3xl md:rounded-3xl shadow-xl flex flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--theme-hairline)] px-5 py-4 shrink-0 bg-[var(--theme-card)]">
               <h2 id="order-event-modal-title" className="text-lg md:text-xl font-bold pr-8 line-clamp-2">
                 {locale === 'bg'
                   ? eventDetailModal.titleBg
@@ -2557,7 +2560,7 @@ function OrderPageContent() {
               <button
                 type="button"
                 onClick={() => setEventDetailModal(null)}
-                className="text-3xl leading-none text-[var(--malts-ink)] hover:text-[var(--malts-accent)] shrink-0"
+                className="text-3xl leading-none text-[var(--theme-ink)] hover:text-[var(--theme-accent)] shrink-0"
                 aria-label={locale === 'bg' ? 'Затвори' : locale === 'en' ? 'Close' : 'Închide'}
               >
                 ×
@@ -2565,7 +2568,7 @@ function OrderPageContent() {
             </div>
             <div className="overflow-y-auto p-5 md:p-6 flex-1 space-y-5">
               {eventDetailImageUrl(eventDetailModal) ? (
-                <div className="relative w-full overflow-hidden rounded-xl bg-[var(--malts-inset)]">
+                <div className="relative w-full overflow-hidden rounded-xl bg-[var(--theme-inset)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={eventDetailImageUrl(eventDetailModal)!}
@@ -2578,31 +2581,23 @@ function OrderPageContent() {
                 <span
                   className={
                     eventDetailModal.isExternal
-                      ? 'px-3 py-1 rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)]'
-                      : 'px-3 py-1 rounded-full border border-[var(--malts-accent-tint-border)] bg-[var(--malts-accent-tint)] text-[var(--malts-accent)]'
+                      ? 'px-3 py-1 rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-inset)]'
+                      : 'px-3 py-1 rounded-full border border-[var(--theme-accent-tint-border)] bg-[var(--theme-accent-tint)] text-[var(--theme-accent)]'
                   }
                 >
                   {eventDetailModal.isExternal
-                    ? locale === 'bg'
-                      ? 'Партньорско'
-                      : locale === 'en'
-                        ? 'Partner'
-                        : 'Partener'
-                    : locale === 'bg'
-                      ? 'При нас'
-                      : locale === 'en'
-                        ? 'At Malts'
-                        : 'La Malts'}
+                    ? partnerEventBadgeShort(locale)
+                    : atVenueBadgeShort(locale, siteName)}
                 </span>
-                <span className="malts-muted">
+                <span className="theme-muted">
                   {formatDateForLocale(new Date(eventDetailModal.eventDate), locale as 'bg' | 'en' | 'ro')}
                 </span>
               </div>
               <div>
-                <p className="text-sm malts-muted mb-1">
+                <p className="text-sm theme-muted mb-1">
                   {locale === 'bg' ? 'Локация' : locale === 'en' ? 'Location' : 'Locație'}
                 </p>
-                <p className="font-medium text-[var(--malts-ink)]">
+                <p className="font-medium text-[var(--theme-ink)]">
                   {eventDetailModal.isExternal
                     ? locale === 'bg'
                       ? eventDetailModal.locationBg || eventDetailModal.location
@@ -2612,7 +2607,7 @@ function OrderPageContent() {
                     : eventDetailModal.location}
                 </p>
               </div>
-              <p className="text-[var(--malts-ink)] leading-relaxed whitespace-pre-line">
+              <p className="text-[var(--theme-ink)] leading-relaxed whitespace-pre-line">
                 {locale === 'bg'
                   ? eventDetailModal.descriptionBg
                   : locale === 'en'
@@ -2624,22 +2619,22 @@ function OrderPageContent() {
                   href={eventDetailModal.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block text-[var(--malts-accent)] font-medium hover:underline break-all"
+                  className="inline-block text-[var(--theme-accent)] font-medium hover:underline break-all"
                 >
                   {eventDetailModal.externalUrl}
                 </a>
               ) : null}
               {eventDetailModal.contactInfo ? (
-                <p className="text-sm malts-muted whitespace-pre-line border-t border-[var(--malts-hairline)] pt-4">
+                <p className="text-sm theme-muted whitespace-pre-line border-t border-[var(--theme-hairline)] pt-4">
                   {eventDetailModal.contactInfo}
                 </p>
               ) : null}
             </div>
-            <div className="border-t border-[var(--malts-hairline)] p-4 shrink-0 bg-[var(--malts-card)]">
+            <div className="border-t border-[var(--theme-hairline)] p-4 shrink-0 bg-[var(--theme-card)]">
               <button
                 type="button"
                 onClick={() => setEventDetailModal(null)}
-                className="w-full rounded-xl malts-btn-primary py-3 font-semibold"
+                className="w-full rounded-xl theme-btn-primary py-3 font-semibold"
               >
                 OK
               </button>
@@ -2649,13 +2644,13 @@ function OrderPageContent() {
       )}
 
       {sessionStatus !== 'valid' && (
-        <div className="fixed inset-0 z-[60] bg-[var(--malts-paper)]/85 backdrop-blur-md px-6 flex items-center justify-center text-center">
+        <div className="fixed inset-0 z-[60] bg-[var(--theme-paper)]/85 backdrop-blur-md px-6 flex items-center justify-center text-center">
           <div className="max-w-2xl">
             <div className="text-6xl mb-6">
               {sessionStatus === 'checking' ? '🔄' : '🔒'}
             </div>
             <h2 className="text-3xl font-bold mb-4">{sessionOverlayTitle}</h2>
-            <p className="malts-muted text-lg mb-8 whitespace-pre-line">
+            <p className="theme-muted text-lg mb-8 whitespace-pre-line">
               {sessionOverlayBody}
             </p>
 
@@ -2663,20 +2658,20 @@ function OrderPageContent() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => validateSession()}
-                  className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all"
+                  className="px-6 py-3 theme-btn-primary rounded-xl font-semibold transition-all"
                 >
                   🔄 {locale === 'bg' ? 'Провери отново' : locale === 'en' ? 'Check again' : 'Verifică din nou'}
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-6 py-3 malts-btn-secondary rounded-xl font-semibold transition-all"
+                  className="px-6 py-3 theme-btn-secondary rounded-xl font-semibold transition-all"
                 >
                   ↻ {locale === 'bg' ? 'Обнови страницата' : locale === 'en' ? 'Refresh page' : 'Reîncarcă pagina'}
                 </button>
               </div>
             ) : (
               <div className="flex justify-center">
-                <div className="w-12 h-12 border-4 border-[var(--malts-accent)] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
           </div>

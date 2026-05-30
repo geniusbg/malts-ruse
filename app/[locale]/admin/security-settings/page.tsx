@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 export default function SecuritySettingsPage({
   params
@@ -136,31 +136,31 @@ export default function SecuritySettingsPage({
           <button
             type="button"
             onClick={() => router.push(`/${locale}/admin`)}
-            className="mb-4 flex items-center gap-2 malts-muted hover:text-[var(--malts-ink)] transition-colors"
+            className="mb-4 flex items-center gap-2 theme-muted hover:text-[var(--theme-ink)] transition-colors"
           >
             <span aria-hidden>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки за сигурност</h1>
-          <p className="mt-2 malts-muted max-w-2xl">
+          <h1 className="theme-admin-heading-font theme-admin-page-title">Настройки за сигурност</h1>
+          <p className="mt-2 theme-muted max-w-2xl">
             Определи след колко поръчки и в какъв период ще се изисква одобрение. Настройките се отразяват веднага.
           </p>
         </div>
 
         {/* Settings Form */}
-        <div className="malts-card p-6 md:p-8">
+        <div className="theme-card p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-[var(--malts-ink)]">Конфигурация</h2>
+              <h2 className="text-2xl font-bold text-[var(--theme-ink)]">Конфигурация</h2>
             </div>
             <button
               type="button"
               onClick={handleSaveSettings}
               disabled={settingsLoading || savingSettings}
-              className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+              className={`theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                 settingsLoading || savingSettings
-                  ? 'malts-btn-secondary cursor-not-allowed opacity-50'
-                  : 'malts-btn-primary'
+                  ? 'theme-btn-secondary cursor-not-allowed opacity-50'
+                  : 'theme-btn-primary'
               }`}
             >
               {savingSettings ? 'Запазване...' : 'Запази настройките'}
@@ -168,19 +168,19 @@ export default function SecuritySettingsPage({
           </div>
 
           {settingsMessage && (
-            <MaltsInlineFeedback tone="success" className="mb-4" role="status">
+            <ThemeInlineFeedback tone="success" className="mb-4" role="status">
               {settingsMessage}
-            </MaltsInlineFeedback>
+            </ThemeInlineFeedback>
           )}
           {settingsError && (
-            <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+            <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
               {settingsError}
-            </MaltsInlineFeedback>
+            </ThemeInlineFeedback>
           )}
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="malts-label">
+              <label className="theme-label">
                 Брой поръчки преди одобрение
               </label>
               <input
@@ -190,15 +190,15 @@ export default function SecuritySettingsPage({
                 value={securitySettings.approvalOrderThreshold}
                 onChange={(e) => handleSettingsChange('approvalOrderThreshold', Number(e.target.value))}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
               />
-              <p className="malts-help">
+              <p className="theme-help">
                 Колко поръчки от една маса преди да се изисква одобрение от администратор.
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="malts-label">
+              <label className="theme-label">
                 Времеви прозорец (минути)
               </label>
               <input
@@ -208,13 +208,13 @@ export default function SecuritySettingsPage({
                 value={securitySettings.approvalTimeWindowMinutes}
                 onChange={(e) => handleSettingsChange('approvalTimeWindowMinutes', Number(e.target.value))}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
               />
-              <p className="malts-help">Периодът, в който се броят поръчките (например 5 минути).</p>
+              <p className="theme-help">Периодът, в който се броят поръчките (например 5 минути).</p>
             </div>
 
             <div className="space-y-2">
-              <label className="malts-label">
+              <label className="theme-label">
                 Валидност на сесиите (часове)
               </label>
               <input
@@ -224,13 +224,13 @@ export default function SecuritySettingsPage({
                 value={securitySettings.sessionDurationHours}
                 onChange={(e) => handleSettingsChange('sessionDurationHours', Number(e.target.value))}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
               />
-              <p className="malts-help">Колко време QR сесията остава активна след сканиране.</p>
+              <p className="theme-help">Колко време QR сесията остава активна след сканиране.</p>
             </div>
 
             <div className="space-y-2">
-              <label className="malts-label">
+              <label className="theme-label">
                 Автоматично отхвърляне (минути)
               </label>
               <input
@@ -240,9 +240,9 @@ export default function SecuritySettingsPage({
                 value={securitySettings.autoRejectMinutes}
                 onChange={(e) => handleSettingsChange('autoRejectMinutes', Number(e.target.value))}
                 disabled={settingsLoading}
-                className="malts-field"
+                className="theme-field"
               />
-              <p className="malts-help">След колко време чакащите поръчки се отхвърлят автоматично.</p>
+              <p className="theme-help">След колко време чакащите поръчки се отхвърлят автоматично.</p>
             </div>
           </div>
         </div>

@@ -74,11 +74,11 @@ export default function BeerMugLoader({
             width="64"
             height={fillHeight}
             fill={`url(#${liquidGradId})`}
-            className={animate ? 'malts-beer-liquid' : ''}
+            className={animate ? 'theme-beer-liquid' : ''}
           />
         </g>
 
-        <g className={animate ? 'malts-beer-foam' : ''}>
+        <g className={animate ? 'theme-beer-foam' : ''}>
           <path
             d="M56 39 C52 33, 57 26, 64 27 C66 21, 72 19, 77 22 C81 17, 88 17, 93 22 C101 21, 107 28, 104 34 C109 37, 109 44, 103 47 C95 51, 65 51, 58 47 C53 45, 52 41, 56 39 Z"
             fill={`url(#${foamGradId})`}

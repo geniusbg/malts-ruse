@@ -167,7 +167,7 @@ export default function CategorySelectCombobox({
       return (
         <div key={cat.id}>
           <div
-            className="flex min-h-[2.25rem] items-center gap-1 border-b border-[var(--malts-hairline)]/40 last:border-b-0"
+            className="flex min-h-[2.25rem] items-center gap-1 border-b border-[var(--theme-hairline)]/40 last:border-b-0"
             style={{ paddingLeft: pl }}
           >
             {hasKids ? (
@@ -177,7 +177,7 @@ export default function CategorySelectCombobox({
                   e.stopPropagation();
                   toggleExpanded(cat.id);
                 }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-base font-bold leading-none text-[var(--malts-ink)] transition-colors hover:bg-[var(--malts-card-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--malts-accent)]"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--theme-hairline)] bg-[var(--theme-inset)] text-base font-bold leading-none text-[var(--theme-ink)] transition-colors hover:bg-[var(--theme-card-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 aria-expanded={isExpanded}
                 aria-label={isExpanded ? 'Свий' : 'Разгъни'}
               >
@@ -191,16 +191,16 @@ export default function CategorySelectCombobox({
               onClick={() => pick(cat.id)}
               className={`min-w-0 flex-1 rounded-md px-2 py-1.5 text-left text-sm transition-colors ${
                 isSelected
-                  ? 'bg-[var(--malts-accent-tint)] font-semibold text-[var(--malts-ink)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-inset)]'
+                  ? 'bg-[var(--theme-accent-tint)] font-semibold text-[var(--theme-ink)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-inset)]'
               }`}
             >
               <span className="break-words">{getName(cat)}</span>
-              {isSelected && <span className="ml-1 text-[var(--malts-success)]">✓</span>}
+              {isSelected && <span className="ml-1 text-[var(--theme-success)]">✓</span>}
             </button>
           </div>
           {hasKids && isExpanded && (
-            <div className="ml-2 border-l-2 border-[var(--malts-hairline)] pl-2 md:ml-3 md:pl-3">
+            <div className="ml-2 border-l-2 border-[var(--theme-hairline)] pl-2 md:ml-3 md:pl-3">
               {renderTree(cat.id, depth + 1)}
             </div>
           )}
@@ -226,7 +226,7 @@ export default function CategorySelectCombobox({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2.5 text-sm malts-muted">
+      <div className="rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-2.5 text-sm theme-muted">
         {locale === 'en' ? 'No categories.' : locale === 'ro' ? 'Nu există categorii.' : 'Няма категории.'}
       </div>
     );
@@ -242,24 +242,24 @@ export default function CategorySelectCombobox({
         aria-expanded={open}
         aria-labelledby={labelId ? `${labelId} product-category-trigger` : undefined}
         onClick={() => !disabled && setOpen((o) => !o)}
-        className="malts-field flex w-full items-center justify-between gap-2 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        className="theme-field flex w-full items-center justify-between gap-2 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <span className={selectedLabel ? 'text-[var(--malts-ink)]' : 'malts-muted'}>
+        <span className={selectedLabel ? 'text-[var(--theme-ink)]' : 'theme-muted'}>
           {selectedLabel || placeholder}
         </span>
-        <span className="text-[var(--malts-subtle)] shrink-0" aria-hidden>
+        <span className="text-[var(--theme-subtle)] shrink-0" aria-hidden>
           {open ? '▲' : '▼'}
         </span>
       </button>
 
       {open && (
         <div
-          className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-80 flex-col overflow-hidden rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] shadow-lg"
+          className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-80 flex-col overflow-hidden rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] shadow-lg"
           role="listbox"
           aria-label={locale === 'en' ? 'Categories' : locale === 'ro' ? 'Categorii' : 'Категории'}
         >
           <div
-            className="shrink-0 border-b border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-2"
+            className="shrink-0 border-b border-[var(--theme-hairline)] bg-[var(--theme-inset)] p-2"
             onMouseDown={(e) => e.preventDefault()}
           >
             <input
@@ -268,7 +268,7 @@ export default function CategorySelectCombobox({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={searchPlaceholder}
-              className="malts-field w-full text-sm"
+              className="theme-field w-full text-sm"
               autoComplete="off"
               onKeyDown={(e) => e.stopPropagation()}
             />
@@ -277,7 +277,7 @@ export default function CategorySelectCombobox({
           <div className="min-h-0 flex-1 overflow-y-auto py-1">
             {q ? (
               searchHits.length === 0 ? (
-                <p className="px-3 py-4 text-sm malts-muted">
+                <p className="px-3 py-4 text-sm theme-muted">
                   {locale === 'en' ? 'No matches.' : locale === 'ro' ? 'Niciun rezultat.' : 'Няма съвпадения.'}
                 </p>
               ) : (
@@ -293,12 +293,12 @@ export default function CategorySelectCombobox({
                           onClick={() => pick(cat.id)}
                           className={`w-full px-3 py-2.5 text-left text-sm transition-colors ${
                             isSelected
-                              ? 'bg-[var(--malts-accent-tint)] font-semibold'
-                              : 'hover:bg-[var(--malts-inset)]'
+                              ? 'bg-[var(--theme-accent-tint)] font-semibold'
+                              : 'hover:bg-[var(--theme-inset)]'
                           }`}
                         >
                           <span className="break-words">{getPathLabel(cat.id)}</span>
-                          {isSelected && <span className="ml-1 text-[var(--malts-success)]">✓</span>}
+                          {isSelected && <span className="ml-1 text-[var(--theme-success)]">✓</span>}
                         </button>
                       </li>
                     );

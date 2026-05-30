@@ -35,7 +35,7 @@ export type LoadingUiSettings = {
 };
 
 const DEFAULT_SETTINGS = {
-  enabled: true,
+  enabled: false,
   defaultAssetId: null as string | null,
   assets: [] as LoadingAsset[],
   rules: [] as LoadingRule[],

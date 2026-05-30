@@ -126,17 +126,17 @@ export default function WorkingHoursPage({
       )}
 
       <div className="mb-8">
-        <h1 className="malts-admin-heading-font malts-admin-page-title mb-3">
+        <h1 className="theme-admin-heading-font theme-admin-page-title mb-3">
           {locale === 'bg' ? 'Работно време' : locale === 'en' ? 'Working Hours' : 'Arbeitszeiten'}
         </h1>
-        <p className="malts-muted text-lg">
+        <p className="theme-muted text-lg">
           {locale === 'bg' ? 'Управление на работното време за всеки ден от седмицата' : 
            locale === 'en' ? 'Manage working hours for each day of the week' : 
            'Verwalten Sie die Arbeitszeiten für jeden Tag der Woche'}
         </p>
       </div>
 
-      <div className="malts-card rounded-2xl p-6 md:p-8">
+      <div className="theme-card rounded-2xl p-6 md:p-8">
         <div className="space-y-4">
           {DAYS.map(day => {
             const dayData = workingHours.find(wh => wh.dayOfWeek === day.dayOfWeek);
@@ -147,7 +147,7 @@ export default function WorkingHoursPage({
             return (
               <div
                 key={day.dayOfWeek}
-                className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-xl p-4 md:p-6"
+                className="bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-xl p-4 md:p-6"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -156,9 +156,9 @@ export default function WorkingHoursPage({
                         type="checkbox"
                         checked={dayData.isOpen}
                         onChange={(e) => handleDayChange(day.dayOfWeek, 'isOpen', e.target.checked)}
-                        className="w-5 h-5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                        className="w-5 h-5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-success)] focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                       />
-                      <span className="text-[var(--malts-ink)] font-semibold text-lg md:text-xl">
+                      <span className="text-[var(--theme-ink)] font-semibold text-lg md:text-xl">
                         {dayName}
                       </span>
                     </label>
@@ -167,33 +167,33 @@ export default function WorkingHoursPage({
                   {dayData.isOpen && (
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <label className="malts-muted text-sm">
+                        <label className="theme-muted text-sm">
                           {locale === 'bg' ? 'От' : locale === 'en' ? 'From' : 'Von'}
                         </label>
                         <input
                           type="time"
                           value={dayData.openTime || '10:00'}
                           onChange={(e) => handleDayChange(day.dayOfWeek, 'openTime', e.target.value)}
-                          className="malts-field"
+                          className="theme-field"
                         />
                       </div>
-                      <span className="malts-muted">-</span>
+                      <span className="theme-muted">-</span>
                       <div className="flex items-center gap-2">
-                        <label className="malts-muted text-sm">
+                        <label className="theme-muted text-sm">
                           {locale === 'bg' ? 'До' : locale === 'en' ? 'To' : 'Bis'}
                         </label>
                         <input
                           type="time"
                           value={dayData.closeTime || '00:00'}
                           onChange={(e) => handleDayChange(day.dayOfWeek, 'closeTime', e.target.value)}
-                          className="malts-field"
+                          className="theme-field"
                         />
                       </div>
                     </div>
                   )}
 
                   {!dayData.isOpen && (
-                    <span className="malts-muted text-sm md:text-base">
+                    <span className="theme-muted text-sm md:text-base">
                       {locale === 'bg' ? 'Затворено' : locale === 'en' ? 'Closed' : 'Geschlossen'}
                     </span>
                   )}
@@ -208,11 +208,11 @@ export default function WorkingHoursPage({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="malts-btn-primary malts-btn-admin-compact flex w-full items-center justify-center gap-2 rounded-xl font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="theme-btn-primary theme-btn-admin-compact flex w-full items-center justify-center gap-2 rounded-xl font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving ? (
               <>
-                <div className="w-5 h-5 border-2 border-[var(--malts-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-[var(--theme-accent-contrast)] border-t-transparent rounded-full animate-spin"></div>
                 <span>{locale === 'bg' ? 'Запазване...' : locale === 'en' ? 'Saving...' : 'Speichern...'}</span>
               </>
             ) : (

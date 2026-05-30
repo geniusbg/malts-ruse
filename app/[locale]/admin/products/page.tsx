@@ -145,10 +145,10 @@ export default function AdminProductsPage() {
         />
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
-        <h1 className="malts-admin-heading-font malts-admin-page-title">Продукти</h1>
+        <h1 className="theme-admin-heading-font theme-admin-page-title">Продукти</h1>
         <Link
           href={`/${locale}/admin/products/new`}
-          className="malts-btn-primary malts-btn-admin-compact w-full rounded-lg text-center font-semibold transition-all sm:w-auto"
+          className="theme-btn-primary theme-btn-admin-compact w-full rounded-lg text-center font-semibold transition-all sm:w-auto"
         >
           + Добави продукт
         </Link>
@@ -161,13 +161,13 @@ export default function AdminProductsPage() {
             depth === 0
               ? `rounded-lg px-3 py-2 text-sm font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                    : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                    ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                    : 'border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
                 }`
               : `rounded-lg px-3 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'border-2 border-[var(--malts-accent)] bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                    : 'border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                    ? 'border-2 border-[var(--theme-accent)] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                    : 'border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
                 }`;
 
           const renderTierRow = (depth: number) => {
@@ -219,12 +219,12 @@ export default function AdminProductsPage() {
           return (
             <>
               <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-semibold text-[var(--malts-ink)]">Категории</div>
+                <div className="text-sm font-semibold text-[var(--theme-ink)]">Категории</div>
                 {categoryPath.length ? (
                   <button
                     type="button"
                     onClick={() => setCategoryPath([])}
-                    className="malts-btn-secondary rounded-lg px-3 py-2 text-sm font-semibold transition-all"
+                    className="theme-btn-secondary rounded-lg px-3 py-2 text-sm font-semibold transition-all"
                   >
                     Изчисти филтър
                   </button>
@@ -236,8 +236,8 @@ export default function AdminProductsPage() {
               })}
               {leafCategoryId ? (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs malts-muted">Избрано:</span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1 text-xs font-semibold text-[var(--malts-ink)]">
+                  <span className="text-xs theme-muted">Избрано:</span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-1 text-xs font-semibold text-[var(--theme-ink)]">
                     {getCategoryPathLabel(leafCategoryId)}
                   </span>
                 </div>
@@ -250,15 +250,15 @@ export default function AdminProductsPage() {
       {/* Visibility Filter */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[var(--malts-ink)]">Показвай:</span>
-          <div className="inline-flex overflow-hidden rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)]">
+          <span className="text-sm font-semibold text-[var(--theme-ink)]">Показвай:</span>
+          <div className="inline-flex overflow-hidden rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-card)]">
             <button
               type="button"
               onClick={() => setVisibilityFilter('all')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'all'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
               }`}
             >
               Всички
@@ -268,8 +268,8 @@ export default function AdminProductsPage() {
               onClick={() => setVisibilityFilter('visible')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'visible'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
               }`}
             >
               Видими
@@ -279,15 +279,15 @@ export default function AdminProductsPage() {
               onClick={() => setVisibilityFilter('hidden')}
               className={`px-3 py-2 text-sm font-semibold transition-colors ${
                 visibilityFilter === 'hidden'
-                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                  : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                  : 'text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
               }`}
             >
               Скрити
             </button>
           </div>
         </div>
-        <div className="text-sm malts-muted"> </div>
+        <div className="text-sm theme-muted"> </div>
       </div>
 
       {/* Search Bar */}
@@ -297,13 +297,13 @@ export default function AdminProductsPage() {
           placeholder="🔍 Търси продукт..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="malts-field"
+          className="theme-field"
         />
       </div>
 
       {/* Products Grid - Card View */}
       {filteredProducts.length === 0 ? (
-        <p className="text-center py-16 malts-muted">
+        <p className="text-center py-16 theme-muted">
           Няма продукти за този филтър{searchQuery.trim() ? ' / търсене' : ''}.
         </p>
       ) : (
@@ -311,11 +311,11 @@ export default function AdminProductsPage() {
         {filteredProducts.map((product: any) => (
           <div
             key={product.id}
-            className="malts-card overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+            className="theme-card overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           >
             {/* Product Image */}
             {product.imageUrl ? (
-              <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+              <div className="relative h-56 w-full overflow-hidden bg-[var(--theme-inset)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={product.imageUrl}
@@ -326,8 +326,8 @@ export default function AdminProductsPage() {
                 />
               </div>
             ) : (
-              <div className="h-56 bg-[var(--malts-inset)] flex items-center justify-center">
-                <svg className="w-16 h-16 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="h-56 bg-[var(--theme-inset)] flex items-center justify-center">
+                <svg className="w-16 h-16 text-[var(--theme-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -338,30 +338,30 @@ export default function AdminProductsPage() {
               {/* Name with Price and Status in one row */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[var(--malts-ink)] flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-bold text-[var(--theme-ink)] flex items-center gap-2 mb-1">
                     {product.isFeatured && <span className="text-yellow-400">⭐</span>}
                     {product.nameBg}
                   </h3>
-                  <p className="malts-subtle text-xs">{getCategoryPathLabel(product.categoryId)}</p>
+                  <p className="theme-subtle text-xs">{getCategoryPathLabel(product.categoryId)}</p>
                 </div>
                 <div className="text-right ml-3">
-                  <div className="text-xl font-bold text-[var(--malts-ink)]">{displayPrice(Number(product.priceBgn), 'EUR')}</div>
-                  <div className="text-xs malts-subtle">{displayPrice(Number(product.priceBgn), 'BGN')}</div>
+                  <div className="text-xl font-bold text-[var(--theme-ink)]">{displayPrice(Number(product.priceBgn), 'EUR')}</div>
+                  <div className="text-xs theme-subtle">{displayPrice(Number(product.priceBgn), 'BGN')}</div>
                   {product.unit && product.quantity && (
-                    <div className="text-xs malts-subtle mt-1">
+                    <div className="text-xs theme-subtle mt-1">
                       {product.quantity} {product.unit === 'pcs' ? 'бр.' : product.unit}
                     </div>
                   )}
                   <div className="mt-1">
                     {product.isHidden ? (
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-[var(--malts-inset)] border border-[var(--malts-hairline)] text-[var(--malts-ink)] inline-block">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-[var(--theme-inset)] border border-[var(--theme-hairline)] text-[var(--theme-ink)] inline-block">
                         🚫 Скрит
                       </span>
                     ) : (
                       <span className={`px-2 py-0.5 rounded-full text-xs inline-block ${
                         product.isAvailable 
-                          ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
-                          : 'bg-[rgba(146,64,14,0.12)] text-[var(--malts-warning)] border border-[rgba(146,64,14,0.25)]'
+                          ? 'bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]'
+                          : 'bg-[rgba(146,64,14,0.12)] text-[var(--theme-warning)] border border-[rgba(146,64,14,0.25)]'
                       }`}>
                         {product.isAvailable ? '✅ Налично' : '⚠️ Не е наличен'}
                       </span>
@@ -382,7 +382,7 @@ export default function AdminProductsPage() {
                 
                 return description ? (
                   <div className="mb-3">
-                    <p className="malts-muted text-sm leading-relaxed break-words whitespace-pre-wrap">
+                    <p className="theme-muted text-sm leading-relaxed break-words whitespace-pre-wrap">
                       {description}
                     </p>
                   </div>
@@ -407,7 +407,7 @@ export default function AdminProductsPage() {
                 if (variants.length === 0) return null;
                 return (
                   <div className="mb-3">
-                    <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                    <div className="text-[11px] uppercase tracking-wide theme-muted mb-1">
                       Варианти
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -416,8 +416,8 @@ export default function AdminProductsPage() {
                           key={v.label}
                           className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-semibold ${
                             v.enabled
-                              ? 'border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-[var(--malts-ink)]'
-                              : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] text-[var(--malts-subtle)]'
+                              ? 'border-[var(--theme-hairline)] bg-[var(--theme-inset)] text-[var(--theme-ink)]'
+                              : 'border-[var(--theme-hairline)] bg-[var(--theme-paper)] text-[var(--theme-subtle)]'
                           }`}
                         >
                           {v.label}
@@ -432,13 +432,13 @@ export default function AdminProductsPage() {
               <div className="flex gap-2">
                 <Link
                   href={`/${locale}/admin/products/${encodeURIComponent(productParamForUrl(product))}/edit`}
-                  className="flex-1 px-3 py-2 malts-btn-secondary rounded-lg text-sm font-semibold transition-all text-center"
+                  className="flex-1 px-3 py-2 theme-btn-secondary rounded-lg text-sm font-semibold transition-all text-center"
                 >
                   Редактирай
                 </Link>
                 <button
                   onClick={() => setDeleteTarget({ id: product.id, name: product.nameBg })}
-                  className="flex-1 px-3 py-2 malts-btn-danger rounded-lg text-sm font-semibold transition-all"
+                  className="flex-1 px-3 py-2 theme-btn-danger rounded-lg text-sm font-semibold transition-all"
                 >
                   Изтрий
                 </button>

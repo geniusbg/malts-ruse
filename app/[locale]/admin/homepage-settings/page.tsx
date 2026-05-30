@@ -8,7 +8,7 @@ import AutoTranslateButton from '@/components/AutoTranslateButton';
 import OfferingCardIcon from '@/components/OfferingCardIcon';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 interface HomepageSettings {
   id: string;
@@ -297,25 +297,25 @@ export default function HomepageSettingsPage({
         <div className="mb-8">
           <button
             onClick={() => router.push(`/${locale}/admin`)}
-            className="malts-muted hover:text-[var(--malts-ink)] mb-4 flex items-center gap-2 transition-colors"
+            className="theme-muted hover:text-[var(--theme-ink)] mb-4 flex items-center gap-2 transition-colors"
           >
             <span>←</span>
             <span>Назад към Dashboard</span>
           </button>
-          <h1 className="malts-admin-heading-font malts-admin-page-title">Настройки на началната страница</h1>
-          <p className="malts-muted mt-2">
+          <h1 className="theme-admin-heading-font theme-admin-page-title">Настройки на началната страница</h1>
+          <p className="theme-muted mt-2">
             Управлявай съдържанието на секцията &quot;Предложения&quot; на началната страница.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-[var(--malts-hairline)]">
+        <div className="flex gap-2 mb-6 border-b border-[var(--theme-hairline)]">
           <button
             onClick={() => setActiveTab('general')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'general'
-                ? 'text-[var(--malts-ink)] border-b-2 border-[var(--malts-accent)]'
-                : 'malts-muted hover:text-[var(--malts-ink)]'
+                ? 'text-[var(--theme-ink)] border-b-2 border-[var(--theme-accent)]'
+                : 'theme-muted hover:text-[var(--theme-ink)]'
             }`}
           >
             Общи настройки
@@ -324,8 +324,8 @@ export default function HomepageSettingsPage({
             onClick={() => setActiveTab('stats')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'stats'
-                ? 'text-[var(--malts-ink)] border-b-2 border-[var(--malts-accent)]'
-                : 'malts-muted hover:text-[var(--malts-ink)]'
+                ? 'text-[var(--theme-ink)] border-b-2 border-[var(--theme-accent)]'
+                : 'theme-muted hover:text-[var(--theme-ink)]'
             }`}
           >
             Статистики
@@ -334,8 +334,8 @@ export default function HomepageSettingsPage({
             onClick={() => setActiveTab('cards')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'cards'
-                ? 'text-[var(--malts-ink)] border-b-2 border-[var(--malts-accent)]'
-                : 'malts-muted hover:text-[var(--malts-ink)]'
+                ? 'text-[var(--theme-ink)] border-b-2 border-[var(--theme-accent)]'
+                : 'theme-muted hover:text-[var(--theme-ink)]'
             }`}
           >
             Карти ({cards.length})
@@ -343,33 +343,33 @@ export default function HomepageSettingsPage({
         </div>
 
         {message && (
-          <MaltsInlineFeedback tone="success" className="mb-4" role="status">
+          <ThemeInlineFeedback tone="success" className="mb-4" role="status">
             {message}
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         )}
         {error && (
-          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+          <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
             {error}
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         )}
         {translateErr && (
-          <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+          <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
             {translateErr}
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         )}
 
         {/* General Settings Tab */}
         {activeTab === 'general' && (
-          <div className="malts-card p-6 md:p-8">
+          <div className="theme-card p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <h2 className="text-2xl font-bold">Общи настройки</h2>
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
-                className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+                className={`theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                   saving
-                    ? 'malts-btn-secondary cursor-not-allowed opacity-50'
-                    : 'malts-btn-primary'
+                    ? 'theme-btn-secondary cursor-not-allowed opacity-50'
+                    : 'theme-btn-primary'
                 }`}
               >
                 {saving ? 'Запазване...' : 'Запази'}
@@ -380,17 +380,17 @@ export default function HomepageSettingsPage({
               {/* Section Label */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Етикет на секцията (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Етикет на секцията (БГ)</label>
                   <input
                     type="text"
                     value={settings.sectionLabelBg}
                     onChange={(e) => setSettings({ ...settings, sectionLabelBg: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Етикет на секцията (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Етикет на секцията (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.sectionLabelBg}
                       targetLang="en"
@@ -402,12 +402,12 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.sectionLabelEn}
                     onChange={(e) => setSettings({ ...settings, sectionLabelEn: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Етикет на секцията (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Етикет на секцията (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.sectionLabelBg}
                       targetLang="ro"
@@ -419,7 +419,7 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.sectionLabelRo}
                     onChange={(e) => setSettings({ ...settings, sectionLabelRo: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -427,17 +427,17 @@ export default function HomepageSettingsPage({
               {/* Title */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Заглавие (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Заглавие (БГ)</label>
                   <input
                     type="text"
                     value={settings.titleBg}
                     onChange={(e) => setSettings({ ...settings, titleBg: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Заглавие (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Заглавие (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.titleBg}
                       targetLang="en"
@@ -449,12 +449,12 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.titleEn}
                     onChange={(e) => setSettings({ ...settings, titleEn: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Заглавие (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Заглавие (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.titleBg}
                       targetLang="ro"
@@ -466,7 +466,7 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.titleRo}
                     onChange={(e) => setSettings({ ...settings, titleRo: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -474,17 +474,17 @@ export default function HomepageSettingsPage({
               {/* Subtitle */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Подзаглавие (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Подзаглавие (БГ)</label>
                   <input
                     type="text"
                     value={settings.subtitleBg}
                     onChange={(e) => setSettings({ ...settings, subtitleBg: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Подзаглавие (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Подзаглавие (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.subtitleBg}
                       targetLang="en"
@@ -496,12 +496,12 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.subtitleEn}
                     onChange={(e) => setSettings({ ...settings, subtitleEn: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Подзаглавие (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Подзаглавие (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.subtitleBg}
                       targetLang="ro"
@@ -513,7 +513,7 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.subtitleRo}
                     onChange={(e) => setSettings({ ...settings, subtitleRo: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -521,18 +521,18 @@ export default function HomepageSettingsPage({
               {/* Cards heading (shown above the cards grid) */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Заглавие над картите (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Заглавие над картите (БГ)</label>
                   <input
                     type="text"
                     value={settings.cardsHeadingBg}
                     onChange={(e) => setSettings({ ...settings, cardsHeadingBg: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                     placeholder="напр. Акценти"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Заглавие над картите (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Заглавие над картите (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.cardsHeadingBg}
                       targetLang="en"
@@ -544,13 +544,13 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.cardsHeadingEn}
                     onChange={(e) => setSettings({ ...settings, cardsHeadingEn: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                     placeholder="e.g. Highlights"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Заглавие над картите (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Заглавие над картите (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.cardsHeadingBg}
                       targetLang="ro"
@@ -562,7 +562,7 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.cardsHeadingRo}
                     onChange={(e) => setSettings({ ...settings, cardsHeadingRo: e.target.value })}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                     placeholder="ex. Accente"
                   />
                 </div>
@@ -571,17 +571,17 @@ export default function HomepageSettingsPage({
               {/* Description */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Описание (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Описание (БГ)</label>
                   <textarea
                     value={settings.descriptionBg}
                     onChange={(e) => setSettings({ ...settings, descriptionBg: e.target.value })}
                     rows={4}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Описание (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Описание (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.descriptionBg}
                       targetLang="en"
@@ -593,12 +593,12 @@ export default function HomepageSettingsPage({
                     value={settings.descriptionEn}
                     onChange={(e) => setSettings({ ...settings, descriptionEn: e.target.value })}
                     rows={4}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Описание (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Описание (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.descriptionBg}
                       targetLang="ro"
@@ -610,7 +610,7 @@ export default function HomepageSettingsPage({
                     value={settings.descriptionRo}
                     onChange={(e) => setSettings({ ...settings, descriptionRo: e.target.value })}
                     rows={4}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -618,17 +618,17 @@ export default function HomepageSettingsPage({
               {/* Mood Text */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Текст под логото (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Текст под логото (БГ)</label>
                   <textarea
                     value={settings.moodTextBg}
                     onChange={(e) => setSettings({ ...settings, moodTextBg: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Текст под логото (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Текст под логото (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.moodTextBg}
                       targetLang="en"
@@ -640,12 +640,12 @@ export default function HomepageSettingsPage({
                     value={settings.moodTextEn}
                     onChange={(e) => setSettings({ ...settings, moodTextEn: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Текст под логото (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Текст под логото (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.moodTextBg}
                       targetLang="ro"
@@ -657,7 +657,7 @@ export default function HomepageSettingsPage({
                     value={settings.moodTextRo}
                     onChange={(e) => setSettings({ ...settings, moodTextRo: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -665,17 +665,17 @@ export default function HomepageSettingsPage({
               {/* Offerings Note */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold malts-subtle mb-2">Текст в „Какво предлагаме“ (БГ)</label>
+                  <label className="block text-sm font-semibold theme-subtle mb-2">Текст в „Какво предлагаме“ (БГ)</label>
                   <textarea
                     value={settings.offeringsNoteBg}
                     onChange={(e) => setSettings({ ...settings, offeringsNoteBg: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Текст в „Какво предлагаме“ (EN)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Текст в „Какво предлагаме“ (EN)</label>
                     <AutoTranslateButton
                       sourceText={settings.offeringsNoteBg}
                       targetLang="en"
@@ -687,12 +687,12 @@ export default function HomepageSettingsPage({
                     value={settings.offeringsNoteEn}
                     onChange={(e) => setSettings({ ...settings, offeringsNoteEn: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="block text-sm font-semibold malts-subtle">Текст в „Какво предлагаме“ (RO)</label>
+                    <label className="block text-sm font-semibold theme-subtle">Текст в „Какво предлагаме“ (RO)</label>
                     <AutoTranslateButton
                       sourceText={settings.offeringsNoteBg}
                       targetLang="ro"
@@ -704,7 +704,7 @@ export default function HomepageSettingsPage({
                     value={settings.offeringsNoteRo}
                     onChange={(e) => setSettings({ ...settings, offeringsNoteRo: e.target.value })}
                     rows={2}
-                    className="w-full rounded-xl malts-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                    className="w-full rounded-xl theme-inset px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   />
                 </div>
               </div>
@@ -712,17 +712,17 @@ export default function HomepageSettingsPage({
               {/* CTA Buttons */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="malts-label">Основен призив (БГ)</label>
+                  <label className="theme-label">Основен призив (БГ)</label>
                   <input
                     type="text"
                     value={settings.ctaPrimaryBg}
                     onChange={(e) => setSettings({ ...settings, ctaPrimaryBg: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="malts-label">Основен призив (EN)</label>
+                    <label className="theme-label">Основен призив (EN)</label>
                     <AutoTranslateButton
                       variant="dark"
                       sourceText={settings.ctaPrimaryBg}
@@ -735,12 +735,12 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.ctaPrimaryEn}
                     onChange={(e) => setSettings({ ...settings, ctaPrimaryEn: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="malts-label">Основен призив (RO)</label>
+                    <label className="theme-label">Основен призив (RO)</label>
                     <AutoTranslateButton
                       variant="dark"
                       sourceText={settings.ctaPrimaryBg}
@@ -753,24 +753,24 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.ctaPrimaryRo}
                     onChange={(e) => setSettings({ ...settings, ctaPrimaryRo: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
               </div>
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="malts-label">Втори призив (БГ)</label>
+                  <label className="theme-label">Втори призив (БГ)</label>
                   <input
                     type="text"
                     value={settings.ctaSecondaryBg}
                     onChange={(e) => setSettings({ ...settings, ctaSecondaryBg: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="malts-label">Втори призив (EN)</label>
+                    <label className="theme-label">Втори призив (EN)</label>
                     <AutoTranslateButton
                       variant="dark"
                       sourceText={settings.ctaSecondaryBg}
@@ -783,12 +783,12 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.ctaSecondaryEn}
                     onChange={(e) => setSettings({ ...settings, ctaSecondaryEn: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between items-center gap-2 mb-2">
-                    <label className="malts-label">Втори призив (RO)</label>
+                    <label className="theme-label">Втори призив (RO)</label>
                     <AutoTranslateButton
                       variant="dark"
                       sourceText={settings.ctaSecondaryBg}
@@ -801,7 +801,7 @@ export default function HomepageSettingsPage({
                     type="text"
                     value={settings.ctaSecondaryRo}
                     onChange={(e) => setSettings({ ...settings, ctaSecondaryRo: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
               </div>
@@ -811,16 +811,16 @@ export default function HomepageSettingsPage({
 
         {/* Stats Tab */}
         {activeTab === 'stats' && (
-          <div className="malts-card rounded-2xl p-6 md:p-8">
+          <div className="theme-card rounded-2xl p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-[var(--malts-ink)]">Статистики</h2>
+              <h2 className="text-2xl font-bold text-[var(--theme-ink)]">Статистики</h2>
               <button
                 onClick={handleSaveSettings}
                 disabled={saving}
-                className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+                className={`theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
                   saving
-                    ? 'malts-btn-secondary cursor-not-allowed opacity-50'
-                    : 'malts-btn-primary'
+                    ? 'theme-btn-secondary cursor-not-allowed opacity-50'
+                    : 'theme-btn-primary'
                 }`}
               >
                 {saving ? 'Запазване...' : 'Запази'}
@@ -829,7 +829,7 @@ export default function HomepageSettingsPage({
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4">Български</h3>
+                <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4">Български</h3>
                 {settings.stats.bg.map((stat, index) => (
                   <div key={index} className="grid grid-cols-2 gap-4 mb-4">
                     <input
@@ -841,7 +841,7 @@ export default function HomepageSettingsPage({
                         setSettings({ ...settings, stats: newStats });
                       }}
                       placeholder="Label"
-                      className="malts-field"
+                      className="theme-field"
                     />
                     <input
                       type="text"
@@ -852,7 +852,7 @@ export default function HomepageSettingsPage({
                         setSettings({ ...settings, stats: newStats });
                       }}
                       placeholder="Value"
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 ))}
@@ -862,14 +862,14 @@ export default function HomepageSettingsPage({
                     newStats.bg.push({ label: '', value: '' });
                     setSettings({ ...settings, stats: newStats });
                   }}
-                  className="malts-muted hover:text-[var(--malts-ink)] text-sm"
+                  className="theme-muted hover:text-[var(--theme-ink)] text-sm"
                 >
                   + Добави статистика
                 </button>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4">English</h3>
+                <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4">English</h3>
                 {settings.stats.en.map((stat, index) => (
                   <div key={index} className="grid grid-cols-2 gap-4 mb-4">
                     <div className="flex gap-2 items-start">
@@ -882,7 +882,7 @@ export default function HomepageSettingsPage({
                           setSettings({ ...settings, stats: newStats });
                         }}
                         placeholder="Label"
-                        className="malts-field flex-1 min-w-0"
+                        className="theme-field flex-1 min-w-0"
                       />
                       <AutoTranslateButton
                         variant="dark"
@@ -906,7 +906,7 @@ export default function HomepageSettingsPage({
                         setSettings({ ...settings, stats: newStats });
                       }}
                       placeholder="Value"
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 ))}
@@ -916,14 +916,14 @@ export default function HomepageSettingsPage({
                     newStats.en.push({ label: '', value: '' });
                     setSettings({ ...settings, stats: newStats });
                   }}
-                  className="malts-muted hover:text-[var(--malts-ink)] text-sm"
+                  className="theme-muted hover:text-[var(--theme-ink)] text-sm"
                 >
                   + Добави статистика
                 </button>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4">Română</h3>
+                <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4">Română</h3>
                 {settings.stats.ro.map((stat, index) => (
                   <div key={index} className="grid grid-cols-2 gap-4 mb-4">
                     <div className="flex gap-2 items-start">
@@ -936,7 +936,7 @@ export default function HomepageSettingsPage({
                           setSettings({ ...settings, stats: newStats });
                         }}
                         placeholder="Label"
-                        className="malts-field flex-1 min-w-0"
+                        className="theme-field flex-1 min-w-0"
                       />
                       <AutoTranslateButton
                         variant="dark"
@@ -960,7 +960,7 @@ export default function HomepageSettingsPage({
                         setSettings({ ...settings, stats: newStats });
                       }}
                       placeholder="Value"
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 ))}
@@ -970,7 +970,7 @@ export default function HomepageSettingsPage({
                     newStats.ro.push({ label: '', value: '' });
                     setSettings({ ...settings, stats: newStats });
                   }}
-                  className="malts-muted hover:text-[var(--malts-ink)] text-sm"
+                  className="theme-muted hover:text-[var(--theme-ink)] text-sm"
                 >
                   + Добави статистика
                 </button>
@@ -983,7 +983,7 @@ export default function HomepageSettingsPage({
         {activeTab === 'cards' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-[var(--malts-ink)]">Карти</h2>
+              <h2 className="text-2xl font-bold text-[var(--theme-ink)]">Карти</h2>
               <button
                 onClick={() => {
                   setEditingCard({
@@ -1004,7 +1004,7 @@ export default function HomepageSettingsPage({
                   });
                   setShowCardModal(true);
                 }}
-                className="malts-btn-primary malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto"
+                className="theme-btn-primary theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto"
               >
                 + Добави карта
               </button>
@@ -1014,7 +1014,7 @@ export default function HomepageSettingsPage({
               {cards.map((card) => (
                 <div
                   key={card.id}
-                  className="malts-card rounded-2xl p-6"
+                  className="theme-card rounded-2xl p-6"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex h-12 w-12 items-center justify-center text-4xl">
@@ -1026,23 +1026,23 @@ export default function HomepageSettingsPage({
                           setEditingCard(card);
                           setShowCardModal(true);
                         }}
-                        className="px-3 py-1 rounded-lg malts-btn-secondary text-sm"
+                        className="px-3 py-1 rounded-lg theme-btn-secondary text-sm"
                       >
                         Редактирай
                       </button>
                       <button
                         onClick={() => setDeleteCardId(card.id)}
-                        className="px-3 py-1 rounded-lg malts-btn-danger text-sm"
+                        className="px-3 py-1 rounded-lg theme-btn-danger text-sm"
                       >
                         Изтрий
                       </button>
                     </div>
                   </div>
-                  <h3 className="text-[var(--malts-ink)] font-semibold mb-2">{card.titleBg}</h3>
-                  <p className="malts-muted text-sm mb-2">{card.descriptionBg.substring(0, 100)}...</p>
+                  <h3 className="text-[var(--theme-ink)] font-semibold mb-2">{card.titleBg}</h3>
+                  <p className="theme-muted text-sm mb-2">{card.descriptionBg.substring(0, 100)}...</p>
                   <div className="flex items-center gap-2 mt-4">
-                    <span className="text-xs malts-muted">Badge: {card.badgeBg}</span>
-                    <span className="text-xs malts-muted">Order: {card.order}</span>
+                    <span className="text-xs theme-muted">Badge: {card.badgeBg}</span>
+                    <span className="text-xs theme-muted">Order: {card.order}</span>
                   </div>
                 </div>
               ))}
@@ -1052,10 +1052,10 @@ export default function HomepageSettingsPage({
 
         {/* Card Modal */}
         {showCardModal && editingCard && (
-          <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="malts-card rounded-2xl p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="theme-card rounded-2xl p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-[var(--malts-ink)]">
+                <h3 className="text-2xl font-bold text-[var(--theme-ink)]">
                   {editingCard.id ? 'Редактирай карта' : 'Добави карта'}
                 </h3>
                 <button
@@ -1063,7 +1063,7 @@ export default function HomepageSettingsPage({
                     setShowCardModal(false);
                     setEditingCard(null);
                   }}
-                  className="text-[var(--malts-subtle)] hover:text-[var(--malts-ink)]"
+                  className="text-[var(--theme-subtle)] hover:text-[var(--theme-ink)]"
                 >
                   ✕
                 </button>
@@ -1072,12 +1072,12 @@ export default function HomepageSettingsPage({
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="malts-label">Икона (емоджи или път)</label>
+                    <label className="theme-label">Икона (емоджи или път)</label>
                     <input
                       type="text"
                       value={editingCard.icon}
                       onChange={(e) => setEditingCard({ ...editingCard, icon: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                       placeholder="напр. ☕ или /nasheto-menu.webp"
                     />
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -1088,8 +1088,8 @@ export default function HomepageSettingsPage({
                             key={ic}
                             type="button"
                             onClick={() => setEditingCard({ ...editingCard, icon: ic })}
-                            className={`h-9 w-9 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-lg transition-colors hover:bg-[var(--malts-card-hover)] ${
-                              editingCard.icon === ic ? 'ring-2 ring-[var(--malts-accent-tint-border)]' : ''
+                            className={`h-9 w-9 rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] text-lg transition-colors hover:bg-[var(--theme-card-hover)] ${
+                              editingCard.icon === ic ? 'ring-2 ring-[var(--theme-accent-tint-border)]' : ''
                             }`}
                             aria-label={`Pick icon ${ic}`}
                             title={ic}
@@ -1100,29 +1100,29 @@ export default function HomepageSettingsPage({
                       </div>
                   </div>
                   <div>
-                    <label className="malts-label">Позиция (подредба)</label>
+                    <label className="theme-label">Позиция (подредба)</label>
                     <input
                       type="number"
                       value={editingCard.order}
                       onChange={(e) => setEditingCard({ ...editingCard, order: Number(e.target.value) })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="malts-label">Заглавие (BG)</label>
+                    <label className="theme-label">Заглавие (BG)</label>
                     <input
                       type="text"
                       value={editingCard.titleBg}
                       onChange={(e) => setEditingCard({ ...editingCard, titleBg: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Заглавие (EN)</label>
+                      <label className="theme-label">Заглавие (EN)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.titleBg}
@@ -1135,12 +1135,12 @@ export default function HomepageSettingsPage({
                       type="text"
                       value={editingCard.titleEn}
                       onChange={(e) => setEditingCard({ ...editingCard, titleEn: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Заглавие (RO)</label>
+                      <label className="theme-label">Заглавие (RO)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.titleBg}
@@ -1153,24 +1153,24 @@ export default function HomepageSettingsPage({
                       type="text"
                       value={editingCard.titleRo}
                       onChange={(e) => setEditingCard({ ...editingCard, titleRo: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="malts-label">Описание (BG)</label>
+                    <label className="theme-label">Описание (BG)</label>
                     <textarea
                       value={editingCard.descriptionBg}
                       onChange={(e) => setEditingCard({ ...editingCard, descriptionBg: e.target.value })}
                       rows={4}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Описание (EN)</label>
+                      <label className="theme-label">Описание (EN)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.descriptionBg}
@@ -1183,12 +1183,12 @@ export default function HomepageSettingsPage({
                       value={editingCard.descriptionEn}
                       onChange={(e) => setEditingCard({ ...editingCard, descriptionEn: e.target.value })}
                       rows={4}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Описание (RO)</label>
+                      <label className="theme-label">Описание (RO)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.descriptionBg}
@@ -1201,24 +1201,24 @@ export default function HomepageSettingsPage({
                       value={editingCard.descriptionRo}
                       onChange={(e) => setEditingCard({ ...editingCard, descriptionRo: e.target.value })}
                       rows={4}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="malts-label">Бадж (BG)</label>
+                    <label className="theme-label">Бадж (BG)</label>
                     <input
                       type="text"
                       value={editingCard.badgeBg}
                       onChange={(e) => setEditingCard({ ...editingCard, badgeBg: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Бадж (EN)</label>
+                      <label className="theme-label">Бадж (EN)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.badgeBg}
@@ -1231,12 +1231,12 @@ export default function HomepageSettingsPage({
                       type="text"
                       value={editingCard.badgeEn}
                       onChange={(e) => setEditingCard({ ...editingCard, badgeEn: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center gap-2 mb-2">
-                      <label className="malts-label">Бадж (RO)</label>
+                      <label className="theme-label">Бадж (RO)</label>
                       <AutoTranslateButton
                         variant="dark"
                         sourceText={editingCard.badgeBg}
@@ -1249,27 +1249,27 @@ export default function HomepageSettingsPage({
                       type="text"
                       value={editingCard.badgeRo}
                       onChange={(e) => setEditingCard({ ...editingCard, badgeRo: e.target.value })}
-                      className="malts-field"
+                      className="theme-field"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="malts-label">Акценти (едно поле = един акцент)</label>
+                  <label className="theme-label">Акценти (едно поле = един акцент)</label>
                   <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="malts-label">Етикет над акцентите (BG)</label>
+                      <label className="theme-label">Етикет над акцентите (BG)</label>
                       <input
                         type="text"
                         value={settings?.highlightsLabelBg ?? ''}
                         onChange={(e) => settings && setSettings({ ...settings, highlightsLabelBg: e.target.value })}
-                        className="malts-field"
+                        className="theme-field"
                         placeholder="Акценти"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center gap-2 mb-2">
-                        <label className="malts-label">Етикет над акцентите (EN)</label>
+                        <label className="theme-label">Етикет над акцентите (EN)</label>
                         <AutoTranslateButton
                           variant="dark"
                           sourceText={settings?.highlightsLabelBg ?? ''}
@@ -1282,13 +1282,13 @@ export default function HomepageSettingsPage({
                         type="text"
                         value={settings?.highlightsLabelEn ?? ''}
                         onChange={(e) => settings && setSettings({ ...settings, highlightsLabelEn: e.target.value })}
-                        className="malts-field"
+                        className="theme-field"
                         placeholder="Highlights"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center gap-2 mb-2">
-                        <label className="malts-label">Етикет над акцентите (RO)</label>
+                        <label className="theme-label">Етикет над акцентите (RO)</label>
                         <AutoTranslateButton
                           variant="dark"
                           sourceText={settings?.highlightsLabelBg ?? ''}
@@ -1301,7 +1301,7 @@ export default function HomepageSettingsPage({
                         type="text"
                         value={settings?.highlightsLabelRo ?? ''}
                         onChange={(e) => settings && setSettings({ ...settings, highlightsLabelRo: e.target.value })}
-                        className="malts-field"
+                        className="theme-field"
                         placeholder="Accente"
                       />
                     </div>
@@ -1309,7 +1309,7 @@ export default function HomepageSettingsPage({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {(['bg', 'en', 'ro'] as Array<'bg' | 'en' | 'ro'>).map((localeKey) => (
                       <div key={localeKey}>
-                        <label className="block text-xs malts-subtle mb-2 uppercase">{localeKey}</label>
+                        <label className="block text-xs theme-subtle mb-2 uppercase">{localeKey}</label>
                         <div className="space-y-3">
                           <div className="space-y-2">
                             {editingCard.highlights[localeKey].map((highlight, idx) => (
@@ -1321,7 +1321,7 @@ export default function HomepageSettingsPage({
                                   type="text"
                                   value={highlight}
                                   onChange={(e) => updateHighlightValue(localeKey, idx, e.target.value)}
-                                  className="malts-field flex-1 min-w-0"
+                                  className="theme-field flex-1 min-w-0"
                                   placeholder="Въведи акцент"
                                 />
                                 {(localeKey === 'en' || localeKey === 'ro') && (
@@ -1336,7 +1336,7 @@ export default function HomepageSettingsPage({
                                 <button
                                   type="button"
                                   onClick={() => removeHighlightRowAll(idx)}
-                                  className="flex-shrink-0 px-3 py-2 rounded-xl malts-btn-danger text-sm"
+                                  className="flex-shrink-0 px-3 py-2 rounded-xl theme-btn-danger text-sm"
                                 >
                                   ✕
                                 </button>
@@ -1346,7 +1346,7 @@ export default function HomepageSettingsPage({
                           <button
                             type="button"
                             onClick={() => addHighlightRowAll()}
-                            className="malts-muted hover:text-[var(--malts-ink)] text-sm block"
+                            className="theme-muted hover:text-[var(--theme-ink)] text-sm block"
                           >
                             + Добави акцент
                           </button>
@@ -1361,10 +1361,10 @@ export default function HomepageSettingsPage({
                     type="button"
                     onClick={() => handleSaveCard(editingCard)}
                     disabled={saving}
-                    className={`malts-btn-admin-compact flex-1 rounded-xl font-semibold transition-all ${
+                    className={`theme-btn-admin-compact flex-1 rounded-xl font-semibold transition-all ${
                       saving
-                        ? 'malts-btn-secondary cursor-not-allowed opacity-50'
-                        : 'malts-btn-primary'
+                        ? 'theme-btn-secondary cursor-not-allowed opacity-50'
+                        : 'theme-btn-primary'
                     }`}
                   >
                     {saving ? 'Запазване...' : 'Запази'}
@@ -1375,7 +1375,7 @@ export default function HomepageSettingsPage({
                       setShowCardModal(false);
                       setEditingCard(null);
                     }}
-                    className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-xl font-semibold transition-all sm:flex-none"
+                    className="theme-btn-secondary theme-btn-admin-compact flex-1 rounded-xl font-semibold transition-all sm:flex-none"
                   >
                     Отказ
                   </button>

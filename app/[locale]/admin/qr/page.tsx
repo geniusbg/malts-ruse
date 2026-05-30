@@ -6,7 +6,21 @@ import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import { formatBulgarianDateTime } from '@/lib/date-utils';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
+import { useSiteDisplayName } from '@/lib/use-site-display-name';
+
+const LEGACY_LOGO_TEXT = "Malt's\nРесторант - Русе";
+
+function defaultLogoText(siteName: string): string {
+  const name = siteName.trim() || 'App';
+  return `${name}\nРесторант - Русе`;
+}
+
+function normalizeLogoText(logoText: string | undefined, siteName: string): string {
+  const trimmed = (logoText ?? '').trim();
+  if (!trimmed || trimmed === LEGACY_LOGO_TEXT) return defaultLogoText(siteName);
+  return logoText ?? defaultLogoText(siteName);
+}
 
 interface QRCodeSettings {
   /** Фон на цялата картка (лого, рамка, текст). */
@@ -41,7 +55,7 @@ const DEFAULT_SETTINGS: QRCodeSettings = {
   orientation: 'portrait',
   logoUrl: '',
   useLogo: false,
-  logoText: "Malt's\nРесторант - Русе",
+  logoText: '',
   logoSize: 80,
   logoMargin: 0, // px
   scanTextBg: 'Сканирай за меню и поръчка',
@@ -63,21 +77,29 @@ function scanLineDisplay(text: string): string {
 }
 
 // Logo Section Component with Collapsible functionality
-function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setSettings: (s: QRCodeSettings) => void }) {
+function LogoSection({
+  settings,
+  setSettings,
+  siteName,
+}: {
+  settings: QRCodeSettings;
+  setSettings: (s: QRCodeSettings) => void;
+  siteName: string;
+}) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="malts-card rounded-lg overflow-hidden">
+    <div className="theme-card rounded-lg overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[var(--malts-card-hover)] transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[var(--theme-card-hover)] transition-colors"
       >
-        <h3 className="text-lg font-semibold text-[var(--malts-ink)] flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[var(--theme-ink)] flex items-center gap-2">
           <span className="text-2xl">🖼️</span>
           Лого настройки
         </h3>
         <svg
-          className={`w-5 h-5 text-[var(--malts-subtle)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 text-[var(--theme-subtle)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -89,7 +111,7 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
       {isExpanded && (
         <div className="px-4 pb-4 space-y-4">
           <div>
-            <label className="malts-label mb-3">
+            <label className="theme-label mb-3">
               Лого или текст
             </label>
             <div className="flex gap-4">
@@ -101,7 +123,7 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                   onChange={() => setSettings({ ...settings, useLogo: false })}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="malts-muted">📝 Текст</span>
+                <span className="theme-muted">📝 Текст</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -111,46 +133,46 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                   onChange={() => setSettings({ ...settings, useLogo: true })}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className="malts-muted">🖼️ Лого (изображение)</span>
+                <span className="theme-muted">🖼️ Лого (изображение)</span>
               </label>
             </div>
           </div>
           
           {!settings.useLogo ? (
             <div>
-              <label className="malts-label">
+              <label className="theme-label">
                 Текст за лого
               </label>
               <textarea
                 value={settings.logoText}
                 onChange={(e) => setSettings({ ...settings, logoText: e.target.value })}
                 rows={3}
-                className="malts-field"
-                placeholder="Malt's&#10;Ресторант - Русе"
+                className="theme-field"
+                placeholder={`${siteName}\nРесторант - Русе`}
               />
-              <p className="malts-help mt-1">Използвай нов ред (Enter) за нов ред в текста</p>
+              <p className="theme-help mt-1">Използвай нов ред (Enter) за нов ред в текста</p>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="malts-label">
+                <label className="theme-label">
                   URL на лого
                 </label>
                 <input
                   type="text"
                   value={settings.logoUrl || ''}
                   onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="https://example.com/logo.png или /logo.png"
                 />
-                <p className="malts-help mt-1">Въведи пълен URL или път към изображението</p>
+                <p className="theme-help mt-1">Въведи пълен URL или път към изображението</p>
               </div>
               
               {settings.logoUrl && settings.logoUrl.trim() !== '' && (
-                <div className="space-y-4 pt-2 border-t border-[var(--malts-hairline)]">
+                <div className="space-y-4 pt-2 border-t border-[var(--theme-hairline)]">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="malts-label">
+                      <label className="theme-label">
                         Размер на логото (px)
                       </label>
                       <input
@@ -160,11 +182,11 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                         step="10"
                         value={settings.logoSize}
                         onChange={(e) => setSettings({ ...settings, logoSize: parseInt(e.target.value) || 80 })}
-                        className="malts-field"
+                        className="theme-field"
                       />
                     </div>
                     <div>
-                      <label className="malts-label">
+                      <label className="theme-label">
                         Отстояние на логото (px)
                       </label>
                       <input
@@ -174,20 +196,20 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                         step="1"
                         value={settings.logoMargin}
                         onChange={(e) => setSettings({ ...settings, logoMargin: parseInt(e.target.value) || 0 })}
-                        className="malts-field"
+                        className="theme-field"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <p className="malts-help mb-2">Preview на логото (фон: {settings.backgroundColor}):</p>
+                    <p className="theme-help mb-2">Preview на логото (фон: {settings.backgroundColor}):</p>
                     <div className="relative inline-block">
                       <Image
                         src={settings.logoUrl}
                         alt="Logo preview"
                         width={Math.max(1, settings.logoSize)}
                         height={Math.max(1, settings.logoSize)}
-                        className="object-contain border border-[var(--malts-hairline)] rounded p-2 bg-[var(--malts-card)]"
+                        className="object-contain border border-[var(--theme-hairline)] rounded p-2 bg-[var(--theme-card)]"
                         style={{
                           backgroundColor: settings.backgroundColor,
                           maxWidth: `${settings.logoSize}px`,
@@ -214,7 +236,7 @@ function LogoSection({ settings, setSettings }: { settings: QRCodeSettings; setS
                         }}
                       />
                     </div>
-                    <p className="malts-help mt-2 break-all">URL: {settings.logoUrl}</p>
+                    <p className="theme-help mt-2 break-all">URL: {settings.logoUrl}</p>
                   </div>
                 </div>
               )}
@@ -238,6 +260,7 @@ interface QRTable {
 }
 
 export default function QRCodesPage() {
+  const siteName = useSiteDisplayName();
   const [tables, setTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generated, setGenerated] = useState(false);
@@ -307,6 +330,7 @@ export default function QRCodesPage() {
           const loadedSettings: QRCodeSettings = {
             ...DEFAULT_SETTINGS,
             ...raw,
+            logoText: normalizeLogoText(raw.logoText, siteName),
             qrCodeBackgroundColor:
               raw.qrCodeBackgroundColor != null && String(raw.qrCodeBackgroundColor).trim() !== ''
                 ? String(raw.qrCodeBackgroundColor)
@@ -315,14 +339,20 @@ export default function QRCodesPage() {
           setSettings(loadedSettings);
           setSavedSettings(loadedSettings); // Track saved settings
         } else {
-          // Use default settings if none exist in database
-          setSettings(DEFAULT_SETTINGS);
-          setSavedSettings(DEFAULT_SETTINGS);
+          const defaults = {
+            ...DEFAULT_SETTINGS,
+            logoText: defaultLogoText(siteName),
+          };
+          setSettings(defaults);
+          setSavedSettings(defaults);
         }
       } catch (error) {
-        // Error loading QR settings, use defaults
-        setSettings(DEFAULT_SETTINGS);
-        setSavedSettings(DEFAULT_SETTINGS);
+        const defaults = {
+          ...DEFAULT_SETTINGS,
+          logoText: defaultLogoText(siteName),
+        };
+        setSettings(defaults);
+        setSavedSettings(defaults);
       }
     };
     
@@ -331,7 +361,7 @@ export default function QRCodesPage() {
     // Clean up any existing fallback messages
     const fallbacks = document.querySelectorAll('.logo-fallback');
     fallbacks.forEach(fb => fb.remove());
-  }, []);
+  }, [siteName]);
 
   // Load existing QR codes on mount
   useEffect(() => {
@@ -814,9 +844,9 @@ export default function QRCodesPage() {
     <div>
       <div className="mb-6 md:mb-8 no-print">
         <div className="mb-4">
-          <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">QR Кодове за маси</h1>
+          <h1 className="theme-admin-heading-font theme-admin-page-title mb-2">QR Кодове за маси</h1>
           {generated && tables.length > 0 && (
-            <p className="malts-muted text-sm md:text-base">
+            <p className="theme-muted text-sm md:text-base">
               ✅ {tables.length} QR кода запазени в базата
             </p>
           )}
@@ -827,20 +857,20 @@ export default function QRCodesPage() {
               setShowRedirectsModal(true);
               loadRedirectTables();
             }}
-            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all"
+            className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold transition-all"
           >
             🔗 Пренасочвания
           </button>
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all"
+            className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold transition-all"
           >
             {showSettings ? '❌ Затвори настройки' : '⚙️ Настройки'}
           </button>
           <button
             onClick={() => generateQRCodes(false)}
             disabled={loading}
-            className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
+            className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--theme-accent)] active:!text-[var(--theme-accent-contrast)] active:!border-[var(--theme-accent)]"
           >
             {loading ? 'Генериране...' : generated ? '🔄 Регенерирай' : '✨ Генерирай'}
           </button>
@@ -854,7 +884,7 @@ export default function QRCodesPage() {
                   setQrExportModal('pdf');
                 }}
                 disabled={loading}
-                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
+                className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold transition-all disabled:opacity-50 active:!bg-[var(--theme-accent)] active:!text-[var(--theme-accent-contrast)] active:!border-[var(--theme-accent)]"
               >
                 {loading ? 'Изтегляне...' : '⬇️ Изтегли PDF'}
               </button>
@@ -865,7 +895,7 @@ export default function QRCodesPage() {
                   setQrExportAlert(null);
                   setQrExportModal('print');
                 }}
-                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--malts-accent)] active:!text-[var(--malts-accent-contrast)] active:!border-[var(--malts-accent)]"
+                className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold transition-all active:!bg-[var(--theme-accent)] active:!text-[var(--theme-accent-contrast)] active:!border-[var(--theme-accent)]"
               >
                 🖨️ Принтирай
               </button>
@@ -876,12 +906,12 @@ export default function QRCodesPage() {
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="mb-6 md:mb-8 malts-card p-4 md:p-6 no-print">
+        <div className="mb-6 md:mb-8 theme-card p-4 md:p-6 no-print">
           <h2 className="text-xl md:text-2xl font-bold mb-6">Настройки на QR кодове</h2>
           
           <div className="space-y-6">
             {/* Section 1: Colors */}
-            <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
+            <div className="bg-[var(--theme-inset)] rounded-lg p-4 border border-[var(--theme-hairline)]">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <span className="text-2xl">🎨</span>
                 Цветове
@@ -889,7 +919,7 @@ export default function QRCodesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {/* Фон картка | Фон QR матрица | Тъмни модули | Текст */}
             <div>
-              <label className="block text-sm font-medium malts-subtle mb-2">
+              <label className="block text-sm font-medium theme-subtle mb-2">
                 Фон на картата
               </label>
               <div className="flex gap-2">
@@ -903,14 +933,14 @@ export default function QRCodesPage() {
                   type="text"
                   value={settings.backgroundColor}
                   onChange={(e) => setSettings({ ...settings, backgroundColor: e.target.value })}
-                  className="flex-1 px-3 py-2 malts-inset rounded border border-[var(--malts-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                  className="flex-1 px-3 py-2 theme-inset rounded border border-[var(--theme-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   placeholder="#FFFFFF"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium malts-subtle mb-2">
+              <label className="block text-sm font-medium theme-subtle mb-2">
                 Фон на QR кода
               </label>
               <div className="flex gap-2">
@@ -924,18 +954,18 @@ export default function QRCodesPage() {
                   type="text"
                   value={settings.qrCodeBackgroundColor}
                   onChange={(e) => setSettings({ ...settings, qrCodeBackgroundColor: e.target.value })}
-                  className="flex-1 px-3 py-2 malts-inset rounded border border-[var(--malts-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--malts-accent-tint-border)]"
+                  className="flex-1 px-3 py-2 theme-inset rounded border border-[var(--theme-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent-tint-border)]"
                   placeholder="#FFFFFF"
                 />
               </div>
-              <p className="malts-help mt-1 text-xs">
+              <p className="theme-help mt-1 text-xs">
                 Светлите полета на матрицата; може да е различен от фона на картата.
               </p>
             </div>
 
             {/* QR Code Color (dark modules) */}
             <div>
-              <label className="malts-label">
+              <label className="theme-label">
                 Цвят на модулите (QR)
               </label>
               <div className="flex gap-2">
@@ -949,7 +979,7 @@ export default function QRCodesPage() {
                   type="text"
                   value={settings.qrCodeColor}
                   onChange={(e) => setSettings({ ...settings, qrCodeColor: e.target.value })}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="#000000"
                 />
               </div>
@@ -957,7 +987,7 @@ export default function QRCodesPage() {
 
             {/* Text Color */}
             <div>
-              <label className="malts-label">
+              <label className="theme-label">
                 Цвят на буквите
               </label>
               <div className="flex gap-2">
@@ -971,7 +1001,7 @@ export default function QRCodesPage() {
                   type="text"
                   value={settings.textColor}
                   onChange={(e) => setSettings({ ...settings, textColor: e.target.value })}
-                  className="malts-field"
+                  className="theme-field"
                   placeholder="#000000"
                 />
               </div>
@@ -981,14 +1011,14 @@ export default function QRCodesPage() {
             </div>
 
             {/* Section 2: Sizes and Spacing */}
-            <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
-              <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4 flex items-center gap-2">
+            <div className="bg-[var(--theme-inset)] rounded-lg p-4 border border-[var(--theme-hairline)]">
+              <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4 flex items-center gap-2">
                 <span className="text-2xl">📐</span>
                 Размери и отстояния
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Размер на QR кода (px)
                   </label>
                   <input
@@ -998,12 +1028,12 @@ export default function QRCodesPage() {
                     step="50"
                     value={settings.qrCodeSize}
                     onChange={(e) => setSettings({ ...settings, qrCodeSize: parseInt(e.target.value) || 400 })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
 
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Отстояние на QR кода (px)
                   </label>
                   <input
@@ -1013,12 +1043,12 @@ export default function QRCodesPage() {
                     step="1"
                     value={settings.qrCodeMargin}
                     onChange={(e) => setSettings({ ...settings, qrCodeMargin: parseInt(e.target.value) || 0 })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
 
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Размер на текста (px)
                   </label>
                   <input
@@ -1028,12 +1058,12 @@ export default function QRCodesPage() {
                     step="1"
                     value={settings.scanTextSize}
                     onChange={(e) => setSettings({ ...settings, scanTextSize: parseInt(e.target.value) || 20 })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
 
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Отстояние на текста (px)
                   </label>
                   <input
@@ -1043,21 +1073,21 @@ export default function QRCodesPage() {
                     step="1"
                     value={settings.scanTextMargin}
                     onChange={(e) => setSettings({ ...settings, scanTextMargin: parseInt(e.target.value) || 0 })}
-                    className="malts-field"
+                    className="theme-field"
                   />
                 </div>
               </div>
             </div>
 
             {/* Section 3: Card Layout */}
-            <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
-              <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4 flex items-center gap-2">
+            <div className="bg-[var(--theme-inset)] rounded-lg p-4 border border-[var(--theme-hairline)]">
+              <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4 flex items-center gap-2">
                 <span className="text-2xl">📄</span>
                 Ориентация и размери на картата
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="malts-label mb-3">
+                  <label className="theme-label mb-3">
                     Ориентация на картата
                   </label>
                   <div className="flex gap-4">
@@ -1070,7 +1100,7 @@ export default function QRCodesPage() {
                         onChange={(e) => setSettings({ ...settings, orientation: e.target.value as 'portrait' | 'landscape' })}
                         className="w-4 h-4 text-blue-600"
                       />
-                      <span className="malts-muted">📄 Портретна (продълговата / вертикална)</span>
+                      <span className="theme-muted">📄 Портретна (продълговата / вертикална)</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -1081,13 +1111,13 @@ export default function QRCodesPage() {
                         onChange={(e) => setSettings({ ...settings, orientation: e.target.value as 'portrait' | 'landscape' })}
                         className="w-4 h-4 text-blue-600"
                       />
-                      <span className="malts-muted">🖼️ Ландшафтна (широка / хоризонтална)</span>
+                      <span className="theme-muted">🖼️ Ландшафтна (широка / хоризонтална)</span>
                     </label>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="malts-label">
+                    <label className="theme-label">
                       Ширина на табелката (cm)
                     </label>
                     <input
@@ -1097,12 +1127,12 @@ export default function QRCodesPage() {
                       step="0.5"
                       value={settings.cardWidth}
                       onChange={(e) => setSettings({ ...settings, cardWidth: parseFloat(e.target.value) || 8.5 })}
-                      className="malts-field"
+                      className="theme-field"
                     />
-                    <p className="malts-help mt-1">Използва се при принтиране и PDF изтегляне</p>
+                    <p className="theme-help mt-1">Използва се при принтиране и PDF изтегляне</p>
                   </div>
                   <div>
-                    <label className="malts-label">
+                    <label className="theme-label">
                       Височина на табелката (cm)
                     </label>
                     <input
@@ -1112,73 +1142,73 @@ export default function QRCodesPage() {
                       step="0.5"
                       value={settings.cardHeight}
                       onChange={(e) => setSettings({ ...settings, cardHeight: parseFloat(e.target.value) || 5.5 })}
-                      className="malts-field"
+                      className="theme-field"
                     />
-                    <p className="malts-help mt-1">Използва се при принтиране и PDF изтегляне</p>
+                    <p className="theme-help mt-1">Използва се при принтиране и PDF изтегляне</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Section 4: Scan Text */}
-            <div className="bg-[var(--malts-inset)] rounded-lg p-4 border border-[var(--malts-hairline)]">
-              <h3 className="text-lg font-semibold text-[var(--malts-ink)] mb-4 flex items-center gap-2">
+            <div className="bg-[var(--theme-inset)] rounded-lg p-4 border border-[var(--theme-hairline)]">
+              <h3 className="text-lg font-semibold text-[var(--theme-ink)] mb-4 flex items-center gap-2">
                 <span className="text-2xl">📝</span>
                 Текстове за сканиране
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Текст за сканиране (Български)
                   </label>
                   <input
                     type="text"
                     value={settings.scanTextBg}
                     onChange={(e) => setSettings({ ...settings, scanTextBg: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                     placeholder="Сканирай за меню и поръчка"
                   />
                 </div>
                 <div>
-                  <label className="malts-label">
+                  <label className="theme-label">
                     Текст за сканиране (English)
                   </label>
                   <input
                     type="text"
                     value={settings.scanTextEn}
                     onChange={(e) => setSettings({ ...settings, scanTextEn: e.target.value })}
-                    className="malts-field"
+                    className="theme-field"
                     placeholder="Scan for menu & order"
                   />
                 </div>
-                <p className="malts-help text-xs">
+                <p className="theme-help text-xs">
                   За iPhone/iPad: при инструкции за бутона Share използвайте „избери“, не „натисни“.
                 </p>
               </div>
             </div>
 
             {/* Section 5: Logo Settings - Collapsible */}
-            <LogoSection settings={settings} setSettings={setSettings} />
+            <LogoSection settings={settings} setSettings={setSettings} siteName={siteName} />
           </div>
 
-          <div className="mt-6 pt-4 border-t border-[var(--malts-hairline)]">
+          <div className="mt-6 pt-4 border-t border-[var(--theme-hairline)]">
             {settingsSaveError && (
-              <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+              <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
                 {settingsSaveError}
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
             {hasUnsavedChanges && (
-              <MaltsInlineFeedback tone="warning" className="mb-4" role="status">
+              <ThemeInlineFeedback tone="warning" className="mb-4" role="status">
                 ⚠️ Има незаписани промени. Не забравяйте да натиснете &quot;Запази&quot; за да запазите настройките.
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
             {saveSuccess && (
-              <MaltsInlineFeedback tone="success" className="mb-4" role="status">
+              <ThemeInlineFeedback tone="success" className="mb-4" role="status">
                 ✅ Настройките са запазени успешно!
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm malts-muted flex-1">
+              <p className="text-sm theme-muted flex-1">
                 💡 Запазете настройките преди генериране/регенериране на QR кодовете. При генериране ще се използват запазените настройки.
               </p>
               <button
@@ -1186,8 +1216,8 @@ export default function QRCodesPage() {
                 disabled={!hasUnsavedChanges || saving}
                 className={`px-6 py-2 rounded-lg font-semibold transition-all ${
                   hasUnsavedChanges && !saving
-                    ? 'malts-btn-primary cursor-pointer'
-                    : 'malts-btn-secondary opacity-50 cursor-not-allowed'
+                    ? 'theme-btn-primary cursor-pointer'
+                    : 'theme-btn-secondary opacity-50 cursor-not-allowed'
                 }`}
               >
                 {saving ? 'Запазване...' : '💾 Запази'}
@@ -1199,23 +1229,23 @@ export default function QRCodesPage() {
 
       {/* Confirm Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[110] no-print">
-          <div className="malts-card p-6 max-w-md mx-4">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[110] no-print">
+          <div className="theme-card p-6 max-w-md mx-4">
             <h3 className="text-xl font-bold mb-4">⚠️ Потвърждение</h3>
-            <p className="malts-muted mb-6">
+            <p className="theme-muted mb-6">
               Сигурни ли сте, че искате да регенерирате всички QR кодове? 
               Това ще презапише текущите QR кодове с новите настройки.
             </p>
             <div className="flex gap-4">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 px-4 py-2 malts-btn-secondary rounded-lg font-semibold transition-all"
+                className="flex-1 px-4 py-2 theme-btn-secondary rounded-lg font-semibold transition-all"
               >
                 Отказ
               </button>
               <button
                 onClick={() => generateQRCodes(true)}
-                className="flex-1 px-4 py-2 malts-btn-danger rounded-lg font-semibold transition-all"
+                className="flex-1 px-4 py-2 theme-btn-danger rounded-lg font-semibold transition-all"
               >
                 Да, регенерирай
               </button>
@@ -1282,7 +1312,7 @@ export default function QRCodesPage() {
 
       {qrExportAlert !== null && qrExportModal === null && (
         <div className="fixed bottom-6 left-1/2 z-[130] w-full max-w-md -translate-x-1/2 px-4 no-print">
-          <MaltsInlineFeedback tone="error" role="alert" className="shadow-lg">
+          <ThemeInlineFeedback tone="error" role="alert" className="shadow-lg">
             <div className="flex items-start justify-between gap-3">
               <span>{qrExportAlert}</span>
               <button
@@ -1294,17 +1324,17 @@ export default function QRCodesPage() {
                 ×
               </button>
             </div>
-          </MaltsInlineFeedback>
+          </ThemeInlineFeedback>
         </div>
       )}
 
       {qrExportModal !== null && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[120] no-print p-4">
-          <div className="malts-card rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-[var(--malts-ink)] mb-2">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-[120] no-print p-4">
+          <div className="theme-card rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-[var(--theme-ink)] mb-2">
               {qrExportModal === 'pdf' ? 'Изтегляне на PDF' : 'Принтиране'}
             </h3>
-            <p className="text-sm malts-muted mb-4">
+            <p className="text-sm theme-muted mb-4">
               Изберете кои QR кодове да се включат.
             </p>
             <div className="flex flex-col gap-3 mb-6">
@@ -1330,14 +1360,14 @@ export default function QRCodesPage() {
               </label>
             </div>
             {qrExportAlert && (
-              <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+              <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
                 {qrExportAlert}
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="malts-btn-secondary rounded-lg px-4 py-2 font-semibold"
+                className="theme-btn-secondary rounded-lg px-4 py-2 font-semibold"
                 onClick={() => {
                   setQrExportModal(null);
                   setQrExportAlert(null);
@@ -1347,7 +1377,7 @@ export default function QRCodesPage() {
               </button>
               <button
                 type="button"
-                className="malts-btn-primary rounded-lg px-4 py-2 font-semibold"
+                className="theme-btn-primary rounded-lg px-4 py-2 font-semibold"
                 onClick={runQrExportConfirm}
               >
                 {qrExportModal === 'pdf' ? 'Изтегли' : 'Принтирай'}
@@ -1362,15 +1392,15 @@ export default function QRCodesPage() {
       )}
 
       {!loading && !generated && (
-        <div className="text-center py-20 malts-card rounded-xl">
+        <div className="text-center py-20 theme-card rounded-xl">
           <div className="text-6xl mb-4">📱</div>
-          <p className="text-[var(--malts-ink)] text-xl mb-4">
+          <p className="text-[var(--theme-ink)] text-xl mb-4">
             Няма генерирани QR кодове
           </p>
-          <p className="malts-muted text-sm mb-2">
+          <p className="theme-muted text-sm mb-2">
             Кликнете &quot;Генерирай QR кодове&quot; за да създадете QR кодове за всички 30 маси
           </p>
-          <p className="malts-muted text-sm">
+          <p className="theme-muted text-sm">
             QR кодовете ще се запазят в базата данни и ще са достъпни винаги
           </p>
         </div>
@@ -1798,13 +1828,13 @@ export default function QRCodesPage() {
 
       {/* QR Redirects Modal */}
       {showRedirectsModal && (
-        <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="malts-card rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="theme-card rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="p-4 md:p-6 border-b border-[var(--malts-hairline)] flex justify-between items-start md:items-center gap-4">
+            <div className="p-4 md:p-6 border-b border-[var(--theme-hairline)] flex justify-between items-start md:items-center gap-4">
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl md:text-2xl font-bold">🔗 Пренасочвания</h2>
-                <p className="malts-muted text-xs md:text-sm mt-1">
+                <p className="theme-muted text-xs md:text-sm mt-1">
                   Управление на URL адресите на QR кодовете. Промените се прилагат веднага без да принтирате нови кодове.
                 </p>
               </div>
@@ -1813,7 +1843,7 @@ export default function QRCodesPage() {
                   setShowRedirectsModal(false);
                   cancelEditingRedirect();
                 }}
-                className="text-[var(--malts-ink)] text-2xl md:text-3xl hover:text-[var(--malts-accent)] transition-colors flex-shrink-0"
+                className="text-[var(--theme-ink)] text-2xl md:text-3xl hover:text-[var(--theme-accent)] transition-colors flex-shrink-0"
                 aria-label="Затвори"
               >
                 ×
@@ -1822,7 +1852,7 @@ export default function QRCodesPage() {
 
             {/* Toast Notification */}
             {redirectsToast && (
-              <MaltsInlineFeedback
+              <ThemeInlineFeedback
                 tone={redirectsToast.type === 'success' ? 'success' : 'error'}
                 className="mx-4 mt-4 flex items-center justify-between gap-3"
                 role={redirectsToast.type === 'success' ? 'status' : 'alert'}
@@ -1831,47 +1861,47 @@ export default function QRCodesPage() {
                 <button
                   type="button"
                   onClick={() => setRedirectsToast(null)}
-                  className="ml-4 shrink-0 text-[var(--malts-subtle)] hover:text-[var(--malts-ink)] transition-colors text-xl font-bold"
+                  className="ml-4 shrink-0 text-[var(--theme-subtle)] hover:text-[var(--theme-ink)] transition-colors text-xl font-bold"
                   aria-label="Затвори"
                 >
                   ×
                 </button>
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
 
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {redirectsLoading ? (
                 <div className="text-center py-12">
-                  <p className="malts-muted">Зареждане...</p>
+                  <p className="theme-muted">Зареждане...</p>
                 </div>
               ) : (
                 <>
                   {/* Add Table */}
-                  <div className="malts-card rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-                    <h3 className="text-lg font-bold text-[var(--malts-ink)] mb-3">➕ Добави маса</h3>
+                  <div className="theme-card rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+                    <h3 className="text-lg font-bold text-[var(--theme-ink)] mb-3">➕ Добави маса</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
-                        <label className="malts-label">Номер *</label>
+                        <label className="theme-label">Номер *</label>
                         <input
                           type="number"
                           inputMode="numeric"
                           value={addTableNumber}
                           onChange={(e) => setAddTableNumber(e.target.value)}
-                          className="malts-field"
+                          className="theme-field"
                           placeholder="напр. 20"
                         />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="malts-label">Етикет (по избор)</label>
+                        <label className="theme-label">Етикет (по избор)</label>
                         <input
                           type="text"
                           value={addTableName}
                           onChange={(e) => setAddTableName(e.target.value.slice(0, 18))}
-                          className="malts-field"
+                          className="theme-field"
                           placeholder="напр. Тераса"
                         />
-                        <p className="malts-help mt-1">До 18 символа.</p>
+                        <p className="theme-help mt-1">До 18 символа.</p>
                       </div>
                     </div>
                     <div className="mt-4 flex justify-end">
@@ -1879,7 +1909,7 @@ export default function QRCodesPage() {
                         type="button"
                         onClick={createTable}
                         disabled={addingTable}
-                        className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
+                        className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
                       >
                         {addingTable ? 'Добавяне...' : 'Добави'}
                       </button>
@@ -1888,24 +1918,24 @@ export default function QRCodesPage() {
 
                   {/* Statistics Cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 md:mb-6">
-                    <div className="malts-card rounded-lg p-4">
-                      <div className="malts-subtle text-sm mb-1">Всички маси</div>
+                    <div className="theme-card rounded-lg p-4">
+                      <div className="theme-subtle text-sm mb-1">Всички маси</div>
                       <div className="text-3xl font-bold">{redirectTables.length}</div>
                     </div>
-                    <div className="malts-card rounded-lg p-4">
-                      <div className="malts-subtle text-sm mb-1">Активни</div>
+                    <div className="theme-card rounded-lg p-4">
+                      <div className="theme-subtle text-sm mb-1">Активни</div>
                       <div className="text-3xl font-bold text-green-500">
                         {redirectTables.filter(t => t.isActive).length}
                       </div>
                     </div>
-                    <div className="malts-card rounded-lg p-4">
-                      <div className="malts-subtle text-sm mb-1">Деактивирани</div>
+                    <div className="theme-card rounded-lg p-4">
+                      <div className="theme-subtle text-sm mb-1">Деактивирани</div>
                       <div className="text-3xl font-bold text-red-500">
                         {redirectTables.filter(t => !t.isActive).length}
                       </div>
                     </div>
-                    <div className="malts-card rounded-lg p-4">
-                      <div className="malts-subtle text-sm mb-1">Общо сканирания</div>
+                    <div className="theme-card rounded-lg p-4">
+                      <div className="theme-subtle text-sm mb-1">Общо сканирания</div>
                       <div className="text-3xl font-bold text-blue-500">
                         {redirectTables.reduce((sum, t) => sum + t.scanCount, 0)}
                       </div>
@@ -1913,19 +1943,19 @@ export default function QRCodesPage() {
                   </div>
 
                   {/* Filters and Sort */}
-                  <div className="bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4 md:p-6 mb-4 md:mb-6">
+                  <div className="bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-lg p-4 md:p-6 mb-4 md:mb-6">
                     <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
                       <div className="flex flex-col sm:flex-row gap-3 flex-1">
                         {/* Status Filter */}
                         <div className="flex-1">
-                          <label className="malts-label text-xs md:text-sm">Филтър по статус</label>
+                          <label className="theme-label text-xs md:text-sm">Филтър по статус</label>
                           <div className="flex gap-2">
                             <button
                               onClick={() => setFilterStatus('all')}
                               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                                 filterStatus === 'all'
-                                  ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                                  : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
+                                  ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                                  : 'bg-[var(--theme-card)] text-[var(--theme-ink)] border border-[var(--theme-hairline)] hover:bg-[var(--theme-card-hover)]'
                               }`}
                             >
                               Всички
@@ -1934,8 +1964,8 @@ export default function QRCodesPage() {
                               onClick={() => setFilterStatus('active')}
                               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                                 filterStatus === 'active'
-                                  ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
-                                  : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
+                                  ? 'bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]'
+                                  : 'bg-[var(--theme-card)] text-[var(--theme-ink)] border border-[var(--theme-hairline)] hover:bg-[var(--theme-card-hover)]'
                               }`}
                             >
                               Активни
@@ -1944,8 +1974,8 @@ export default function QRCodesPage() {
                               onClick={() => setFilterStatus('inactive')}
                               className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                                 filterStatus === 'inactive'
-                                  ? 'bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)] border border-[rgba(153,27,27,0.25)]'
-                                  : 'bg-[var(--malts-card)] text-[var(--malts-ink)] border border-[var(--malts-hairline)] hover:bg-[var(--malts-card-hover)]'
+                                  ? 'bg-[rgba(153,27,27,0.10)] text-[var(--theme-danger)] border border-[rgba(153,27,27,0.25)]'
+                                  : 'bg-[var(--theme-card)] text-[var(--theme-ink)] border border-[var(--theme-hairline)] hover:bg-[var(--theme-card-hover)]'
                               }`}
                             >
                               Деактивирани
@@ -1955,12 +1985,12 @@ export default function QRCodesPage() {
 
                         {/* Sort By */}
                         <div className="flex-1">
-                          <label className="malts-label text-xs md:text-sm">Сортиране по</label>
+                          <label className="theme-label text-xs md:text-sm">Сортиране по</label>
                           <div className="flex gap-2">
                             <select
                               value={sortBy}
                               onChange={(e) => setSortBy(e.target.value as 'tableNumber' | 'scanCount' | 'lastScanned')}
-                              className="malts-field"
+                              className="theme-field"
                             >
                               <option value="tableNumber">Номер на маса</option>
                               <option value="scanCount">Брой сканирания</option>
@@ -1968,7 +1998,7 @@ export default function QRCodesPage() {
                             </select>
                             <button
                               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                              className="px-4 py-2 malts-btn-secondary rounded-lg text-[var(--malts-ink)] text-sm transition-colors"
+                              className="px-4 py-2 theme-btn-secondary rounded-lg text-[var(--theme-ink)] text-sm transition-colors"
                               title={sortOrder === 'asc' ? 'Възходящо' : 'Низходящо'}
                             >
                               {sortOrder === 'asc' ? '↑' : '↓'}
@@ -1979,7 +2009,7 @@ export default function QRCodesPage() {
 
                       {/* Results count */}
                       <div className="text-right">
-                        <div className="text-xs md:text-sm malts-muted">
+                        <div className="text-xs md:text-sm theme-muted">
                           Показва се {filteredTables.length} от {redirectTables.length} маси
                         </div>
                       </div>
@@ -1987,37 +2017,37 @@ export default function QRCodesPage() {
                   </div>
 
                   {/* Tables List */}
-                  <div className="malts-card overflow-hidden">
+                  <div className="theme-card overflow-hidden">
                     {/* Desktop Table View - hidden on mobile */}
                     <div className="hidden md:block overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-[var(--malts-inset)] border-b border-[var(--malts-hairline)]">
+                        <thead className="bg-[var(--theme-inset)] border-b border-[var(--theme-hairline)]">
                           <tr>
                             <th 
-                              className="text-left px-4 py-3 malts-subtle font-semibold cursor-pointer hover:text-[var(--malts-ink)] transition-colors" 
+                              className="text-left px-4 py-3 theme-subtle font-semibold cursor-pointer hover:text-[var(--theme-ink)] transition-colors" 
                               onClick={() => { setSortBy('tableNumber'); setSortOrder(sortBy === 'tableNumber' && sortOrder === 'asc' ? 'desc' : 'asc'); }}
                             >
                               Маса {sortBy === 'tableNumber' && (sortOrder === 'asc' ? '↑' : '↓')}
                             </th>
-                            <th className="text-left px-2 py-3 malts-subtle font-semibold w-[1%] whitespace-nowrap">Статус</th>
-                            <th className="text-left px-4 py-3 malts-subtle font-semibold">QR Link</th>
-                            <th className="text-left px-4 py-3 malts-subtle font-semibold">Redirect URL</th>
+                            <th className="text-left px-2 py-3 theme-subtle font-semibold w-[1%] whitespace-nowrap">Статус</th>
+                            <th className="text-left px-4 py-3 theme-subtle font-semibold">QR Link</th>
+                            <th className="text-left px-4 py-3 theme-subtle font-semibold">Redirect URL</th>
                             <th 
-                              className="text-left px-4 py-3 malts-subtle font-semibold cursor-pointer hover:text-[var(--malts-ink)] transition-colors" 
+                              className="text-left px-4 py-3 theme-subtle font-semibold cursor-pointer hover:text-[var(--theme-ink)] transition-colors" 
                               onClick={() => { setSortBy('scanCount'); setSortOrder(sortBy === 'scanCount' && sortOrder === 'asc' ? 'desc' : 'asc'); }}
                             >
                               Сканирания {sortBy === 'scanCount' && (sortOrder === 'asc' ? '↑' : '↓')}
                             </th>
                             <th 
-                              className="text-left px-4 py-3 malts-subtle font-semibold cursor-pointer hover:text-[var(--malts-ink)] transition-colors" 
+                              className="text-left px-4 py-3 theme-subtle font-semibold cursor-pointer hover:text-[var(--theme-ink)] transition-colors" 
                               onClick={() => { setSortBy('lastScanned'); setSortOrder(sortBy === 'lastScanned' && sortOrder === 'asc' ? 'desc' : 'asc'); }}
                             >
                               Последно {sortBy === 'lastScanned' && (sortOrder === 'asc' ? '↑' : '↓')}
                             </th>
-                            <th className="text-left px-4 py-3 malts-subtle font-semibold">Действия</th>
+                            <th className="text-left px-4 py-3 theme-subtle font-semibold">Действия</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--malts-hairline)]">
+                        <tbody className="divide-y divide-[var(--theme-hairline)]">
                           {filteredTables.map((table) => (
                             <tr key={table.id} className={!table.isActive ? 'opacity-50' : ''}>
                               <td className="px-4 py-3">
@@ -2027,15 +2057,15 @@ export default function QRCodesPage() {
                                     value={editTableName}
                                     onChange={(e) => setEditTableName(e.target.value)}
                                     placeholder={`Маса ${table.tableNumber}`}
-                                    className="malts-field"
+                                    className="theme-field"
                                   />
                                 ) : (
                                   <>
-                                    <div className="font-semibold text-[var(--malts-ink)]">
+                                    <div className="font-semibold text-[var(--theme-ink)]">
                                       Маса {table.tableNumber}
                                     </div>
                                     {table.tableName && (
-                                      <div className="text-sm malts-muted">{table.tableName}</div>
+                                      <div className="text-sm theme-muted">{table.tableName}</div>
                                     )}
                                   </>
                                 )}
@@ -2047,9 +2077,9 @@ export default function QRCodesPage() {
                                       type="checkbox"
                                       checked={editIsActive}
                                       onChange={(e) => setEditIsActive(e.target.checked)}
-                                      className="w-4 h-4 shrink-0 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)]"
+                                      className="w-4 h-4 shrink-0 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-success)]"
                                     />
-                                    <span className="text-[var(--malts-ink)] text-[11px] sm:text-xs leading-tight">
+                                    <span className="text-[var(--theme-ink)] text-[11px] sm:text-xs leading-tight">
                                       {editIsActive ? 'Активна' : 'Спряна'}
                                     </span>
                                   </label>
@@ -2057,8 +2087,8 @@ export default function QRCodesPage() {
                                   <span
                                     className={`inline-flex max-w-full items-center whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none sm:px-2 sm:py-1 sm:text-xs ${
                                       table.isActive
-                                        ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
-                                        : 'bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)] border border-[rgba(153,27,27,0.25)]'
+                                        ? 'bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]'
+                                        : 'bg-[rgba(153,27,27,0.10)] text-[var(--theme-danger)] border border-[rgba(153,27,27,0.25)]'
                                     }`}
                                     title={table.isActive ? 'Активна' : 'Спряна'}
                                   >
@@ -2077,19 +2107,19 @@ export default function QRCodesPage() {
                                     type="text"
                                     value={editUrl}
                                     onChange={(e) => setEditUrl(e.target.value)}
-                                    className="malts-field"
+                                    className="theme-field"
                                     placeholder="/order?table=1"
                                   />
                                 ) : (
-                                  <code className="text-sm malts-muted break-all">
+                                  <code className="text-sm theme-muted break-all">
                                     {table.redirectUrl || `/order?table=${table.tableNumber}`}
                                   </code>
                                 )}
                               </td>
                               <td className="px-4 py-3">
-                                <span className="text-[var(--malts-ink)] font-semibold">{table.scanCount}</span>
+                                <span className="text-[var(--theme-ink)] font-semibold">{table.scanCount}</span>
                               </td>
-                              <td className="px-4 py-3 text-sm malts-muted">
+                              <td className="px-4 py-3 text-sm theme-muted">
                                 {formatDate(table.lastScannedAt)}
                               </td>
                               <td className="px-4 py-3">
@@ -2097,13 +2127,13 @@ export default function QRCodesPage() {
                                   <div className="flex gap-2">
                                     <button
                                       onClick={() => saveRedirect(table.tableNumber)}
-                                      className="px-3 py-1 malts-btn-primary text-sm rounded transition-colors"
+                                      className="px-3 py-1 theme-btn-primary text-sm rounded transition-colors"
                                     >
                                       ✓ Запази
                                     </button>
                                     <button
                                       onClick={cancelEditingRedirect}
-                                      className="px-3 py-1 malts-btn-secondary text-sm rounded transition-colors"
+                                      className="px-3 py-1 theme-btn-secondary text-sm rounded transition-colors"
                                     >
                                       ✗ Откажи
                                     </button>
@@ -2114,7 +2144,7 @@ export default function QRCodesPage() {
                                       type="button"
                                       onClick={() => startEditingRedirect(table)}
                                       disabled={togglingTableId === table.id}
-                                      className="px-3 py-1 malts-btn-secondary text-sm rounded transition-colors disabled:opacity-50"
+                                      className="px-3 py-1 theme-btn-secondary text-sm rounded transition-colors disabled:opacity-50"
                                     >
                                       ✎ Редактирай
                                     </button>
@@ -2122,7 +2152,7 @@ export default function QRCodesPage() {
                                       type="button"
                                       onClick={() => setDeleteTableConfirm(table)}
                                       disabled={togglingTableId === table.id}
-                                      className="px-3 py-1 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)] hover:bg-[rgba(153,27,27,0.14)]"
+                                      className="px-3 py-1 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--theme-danger)] bg-[rgba(153,27,27,0.08)] hover:bg-[rgba(153,27,27,0.14)]"
                                     >
                                       🗑 Изтрий
                                     </button>
@@ -2132,8 +2162,8 @@ export default function QRCodesPage() {
                                       disabled={togglingTableId === table.id}
                                       className={`px-3 py-1 text-sm rounded transition-colors disabled:opacity-50 ${
                                         table.isActive
-                                          ? 'border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)] hover:bg-[rgba(153,27,27,0.14)]'
-                                          : 'malts-btn-primary'
+                                          ? 'border border-[rgba(153,27,27,0.35)] text-[var(--theme-danger)] bg-[rgba(153,27,27,0.08)] hover:bg-[rgba(153,27,27,0.14)]'
+                                          : 'theme-btn-primary'
                                       }`}
                                     >
                                       {togglingTableId === table.id
@@ -2156,7 +2186,7 @@ export default function QRCodesPage() {
                       {filteredTables.map((table) => (
                         <div
                           key={table.id}
-                          className={`bg-[var(--malts-inset)] border border-[var(--malts-hairline)] rounded-lg p-4 space-y-3 ${!table.isActive ? 'opacity-50' : ''}`}
+                          className={`bg-[var(--theme-inset)] border border-[var(--theme-hairline)] rounded-lg p-4 space-y-3 ${!table.isActive ? 'opacity-50' : ''}`}
                         >
                           {/* Header: Table Number & Status */}
                           <div className="flex items-start justify-between gap-2">
@@ -2167,15 +2197,15 @@ export default function QRCodesPage() {
                                   value={editTableName}
                                   onChange={(e) => setEditTableName(e.target.value)}
                                   placeholder={`Маса ${table.tableNumber}`}
-                                  className="malts-field"
+                                  className="theme-field"
                                 />
                               ) : (
                                 <>
-                                  <div className="font-semibold text-[var(--malts-ink)] text-lg">
+                                  <div className="font-semibold text-[var(--theme-ink)] text-lg">
                                     Маса {table.tableNumber}
                                   </div>
                                   {table.tableName && (
-                                    <div className="text-sm malts-muted mt-1">{table.tableName}</div>
+                                    <div className="text-sm theme-muted mt-1">{table.tableName}</div>
                                   )}
                                 </>
                               )}
@@ -2187,9 +2217,9 @@ export default function QRCodesPage() {
                                     type="checkbox"
                                     checked={editIsActive}
                                     onChange={(e) => setEditIsActive(e.target.checked)}
-                                    className="h-5 w-5 shrink-0 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)]"
+                                    className="h-5 w-5 shrink-0 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-success)]"
                                   />
-                                  <span className="text-[11px] leading-tight text-[var(--malts-ink)] sm:text-xs">
+                                  <span className="text-[11px] leading-tight text-[var(--theme-ink)] sm:text-xs">
                                     {editIsActive ? 'Активна' : 'Спряна'}
                                   </span>
                                 </label>
@@ -2197,8 +2227,8 @@ export default function QRCodesPage() {
                                 <span
                                   className={`inline-flex max-w-full items-center whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none sm:px-2 sm:py-1 sm:text-xs ${
                                     table.isActive
-                                      ? 'border border-[rgba(22,101,52,0.25)] bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)]'
-                                      : 'border border-[rgba(153,27,27,0.25)] bg-[rgba(153,27,27,0.10)] text-[var(--malts-danger)]'
+                                      ? 'border border-[rgba(22,101,52,0.25)] bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)]'
+                                      : 'border border-[rgba(153,27,27,0.25)] bg-[rgba(153,27,27,0.10)] text-[var(--theme-danger)]'
                                   }`}
                                   title={table.isActive ? 'Активна' : 'Спряна'}
                                 >
@@ -2210,7 +2240,7 @@ export default function QRCodesPage() {
 
                           {/* QR Link */}
                           <div>
-                            <div className="text-xs malts-muted mb-1">QR Link</div>
+                            <div className="text-xs theme-muted mb-1">QR Link</div>
                             <code className="text-sm text-blue-400 bg-blue-500/10 px-2 py-1 rounded break-all block">
                               /t/{table.tableNumber}
                             </code>
@@ -2218,31 +2248,31 @@ export default function QRCodesPage() {
 
                           {/* Redirect URL */}
                           <div>
-                            <div className="text-xs malts-muted mb-1">Redirect URL</div>
+                            <div className="text-xs theme-muted mb-1">Redirect URL</div>
                             {editingTable === table.tableNumber ? (
                               <input
                                 type="text"
                                 value={editUrl}
                                 onChange={(e) => setEditUrl(e.target.value)}
-                                className="malts-field"
+                                className="theme-field"
                                 placeholder="/order?table=1"
                               />
                             ) : (
-                              <code className="text-sm malts-muted break-all block bg-[var(--malts-card)] px-2 py-1 rounded border border-[var(--malts-hairline)]">
+                              <code className="text-sm theme-muted break-all block bg-[var(--theme-card)] px-2 py-1 rounded border border-[var(--theme-hairline)]">
                                 {table.redirectUrl || `/order?table=${table.tableNumber}`}
                               </code>
                             )}
                           </div>
 
                           {/* Stats Row */}
-                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--malts-hairline)]">
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--theme-hairline)]">
                             <div>
-                              <div className="text-xs malts-muted mb-1">Сканирания</div>
-                              <div className="text-[var(--malts-ink)] font-semibold">{table.scanCount}</div>
+                              <div className="text-xs theme-muted mb-1">Сканирания</div>
+                              <div className="text-[var(--theme-ink)] font-semibold">{table.scanCount}</div>
                             </div>
                             <div>
-                              <div className="text-xs malts-muted mb-1">Последно</div>
-                              <div className="text-sm malts-muted">{formatDate(table.lastScannedAt)}</div>
+                              <div className="text-xs theme-muted mb-1">Последно</div>
+                              <div className="text-sm theme-muted">{formatDate(table.lastScannedAt)}</div>
                             </div>
                           </div>
 
@@ -2252,13 +2282,13 @@ export default function QRCodesPage() {
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => saveRedirect(table.tableNumber)}
-                                  className="flex-1 px-4 py-2 malts-btn-primary text-sm rounded transition-colors font-semibold"
+                                  className="flex-1 px-4 py-2 theme-btn-primary text-sm rounded transition-colors font-semibold"
                                 >
                                   ✓ Запази
                                 </button>
                                 <button
                                   onClick={cancelEditingRedirect}
-                                  className="flex-1 px-4 py-2 malts-btn-secondary text-sm rounded transition-colors font-semibold"
+                                  className="flex-1 px-4 py-2 theme-btn-secondary text-sm rounded transition-colors font-semibold"
                                 >
                                   ✗ Откажи
                                 </button>
@@ -2269,7 +2299,7 @@ export default function QRCodesPage() {
                                   type="button"
                                   onClick={() => startEditingRedirect(table)}
                                   disabled={togglingTableId === table.id}
-                                  className="flex-1 px-4 py-2 malts-btn-secondary text-sm rounded transition-colors font-semibold disabled:opacity-50"
+                                  className="flex-1 px-4 py-2 theme-btn-secondary text-sm rounded transition-colors font-semibold disabled:opacity-50"
                                 >
                                   ✎ Редактирай
                                 </button>
@@ -2277,7 +2307,7 @@ export default function QRCodesPage() {
                                   type="button"
                                   onClick={() => setDeleteTableConfirm(table)}
                                   disabled={togglingTableId === table.id}
-                                  className="flex-1 px-4 py-2 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)]"
+                                  className="flex-1 px-4 py-2 text-sm rounded transition-colors font-semibold disabled:opacity-50 border border-[rgba(153,27,27,0.35)] text-[var(--theme-danger)] bg-[rgba(153,27,27,0.08)]"
                                 >
                                   🗑 Изтрий
                                 </button>
@@ -2287,8 +2317,8 @@ export default function QRCodesPage() {
                                   disabled={togglingTableId === table.id}
                                   className={`flex-1 px-4 py-2 text-sm rounded transition-colors font-semibold disabled:opacity-50 ${
                                     table.isActive
-                                      ? 'border border-[rgba(153,27,27,0.35)] text-[var(--malts-danger)] bg-[rgba(153,27,27,0.08)]'
-                                      : 'malts-btn-primary'
+                                      ? 'border border-[rgba(153,27,27,0.35)] text-[var(--theme-danger)] bg-[rgba(153,27,27,0.08)]'
+                                      : 'theme-btn-primary'
                                   }`}
                                 >
                                   {togglingTableId === table.id
@@ -2306,21 +2336,21 @@ export default function QRCodesPage() {
                   </div>
 
                   {/* Info Box */}
-                  <div className="mt-4 md:mt-6 border border-[var(--malts-hairline)] rounded-lg bg-[var(--malts-inset)] p-4 md:p-6">
-                    <h3 className="mb-3 text-sm font-semibold text-[var(--malts-ink)] md:text-base">
+                  <div className="mt-4 md:mt-6 border border-[var(--theme-hairline)] rounded-lg bg-[var(--theme-inset)] p-4 md:p-6">
+                    <h3 className="mb-3 text-sm font-semibold text-[var(--theme-ink)] md:text-base">
                       💡 Как работят динамичните QR кодове?
                     </h3>
-                    <ul className="space-y-3 text-xs leading-relaxed text-[var(--malts-ink)] md:text-sm">
+                    <ul className="space-y-3 text-xs leading-relaxed text-[var(--theme-ink)] md:text-sm">
                       <li>
-                        <strong className="text-[var(--malts-ink)]">QR линк</strong> — краткият адрес{' '}
-                        <code className="rounded bg-[var(--malts-card)] px-1.5 py-0.5 text-[var(--malts-ink)] ring-1 ring-[var(--malts-hairline)]">
+                        <strong className="text-[var(--theme-ink)]">QR линк</strong> — краткият адрес{' '}
+                        <code className="rounded bg-[var(--theme-card)] px-1.5 py-0.5 text-[var(--theme-ink)] ring-1 ring-[var(--theme-hairline)]">
                           /t/[номер]
                         </code>{' '}
                         е <strong>вграден в QR кода</strong> (статичен). Ако го смените, трябва <strong>нов</strong> отпечатан/генериран код.
                       </li>
                       <li>
-                        <strong className="text-[var(--malts-ink)]">Redirect URL</strong> — към него сочи{' '}
-                        <code className="rounded bg-[var(--malts-card)] px-1.5 py-0.5 text-[var(--malts-ink)] ring-1 ring-[var(--malts-hairline)]">
+                        <strong className="text-[var(--theme-ink)]">Redirect URL</strong> — към него сочи{' '}
+                        <code className="rounded bg-[var(--theme-card)] px-1.5 py-0.5 text-[var(--theme-ink)] ring-1 ring-[var(--theme-hairline)]">
                           /t/[номер]
                         </code>
                         ; сменяте го <strong>тук, без</strong> нова щампа на QR.

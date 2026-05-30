@@ -84,13 +84,13 @@ export default function OrderTierHorizontalScroll({
       {overflow && canLeft ? (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-12 bg-gradient-to-r from-[var(--malts-card)] via-[var(--malts-card)]/90 to-transparent"
+            className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-12 bg-gradient-to-r from-[var(--theme-card)] via-[var(--theme-card)]/90 to-transparent"
             aria-hidden
           />
           <button
             type="button"
             onClick={() => scrollBy(-1)}
-            className="absolute left-0.5 top-1/2 z-[2] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-lg font-bold text-[var(--malts-ink)] shadow-md transition-colors hover:bg-[var(--malts-card-hover)]"
+            className="absolute left-0.5 top-1/2 z-[2] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-lg font-bold text-[var(--theme-ink)] shadow-md transition-colors hover:bg-[var(--theme-card-hover)]"
             aria-label={ariaScrollLeft}
           >
             ‹
@@ -103,13 +103,13 @@ export default function OrderTierHorizontalScroll({
       {overflow && canRight ? (
         <>
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-12 bg-gradient-to-l from-[var(--malts-card)] via-[var(--malts-card)]/90 to-transparent"
+            className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-12 bg-gradient-to-l from-[var(--theme-card)] via-[var(--theme-card)]/90 to-transparent"
             aria-hidden
           />
           <button
             type="button"
             onClick={() => scrollBy(1)}
-            className="absolute right-0.5 top-1/2 z-[2] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-lg font-bold text-[var(--malts-ink)] shadow-md transition-colors hover:bg-[var(--malts-card-hover)]"
+            className="absolute right-0.5 top-1/2 z-[2] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-lg font-bold text-[var(--theme-ink)] shadow-md transition-colors hover:bg-[var(--theme-card-hover)]"
             aria-label={ariaScrollRight}
           >
             ›

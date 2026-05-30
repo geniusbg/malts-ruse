@@ -71,6 +71,33 @@ function resolveRuleForPath(rules: LoadingRule[], raw: string, canonical: string
   return null;
 }
 
+/** Minimal spinner when global loading UI is disabled (admin/order data fetch). */
+function MinimalLoadingFallback({
+  inline,
+  message,
+}: {
+  inline?: boolean;
+  message?: string;
+}) {
+  const inner = (
+    <div className="flex flex-col items-center justify-center gap-3 px-4">
+      <div
+        className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--theme-accent)] border-t-transparent"
+        aria-hidden
+      />
+      {message ? <p className="theme-muted text-sm font-medium">{message}</p> : null}
+    </div>
+  );
+
+  if (inline) return <div className="py-8 text-center">{inner}</div>;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center theme-surface">
+      {inner}
+    </div>
+  );
+}
+
 export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<typeof LoadingScreen>, 'assetUrl' | 'assetType'>) {
   const pathname = usePathname() || '/';
   const [settings, setSettings] = useState<LoadingUiSettings | null>(null);
@@ -97,7 +124,7 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') return;
-    const ch = new BroadcastChannel('malts.loading-ui-settings');
+    const ch = new BroadcastChannel('app.loading-ui-settings');
     ch.onmessage = (ev) => {
       const next = (ev?.data?.settings ?? null) as LoadingUiSettings | null;
       if (next) setSettings(next);
@@ -115,24 +142,27 @@ export default function ManagedLoadingScreen(props: Omit<React.ComponentProps<ty
     return map;
   }, [settings]);
 
+  const globalEnabled = settings?.enabled === true;
+
   const { raw, canonical } = normalizePathForRules(pathname);
-  const rule = settings?.enabled ? resolveRuleForPath(rules, raw, canonical) : null;
+  const rule = globalEnabled ? resolveRuleForPath(rules, raw, canonical) : null;
   const assetId = rule?.enabled ? (rule.assetId ?? settings?.defaultAssetId ?? null) : null;
   const asset = assetId ? assetIndex.get(assetId) : null;
+
+  if (settingsStatus === 'ready' && settings && !settings.enabled) {
+    return <MinimalLoadingFallback inline={props.inline} message={props.message} />;
+  }
 
   return (
     <LoadingScreen
       {...props}
-      assetUrl={asset?.url}
+      assetUrl={globalEnabled && rule?.enabled ? asset?.url : undefined}
       assetType={asset?.type}
-      // Avoid "flash" of the default beer mug before admin settings load.
-      // While settings are loading, hide default media; once loaded, show it only when no custom rule applies.
       hideDefaultMedia={
         settingsStatus === 'loading'
           ? true
-          : Boolean(settings?.enabled && rule?.enabled)
+          : Boolean(globalEnabled && rule?.enabled)
       }
     />
   );
 }
-

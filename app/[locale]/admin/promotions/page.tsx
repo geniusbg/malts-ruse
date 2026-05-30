@@ -6,7 +6,7 @@ import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import ConfirmModal from '@/components/ConfirmModal';
 import { eurToBgn } from '@/lib/currency';
 import AutoTranslateButton from '@/components/AutoTranslateButton';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 type PromotionsUiSettings = { id: string; titleBg: string; titleEn: string; titleRo: string };
 
@@ -345,17 +345,17 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
 
   return (
     <div className="max-w-5xl mx-auto w-full">
-      <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Промоции</h1>
-      <p className="malts-muted text-sm mb-8">
+      <h1 className="theme-admin-heading-font theme-admin-page-title mb-2">Промоции</h1>
+      <p className="theme-muted text-sm mb-8">
         Промо цена в зададен период. На менюто се показва ефективната цена и бадж „Промо“.
       </p>
 
       {uiSettings && (
-        <div className="malts-card p-6 md:p-8 mb-8">
+        <div className="theme-card p-6 md:p-8 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-[var(--malts-ink)]">Заглавие над промо картите</h2>
-              <p className="malts-muted mt-1 text-sm">
+              <h2 className="text-xl md:text-2xl font-bold text-[var(--theme-ink)]">Заглавие над промо картите</h2>
+              <p className="theme-muted mt-1 text-sm">
                 Това е текстът „Промоция“, който се вижда над промоциите в началната страница и в `/order`.
               </p>
             </div>
@@ -363,8 +363,8 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
               type="button"
               onClick={saveUiSettings}
               disabled={savingUi}
-              className={`malts-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
-                savingUi ? 'malts-btn-secondary cursor-not-allowed opacity-50' : 'malts-btn-primary'
+              className={`theme-btn-admin-compact w-full rounded-xl font-semibold transition-all sm:w-auto ${
+                savingUi ? 'theme-btn-secondary cursor-not-allowed opacity-50' : 'theme-btn-primary'
               }`}
             >
               {savingUi ? 'Запазване...' : 'Запази'}
@@ -373,16 +373,16 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Заглавие (BG)</label>
+              <label className="theme-label">Заглавие (BG)</label>
               <input
-                className="malts-field"
+                className="theme-field"
                 value={uiSettings.titleBg}
                 onChange={(e) => setUiSettings({ ...uiSettings, titleBg: e.target.value })}
               />
             </div>
             <div>
               <div className="flex justify-between items-center gap-2 mb-2">
-                <label className="malts-label">Заглавие (EN)</label>
+                <label className="theme-label">Заглавие (EN)</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={uiSettings.titleBg}
@@ -392,14 +392,14 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                 />
               </div>
               <input
-                className="malts-field"
+                className="theme-field"
                 value={uiSettings.titleEn}
                 onChange={(e) => setUiSettings({ ...uiSettings, titleEn: e.target.value })}
               />
             </div>
             <div>
               <div className="flex justify-between items-center gap-2 mb-2">
-                <label className="malts-label">Заглавие (RO)</label>
+                <label className="theme-label">Заглавие (RO)</label>
                 <AutoTranslateButton
                   variant="dark"
                   sourceText={uiSettings.titleBg}
@@ -409,7 +409,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                 />
               </div>
               <input
-                className="malts-field"
+                className="theme-field"
                 value={uiSettings.titleRo}
                 onChange={(e) => setUiSettings({ ...uiSettings, titleRo: e.target.value })}
               />
@@ -419,19 +419,19 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
       )}
 
       {err && (
-        <MaltsInlineFeedback tone="error" className="mb-4" role="alert">
+        <ThemeInlineFeedback tone="error" className="mb-4" role="alert">
           {err}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
 
       <form
         onSubmit={createPromo}
-        className="malts-card p-6 mb-10 space-y-4"
+        className="theme-card p-6 mb-10 space-y-4"
       >
         <h2 className="font-semibold text-lg">Нова промоция</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="md:col-span-2 space-y-2">
-            <label className="block malts-subtle text-sm mb-1" id="promo-product-label">
+            <label className="block theme-subtle text-sm mb-1" id="promo-product-label">
               Продукт
             </label>
             <div ref={productComboRef} className="relative">
@@ -442,16 +442,16 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                 aria-expanded={productListOpen}
                 aria-labelledby="promo-product-label promo-product-trigger"
                 onClick={() => setProductListOpen((o) => !o)}
-                className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-2.5 text-left text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent-tint-border)]"
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-2.5 text-left text-[var(--theme-ink)] transition-colors hover:border-[var(--theme-accent-tint-border)]"
               >
-                <span className={selectedProduct ? '' : 'malts-muted'}>{productTriggerLabel}</span>
-                <span className="text-[var(--malts-subtle)] shrink-0" aria-hidden>
+                <span className={selectedProduct ? '' : 'theme-muted'}>{productTriggerLabel}</span>
+                <span className="text-[var(--theme-subtle)] shrink-0" aria-hidden>
                   {productListOpen ? '▲' : '▼'}
                 </span>
               </button>
               {productListOpen && (
                 <div
-                  className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-72 flex-col overflow-hidden rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] shadow-lg"
+                  className="absolute left-0 right-0 top-full z-50 mt-1 flex max-h-72 flex-col overflow-hidden rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] shadow-lg"
                   role="listbox"
                   aria-label={
                     locale === 'en'
@@ -462,7 +462,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                   }
                 >
                   <div
-                    className="shrink-0 border-b border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-2"
+                    className="shrink-0 border-b border-[var(--theme-hairline)] bg-[var(--theme-inset)] p-2"
                     onMouseDown={(e) => e.preventDefault()}
                   >
                     <input
@@ -477,7 +477,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                             ? 'Caută (nume, categorie, cant.)…'
                             : 'Търси (име, категория, колич.)…'
                       }
-                      className="malts-field w-full text-sm"
+                      className="theme-field w-full text-sm"
                       autoComplete="off"
                       aria-label={
                         locale === 'en'
@@ -491,7 +491,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                   </div>
                   <ul className="min-h-0 flex-1 overflow-y-auto py-1">
                     {productsForSelect.length === 0 ? (
-                      <li className="px-3 py-4 text-sm malts-muted">
+                      <li className="px-3 py-4 text-sm theme-muted">
                         {locale === 'en'
                           ? 'No products match.'
                           : locale === 'ro'
@@ -507,8 +507,8 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                             aria-selected={form.productId === p.id}
                             className={`w-full px-3 py-2.5 text-left text-sm transition-colors ${
                               form.productId === p.id
-                                ? 'bg-[var(--malts-accent-tint)] text-[var(--malts-ink)]'
-                                : 'text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)]'
+                                ? 'bg-[var(--theme-accent-tint)] text-[var(--theme-ink)]'
+                                : 'text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)]'
                             }`}
                             onClick={() => pickProduct(p.id)}
                           >
@@ -524,46 +524,46 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
             <input type="hidden" value={form.productId} required readOnly aria-hidden tabIndex={-1} />
           </div>
           <div>
-            <label className="block malts-subtle text-sm mb-1">Подредба (order)</label>
+            <label className="block theme-subtle text-sm mb-1">Подредба (order)</label>
             <input
               type="number"
               value={form.order}
               onChange={(e) => setForm((f) => ({ ...f, order: e.target.value }))}
               placeholder="0"
-              className="w-full malts-inset px-3 py-2"
+              className="w-full theme-inset px-3 py-2"
             />
           </div>
           <div>
-            <label className="block malts-subtle text-sm mb-1">Етикет (по избор)</label>
+            <label className="block theme-subtle text-sm mb-1">Етикет (по избор)</label>
             <input
               value={form.label}
               onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
               placeholder="Промо"
-              className="w-full malts-inset px-3 py-2"
+              className="w-full theme-inset px-3 py-2"
             />
           </div>
           <div>
-            <label className="block malts-subtle text-sm mb-1">Начало (локално време)</label>
+            <label className="block theme-subtle text-sm mb-1">Начало (локално време)</label>
             <input
               type="datetime-local"
               required
               value={form.startsAt}
               onChange={(e) => setForm((f) => ({ ...f, startsAt: e.target.value }))}
-              className="w-full malts-inset px-3 py-2"
+              className="w-full theme-inset px-3 py-2"
             />
           </div>
           <div>
-            <label className="malts-label">Край</label>
+            <label className="theme-label">Край</label>
             <input
               type="datetime-local"
               required
               value={form.endsAt}
               onChange={(e) => setForm((f) => ({ ...f, endsAt: e.target.value }))}
-              className="w-full malts-inset px-3 py-2 rounded-lg"
+              className="w-full theme-inset px-3 py-2 rounded-lg"
             />
           </div>
           <div>
-            <label className="malts-label">Цена (€)</label>
+            <label className="theme-label">Цена (€)</label>
             <input
               type="number"
               step="0.01"
@@ -578,11 +578,11 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                   priceBgn: v === '' ? '' : String(eurToBgn(parseFloat(v) || 0)),
                 }));
               }}
-              className="w-full malts-inset px-3 py-2 rounded-lg"
+              className="w-full theme-inset px-3 py-2 rounded-lg"
             />
           </div>
           <div>
-            <label className="malts-label">% отстъпка (по избор)</label>
+            <label className="theme-label">% отстъпка (по избор)</label>
             <input
               type="number"
               step="0.01"
@@ -606,9 +606,9 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                 }));
               }}
               placeholder="напр. 50"
-              className="w-full malts-inset px-3 py-2 rounded-lg"
+              className="w-full theme-inset px-3 py-2 rounded-lg"
             />
-            <p className="mt-1 text-xs malts-muted">
+            <p className="mt-1 text-xs theme-muted">
               {locale === 'bg'
                 ? 'Смята се от базовата цена на продукта.'
                 : locale === 'en'
@@ -617,12 +617,12 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
             </p>
           </div>
           <div>
-            <label className="malts-label">≈ лв. (по фиксиран курс)</label>
+            <label className="theme-label">≈ лв. (по фиксиран курс)</label>
             <input
               readOnly
               type="text"
               value={form.priceBgn === '' ? '' : `${form.priceBgn} лв.`}
-              className="w-full malts-inset px-3 py-2 rounded-lg malts-muted cursor-not-allowed"
+              className="w-full theme-inset px-3 py-2 rounded-lg theme-muted cursor-not-allowed"
               aria-readonly="true"
             />
           </div>
@@ -630,16 +630,16 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
         <button
           type="submit"
           disabled={submitting}
-          className="px-6 py-2 malts-btn-primary font-semibold rounded-lg disabled:opacity-50"
+          className="px-6 py-2 theme-btn-primary font-semibold rounded-lg disabled:opacity-50"
         >
           {submitting ? 'Запис…' : 'Добави промоция'}
         </button>
       </form>
 
-      <div className="overflow-x-auto border border-[var(--malts-hairline)] rounded-xl malts-card">
+      <div className="overflow-x-auto border border-[var(--theme-hairline)] rounded-xl theme-card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--malts-hairline)] text-left malts-subtle bg-[var(--malts-inset)]">
+            <tr className="border-b border-[var(--theme-hairline)] text-left theme-subtle bg-[var(--theme-inset)]">
               <th className="p-3">Продукт</th>
               <th className="p-3">Период</th>
               <th className="p-3">Цена</th>
@@ -656,33 +656,33 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
 
               if (isEditing && editing) {
                 return (
-                  <tr key={p.id} className="border-b border-[var(--malts-hairline)] bg-[var(--malts-inset)]">
+                  <tr key={p.id} className="border-b border-[var(--theme-hairline)] bg-[var(--theme-inset)]">
                     <td className="p-3 align-top" colSpan={5}>
                       <form onSubmit={saveEdit} className="space-y-3">
-                        <p className="text-[var(--malts-ink)] font-medium">{p.product.nameBg}</p>
+                        <p className="text-[var(--theme-ink)] font-medium">{p.product.nameBg}</p>
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                           <div>
-                            <label className="malts-label text-xs">Начало</label>
+                            <label className="theme-label text-xs">Начало</label>
                             <input
                               type="datetime-local"
                               required
                               value={editing.startsAt}
                               onChange={(e) => setEditing((x) => (x ? { ...x, startsAt: e.target.value } : x))}
-                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm"
+                              className="w-full theme-inset rounded-lg px-2 py-1.5 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="malts-label text-xs">Край</label>
+                            <label className="theme-label text-xs">Край</label>
                             <input
                               type="datetime-local"
                               required
                               value={editing.endsAt}
                               onChange={(e) => setEditing((x) => (x ? { ...x, endsAt: e.target.value } : x))}
-                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm"
+                              className="w-full theme-inset rounded-lg px-2 py-1.5 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="malts-label text-xs">Цена (€)</label>
+                            <label className="theme-label text-xs">Цена (€)</label>
                             <input
                               type="number"
                               step="0.01"
@@ -701,39 +701,39 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                                     : x
                                 );
                               }}
-                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm"
+                              className="w-full theme-inset rounded-lg px-2 py-1.5 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="malts-label text-xs">≈ лв.</label>
+                            <label className="theme-label text-xs">≈ лв.</label>
                             <input
                               readOnly
                               type="text"
                               value={editing.priceBgn === '' ? '' : `${editing.priceBgn} лв.`}
-                              className="w-full malts-inset rounded-lg px-2 py-1.5 text-sm malts-muted cursor-not-allowed"
+                              className="w-full theme-inset rounded-lg px-2 py-1.5 text-sm theme-muted cursor-not-allowed"
                               aria-readonly="true"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="malts-label text-xs">Етикет</label>
+                          <label className="theme-label text-xs">Етикет</label>
                           <input
                             value={editing.label}
                             onChange={(e) => setEditing((x) => (x ? { ...x, label: e.target.value } : x))}
-                            className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
+                            className="w-full max-w-md theme-inset rounded-lg px-2 py-1.5 text-sm"
                           />
                         </div>
                       <div>
-                        <label className="malts-label text-xs">Подредба (order)</label>
+                        <label className="theme-label text-xs">Подредба (order)</label>
                         <input
                           type="number"
                           value={editing.order}
                           onChange={(e) => setEditing((x) => (x ? { ...x, order: e.target.value } : x))}
-                          className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
+                          className="w-full max-w-md theme-inset rounded-lg px-2 py-1.5 text-sm"
                         />
                       </div>
                       <div>
-                        <label className="malts-label text-xs">% отстъпка (по избор)</label>
+                        <label className="theme-label text-xs">% отстъпка (по избор)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -762,21 +762,21 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                                 : x
                             );
                           }}
-                          className="w-full max-w-md malts-inset rounded-lg px-2 py-1.5 text-sm"
+                          className="w-full max-w-md theme-inset rounded-lg px-2 py-1.5 text-sm"
                         />
                       </div>
                         <div className="flex gap-2">
                           <button
                             type="submit"
                             disabled={savingEdit}
-                            className="px-4 py-1.5 malts-btn-primary text-sm font-semibold rounded-lg disabled:opacity-50"
+                            className="px-4 py-1.5 theme-btn-primary text-sm font-semibold rounded-lg disabled:opacity-50"
                           >
                             {savingEdit ? 'Запис…' : 'Запази'}
                           </button>
                           <button
                             type="button"
                             onClick={cancelEdit}
-                            className="px-4 py-1.5 malts-btn-secondary text-sm rounded-lg"
+                            className="px-4 py-1.5 theme-btn-secondary text-sm rounded-lg"
                           >
                             Отказ
                           </button>
@@ -788,7 +788,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
               }
 
               return (
-                <tr key={p.id} className="border-b border-[var(--malts-hairline)]">
+                <tr key={p.id} className="border-b border-[var(--theme-hairline)]">
                   <td className="p-3">{p.product.nameBg}</td>
                   <td className="p-3 whitespace-nowrap">
                     {new Date(p.startsAt).toLocaleString('bg')} – {new Date(p.endsAt).toLocaleString('bg')}
@@ -798,25 +798,25 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
                   </td>
                   <td className="p-3">
                     {active ? (
-                      <span className="text-[var(--malts-success)] font-semibold">активна</span>
+                      <span className="text-[var(--theme-success)] font-semibold">активна</span>
                     ) : now < start ? (
-                      <span className="text-[var(--malts-warning)] font-semibold">предстои</span>
+                      <span className="text-[var(--theme-warning)] font-semibold">предстои</span>
                     ) : (
-                      <span className="malts-muted">приключила</span>
+                      <span className="theme-muted">приключила</span>
                     )}
                   </td>
                   <td className="p-3 whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => startEdit(p)}
-                      className="text-[var(--malts-accent)] hover:underline mr-4"
+                      className="text-[var(--theme-accent)] hover:underline mr-4"
                     >
                       Редактирай
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeletePromoId(p.id)}
-                      className="text-[var(--malts-danger)] hover:underline"
+                      className="text-[var(--theme-danger)] hover:underline"
                     >
                       Изтрий
                     </button>
@@ -827,7 +827,7 @@ export default function AdminPromotionsPage({ params }: { params: Promise<{ loca
           </tbody>
         </table>
         {promotions.length === 0 && (
-          <p className="p-6 malts-muted text-center">Няма записани промоции.</p>
+          <p className="p-6 theme-muted text-center">Няма записани промоции.</p>
         )}
       </div>
 

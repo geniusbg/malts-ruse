@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 const PAPER_BTN =
-  'text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50 shrink-0';
+  'text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50 shrink-0';
 const DARK_BTN =
-  'text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)] disabled:opacity-50 shrink-0';
+  'text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)] disabled:opacity-50 shrink-0';
 
 type Props = {
   sourceText: string;

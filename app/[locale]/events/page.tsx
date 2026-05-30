@@ -2,35 +2,39 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { getDefaultBrandId } from '@/lib/brand';
 import { eventCardImageUrl } from '@/lib/event-images';
+import { resolveSiteDisplayName } from '@/lib/site-display-name';
+import { atVenueLabel, normalizeBrandLocale, partnerEventBadge, type BrandLocale } from '@/lib/brand-copy';
 
 export const revalidate = 0;
 
-const copy = {
-  bg: {
-    title: 'Събития',
-    subtitle: 'Предстоящи събития',
-    empty: 'Няма предстоящи събития в момента',
-    partner: 'Партньорско събитие',
-    atMalts: 'В Malts',
-    learnMore: 'Научи повече →',
-  },
-  en: {
-    title: 'Events',
-    subtitle: 'Upcoming events',
-    empty: 'No upcoming events at the moment',
-    partner: 'Partner event',
-    atMalts: 'At Malts',
-    learnMore: 'Learn more →',
-  },
-  ro: {
-    title: 'Evenimente',
-    subtitle: 'Evenimente viitoare',
-    empty: 'Nu există evenimente viitoare momentan',
-    partner: 'Eveniment partener',
-    atMalts: 'La Malts',
-    learnMore: 'Află mai multe →',
-  },
-} as const;
+function eventsCopy(locale: BrandLocale, siteName: string) {
+  const base = {
+    bg: {
+      title: 'Събития',
+      subtitle: 'Предстоящи събития',
+      empty: 'Няма предстоящи събития в момента',
+      learnMore: 'Научи повече →',
+    },
+    en: {
+      title: 'Events',
+      subtitle: 'Upcoming events',
+      empty: 'No upcoming events at the moment',
+      learnMore: 'Learn more →',
+    },
+    ro: {
+      title: 'Evenimente',
+      subtitle: 'Evenimente viitoare',
+      empty: 'Nu există evenimente viitoare momentan',
+      learnMore: 'Află mai multe →',
+    },
+  } as const;
+
+  return {
+    ...base[locale],
+    partner: partnerEventBadge(locale),
+    atVenue: atVenueLabel(locale, siteName),
+  };
+}
 
 export default async function EventsPage({
   params,
@@ -38,8 +42,9 @@ export default async function EventsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: loc } = await params;
-  const locale = loc === 'en' || loc === 'ro' ? loc : 'bg';
-  const t = copy[locale];
+  const locale = normalizeBrandLocale(loc);
+  const siteName = await resolveSiteDisplayName();
+  const t = eventsCopy(locale, siteName);
 
   const brandId = await getDefaultBrandId();
 
@@ -53,13 +58,13 @@ export default async function EventsPage({
   });
 
   return (
-    <main className="min-h-screen malts-surface text-[var(--malts-ink)] pt-24 md:pt-28 pb-16">
+    <main className="min-h-screen theme-surface text-[var(--theme-ink)] pt-24 md:pt-28 pb-16">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-[var(--malts-ink)] text-center mb-4 malts-display">{t.title}</h1>
-        <p className="text-xl malts-muted text-center mb-12">{t.subtitle}</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-[var(--theme-ink)] text-center mb-4 theme-display">{t.title}</h1>
+        <p className="text-xl theme-muted text-center mb-12">{t.subtitle}</p>
 
         {events.length === 0 ? (
-          <div className="text-center malts-muted py-20">
+          <div className="text-center theme-muted py-20">
             <p className="text-xl">{t.empty}</p>
           </div>
         ) : (
@@ -104,10 +109,10 @@ export default async function EventsPage({
                 <Link
                   key={event.id}
                   href={`/${loc}/events/${event.id}`}
-                  className="malts-card rounded-2xl overflow-hidden hover:border-[var(--malts-accent)]/40 hover:shadow-md transition-all block group shadow-sm"
+                  className="theme-card rounded-2xl overflow-hidden hover:border-[var(--theme-accent)]/40 hover:shadow-md transition-all block group shadow-sm"
                 >
                   {cardImageSrc && (
-                    <div className="relative h-64 w-full overflow-hidden bg-[var(--malts-inset)]">
+                    <div className="relative h-64 w-full overflow-hidden bg-[var(--theme-inset)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={cardImageSrc}
@@ -126,15 +131,15 @@ export default async function EventsPage({
                           {t.partner}
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-[var(--malts-accent-tint)] text-[var(--malts-accent)] rounded-full text-sm font-medium border border-[var(--malts-accent-tint-border)]">
-                          {t.atMalts}
+                        <span className="px-3 py-1 bg-[var(--theme-accent-tint)] text-[var(--theme-accent)] rounded-full text-sm font-medium border border-[var(--theme-accent-tint-border)]">
+                          {t.atVenue}
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-2xl font-bold text-[var(--malts-ink)] mb-2">{eventTitle}</h3>
+                    <h3 className="text-2xl font-bold text-[var(--theme-ink)] mb-2">{eventTitle}</h3>
 
-                    <div className="flex items-center gap-2 malts-muted mb-3">
+                    <div className="flex items-center gap-2 theme-muted mb-3">
                       <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
@@ -154,7 +159,7 @@ export default async function EventsPage({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 malts-muted mb-4">
+                    <div className="flex items-center gap-2 theme-muted mb-4">
                       <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
@@ -172,10 +177,10 @@ export default async function EventsPage({
                       <span>{eventLocation}</span>
                     </div>
 
-                    <p className="malts-muted mb-4 line-clamp-3">{eventDesc}</p>
+                    <p className="theme-muted mb-4 line-clamp-3">{eventDesc}</p>
 
                     <div className="mt-4 text-center">
-                      <span className="text-[var(--malts-accent)] font-semibold group-hover:underline transition-colors">
+                      <span className="text-[var(--theme-accent)] font-semibold group-hover:underline transition-colors">
                         {t.learnMore}
                       </span>
                     </div>

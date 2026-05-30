@@ -30,7 +30,7 @@ export default function GlobalPendingApprovalsBanner({
         locale={locale} 
         onApprovalClick={onApprovalClick}
         showButtons={true}
-        className="bg-[var(--malts-paper)]/92 backdrop-blur-md border border-[var(--malts-hairline)]"
+        className="bg-[var(--theme-paper)]/92 backdrop-blur-md border border-[var(--theme-hairline)]"
       />
     </div>
   );

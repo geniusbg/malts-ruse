@@ -383,39 +383,39 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
       {toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : null}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-        <h1 className="malts-admin-heading-font malts-admin-page-title">🗄️ Backups</h1>
+        <h1 className="theme-admin-heading-font theme-admin-page-title">🗄️ Backups</h1>
         <button
           type="button"
           onClick={() => void refresh()}
-          className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold"
+          className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold"
         >
           Refresh
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="malts-card p-5">
-          <div className="text-sm malts-muted">Active destinations</div>
-          <div className="mt-1 text-2xl font-bold text-[var(--malts-ink)]">{destCountDisplay}</div>
+        <div className="theme-card p-5">
+          <div className="text-sm theme-muted">Active destinations</div>
+          <div className="mt-1 text-2xl font-bold text-[var(--theme-ink)]">{destCountDisplay}</div>
         </div>
-        <div className="malts-card p-5">
-          <div className="text-sm malts-muted">Active policies</div>
-          <div className="mt-1 text-2xl font-bold text-[var(--malts-ink)]">{polCountDisplay}</div>
+        <div className="theme-card p-5">
+          <div className="text-sm theme-muted">Active policies</div>
+          <div className="mt-1 text-2xl font-bold text-[var(--theme-ink)]">{polCountDisplay}</div>
         </div>
-        <div className="malts-card p-5">
-          <div className="text-sm malts-muted">Recent jobs</div>
-          <div className="mt-1 text-2xl font-bold text-[var(--malts-ink)]">{jobs.length}</div>
+        <div className="theme-card p-5">
+          <div className="text-sm theme-muted">Recent jobs</div>
+          <div className="mt-1 text-2xl font-bold text-[var(--theme-ink)]">{jobs.length}</div>
         </div>
       </div>
 
-      <div className="malts-card p-6 mb-6">
-        <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-3">Quick setup</h2>
-        <ol className="list-decimal pl-5 malts-muted space-y-1">
+      <div className="theme-card p-6 mb-6">
+        <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-3">Quick setup</h2>
+        <ol className="list-decimal pl-5 theme-muted space-y-1">
           <li>За Google Drive: попълнете OAuth (или env BACKUP_GOOGLE_DRIVE_*) и добавете папка (folder ID)</li>
           <li>Добавете поне една дестинация (LOCAL_PATH и/или GOOGLE_DRIVE след свързване)</li>
           <li>Тествайте с „Backup now“; за график използвайте policies + cron към /api/admin/backups/scheduler/tick</li>
         </ol>
-        <div className="mt-3 text-xs malts-muted space-y-1 break-all">
+        <div className="mt-3 text-xs theme-muted space-y-1 break-all">
           <div>
             OAuth redirect (Malts):{' '}
             <code>{typeof window !== 'undefined' ? `${window.location.origin}/api/admin/backups/google/oauth/callback` : '…'}</code>
@@ -427,19 +427,19 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
         </div>
       </div>
 
-      <div className="malts-card p-6 mb-6">
-        <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Google Drive OAuth</h2>
+      <div className="theme-card p-6 mb-6">
+        <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Google Drive OAuth</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
             value={oauthClientId}
             onChange={(e) => setOauthClientId(e.target.value)}
-            className="malts-field"
+            className="theme-field"
             placeholder="Client ID"
           />
           <input
             value={oauthClientSecret}
             onChange={(e) => setOauthClientSecret(e.target.value)}
-            className="malts-field"
+            className="theme-field"
             placeholder={oauthSecretConfigured ? 'Client secret (leave empty to keep)' : 'Client secret'}
             type="password"
             autoComplete="off"
@@ -447,7 +447,7 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
           <input
             value={oauthRedirect}
             onChange={(e) => setOauthRedirect(e.target.value)}
-            className="malts-field md:col-span-2"
+            className="theme-field md:col-span-2"
             placeholder="Redirect URI"
           />
         </div>
@@ -456,64 +456,64 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
             type="button"
             onClick={() => void saveGoogleOauthConfig()}
             disabled={savingOauth}
-            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
+            className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
           >
             {savingOauth ? 'Saving…' : 'Save OAuth settings'}
           </button>
           {oauthSecretConfigured ? (
-            <span className="text-xs malts-muted">Client secret е зададен (db или env)</span>
+            <span className="text-xs theme-muted">Client secret е зададен (db или env)</span>
           ) : null}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="malts-card p-6">
-          <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Backup Destinations</h2>
+        <div className="theme-card p-6">
+          <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Backup Destinations</h2>
 
           <div className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-center">
               <input
                 value={newDestName}
                 onChange={(e) => setNewDestName(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Name (e.g. LOCAL_PATH)"
               />
               <input
                 value={newDestPath}
                 onChange={(e) => setNewDestPath(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Path (e.g. /var/backups/malts)"
               />
               <button
                 type="button"
                 onClick={() => void createLocalDestination()}
-                className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
+                className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
               >
                 Add destination
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-center pt-4 border-t border-[var(--malts-hairline)]">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-center pt-4 border-t border-[var(--theme-hairline)]">
               <input
                 value={newDriveName}
                 onChange={(e) => setNewDriveName(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Име (Google Drive)"
               />
               <input
                 value={newDriveFolderId}
                 onChange={(e) => setNewDriveFolderId(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="Folder ID (от URL на папката)"
               />
               <button
                 type="button"
                 onClick={() => void createDriveDestination()}
-                className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
+                className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
               >
                 Add Drive
               </button>
             </div>
-            <div className="text-xs malts-muted">
+            <div className="text-xs theme-muted">
               <b>LOCAL_PATH</b> записва dump на диска. <b>GOOGLE_DRIVE</b> изисква OAuth (Connect) или service account в
               config през API.
             </div>
@@ -521,23 +521,23 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
 
           <div className="mt-5 space-y-3">
             {destinations.length === 0 ? (
-              <div className="malts-muted">Няма дестинации.</div>
+              <div className="theme-muted">Няма дестинации.</div>
             ) : (
               destinations.map((d) => (
-                <div key={d.id} className="rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-4">
+                <div key={d.id} className="rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="font-semibold text-[var(--malts-ink)] truncate">{d.name}</div>
-                      <div className="text-sm malts-muted">
+                      <div className="font-semibold text-[var(--theme-ink)] truncate">{d.name}</div>
+                      <div className="text-sm theme-muted">
                         {d.type} • {d.active ? 'Active' : 'Disabled'}
                       </div>
                       {d.type === 'LOCAL_PATH' ? (
-                        <div className="text-sm malts-muted mt-1 break-all">
+                        <div className="text-sm theme-muted mt-1 break-all">
                           Path: {String(d.config?.basePath || '')}
                         </div>
                       ) : null}
                       {d.type === 'GOOGLE_DRIVE' ? (
-                        <div className="text-sm malts-muted mt-1 break-all">
+                        <div className="text-sm theme-muted mt-1 break-all">
                           Folder: {String(d.config?.folderId || '')}
                           {d.config?.oauthEmail ? (
                             <span className="ml-2">• {String(d.config.oauthEmail)}</span>
@@ -550,7 +550,7 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
                         <button
                           type="button"
                           onClick={() => void connectGoogleDrive(d.id)}
-                          className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
+                          className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold whitespace-nowrap"
                         >
                           Connect Google
                         </button>
@@ -558,7 +558,7 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
                       <button
                         type="button"
                         onClick={() => void deleteDestination(d.id)}
-                        className="text-xs text-[var(--malts-danger)] font-semibold hover:underline"
+                        className="text-xs text-[var(--theme-danger)] font-semibold hover:underline"
                       >
                         Delete
                       </button>
@@ -570,59 +570,59 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
           </div>
         </div>
 
-        <div className="malts-card p-6">
-          <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Manual actions</h2>
+        <div className="theme-card p-6">
+          <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Manual actions</h2>
           <div className="space-y-3">
             <input
               value={runNote}
               onChange={(e) => setRunNote(e.target.value)}
-              className="malts-field"
+              className="theme-field"
               placeholder="Note (optional)"
             />
             <button
               type="button"
               onClick={() => void runNow()}
               disabled={running}
-              className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
+              className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
             >
               {running ? 'Running...' : 'Backup now'}
             </button>
-            <div className="text-xs malts-muted">
+            <div className="text-xs theme-muted">
               Изисква наличен <code>pg_dump</code> на сървъра и правилен <code>DATABASE_URL</code>.
             </div>
             <button
               type="button"
               onClick={() => void runSchedulerTick()}
               disabled={tickRunning}
-              className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
+              className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
             >
               {tickRunning ? 'Scheduler…' : 'Run scheduler tick (test)'}
             </button>
-            <div className="text-xs malts-muted">
+            <div className="text-xs theme-muted">
               Production: извиквайте периодично с header <code>x-backup-cron-secret</code> ={' '}
               <code>BACKUP_CRON_SECRET</code>, или оставете на SUPER_ADMIN тест оттук.
             </div>
           </div>
 
-          <h3 className="mt-6 text-lg font-bold text-[var(--malts-ink)]">Recent jobs</h3>
+          <h3 className="mt-6 text-lg font-bold text-[var(--theme-ink)]">Recent jobs</h3>
           <div className="mt-3 space-y-3">
             {jobs.length === 0 ? (
-              <div className="malts-muted">Няма jobs.</div>
+              <div className="theme-muted">Няма jobs.</div>
             ) : (
               jobs.map((j) => (
-                <div key={j.id} className="rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-4">
+                <div key={j.id} className="rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="text-sm malts-muted">
+                      <div className="text-sm theme-muted">
                         {j.triggerType} • <b>{j.status}</b>
                       </div>
                       <div className="mt-1 font-mono text-xs break-all">{j.id}</div>
-                      {j.note ? <div className="mt-2 text-sm malts-muted">{j.note}</div> : null}
-                      {j.error ? <div className="mt-2 text-sm text-[var(--malts-danger)]">{j.error}</div> : null}
+                      {j.note ? <div className="mt-2 text-sm theme-muted">{j.note}</div> : null}
+                      {j.error ? <div className="mt-2 text-sm text-[var(--theme-danger)]">{j.error}</div> : null}
                       {(j.artifacts || []).length > 0 ? (
                         <div className="mt-3 space-y-1">
                           {(j.artifacts || []).map((a) => (
-                            <div key={a.id} className="text-xs malts-muted break-all">
+                            <div key={a.id} className="text-xs theme-muted break-all">
                               <span className="font-mono opacity-80">{a.id.slice(0, 8)}…</span> [{a.status}]{' '}
                               {a.destination?.name || 'destination'} • {a.filePath || a.error || ''}
                             </div>
@@ -638,39 +638,39 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
         </div>
       </div>
 
-      <div className="malts-card p-6 mb-6">
-        <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Policies (scheduler)</h2>
+      <div className="theme-card p-6 mb-6">
+        <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Policies (scheduler)</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
           <input
             value={policyName}
             onChange={(e) => setPolicyName(e.target.value)}
-            className="malts-field"
+            className="theme-field"
             placeholder="Име"
           />
           <input
             value={policyInterval}
             onChange={(e) => setPolicyInterval(e.target.value)}
-            className="malts-field"
+            className="theme-field"
             placeholder="Интервал (мин, ≥5)"
             inputMode="numeric"
           />
           <input
             value={policyRetention}
             onChange={(e) => setPolicyRetention(e.target.value)}
-            className="malts-field"
+            className="theme-field"
             placeholder="Retention (дни)"
             inputMode="numeric"
           />
           <button
             type="button"
             onClick={() => void createPolicy()}
-            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold"
+            className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold"
           >
             Създай политика
           </button>
         </div>
         <div className="mb-4">
-          <div className="text-sm malts-muted mb-2">Дестинации за политиката</div>
+          <div className="text-sm theme-muted mb-2">Дестинации за политиката</div>
           <div className="flex flex-wrap gap-3">
             {destinations.map((d) => (
               <label key={d.id} className="inline-flex items-center gap-2 text-sm cursor-pointer">
@@ -685,24 +685,24 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
               </label>
             ))}
           </div>
-          {destinations.length === 0 ? <div className="text-xs malts-muted">Няма дестинации.</div> : null}
+          {destinations.length === 0 ? <div className="text-xs theme-muted">Няма дестинации.</div> : null}
         </div>
         <div className="space-y-3">
           {policies.length === 0 ? (
-            <div className="malts-muted">Няма политики.</div>
+            <div className="theme-muted">Няма политики.</div>
           ) : (
             policies.map((p) => (
               <div
                 key={p.id}
-                className="rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-inset)] p-4 flex flex-wrap items-start justify-between gap-3"
+                className="rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-inset)] p-4 flex flex-wrap items-start justify-between gap-3"
               >
                 <div className="min-w-0">
-                  <div className="font-semibold text-[var(--malts-ink)]">{p.name}</div>
-                  <div className="text-sm malts-muted">
+                  <div className="font-semibold text-[var(--theme-ink)]">{p.name}</div>
+                  <div className="text-sm theme-muted">
                     На всеки {p.intervalMinutes} мин • retention {p.retentionDays} дни •{' '}
                     {p.enabled ? 'включена' : 'изключена'}
                   </div>
-                  <div className="text-xs malts-muted mt-1 break-all font-mono">
+                  <div className="text-xs theme-muted mt-1 break-all font-mono">
                     IDs: {Array.isArray(p.destinationIds) ? p.destinationIds.join(', ') : '—'}
                   </div>
                 </div>
@@ -710,14 +710,14 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
                   <button
                     type="button"
                     onClick={() => void patchPolicy(p.id, { enabled: !p.enabled })}
-                    className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold text-sm"
+                    className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold text-sm"
                   >
                     {p.enabled ? 'Изкл.' : 'Вкл.'}
                   </button>
                   <button
                     type="button"
                     onClick={() => void deletePolicy(p.id)}
-                    className="text-sm text-[var(--malts-danger)] font-semibold"
+                    className="text-sm text-[var(--theme-danger)] font-semibold"
                   >
                     Изтрий
                   </button>
@@ -728,9 +728,9 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
         </div>
       </div>
 
-      <div className="malts-card p-6 mb-6">
-        <h2 className="text-xl font-bold text-[var(--malts-ink)] mb-4">Restore (pg_restore)</h2>
-        <p className="text-sm malts-muted mb-3">
+      <div className="theme-card p-6 mb-6">
+        <h2 className="text-xl font-bold text-[var(--theme-ink)] mb-4">Restore (pg_restore)</h2>
+        <p className="text-sm theme-muted mb-3">
           Копирайте <b>artifact id</b> от успешен backup job по-горе. За нова Б: подайте пълен Postgres connection string. In-place
           изисква <code>BACKUP_ALLOW_INPLACE_RESTORE=true</code> и потвърждение <code>RESTORE_IN_PLACE</code>.
         </p>
@@ -738,13 +738,13 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
           <input
             value={restoreArtifactId}
             onChange={(e) => setRestoreArtifactId(e.target.value)}
-            className="malts-field font-mono text-sm"
+            className="theme-field font-mono text-sm"
             placeholder="Artifact ID (UUID)"
           />
           <input
             value={restoreTargetUrl}
             onChange={(e) => setRestoreTargetUrl(e.target.value)}
-            className="malts-field font-mono text-sm"
+            className="theme-field font-mono text-sm"
             placeholder="postgres://… (целева Б, ако не е in-place)"
             disabled={restoreInPlace}
           />
@@ -757,7 +757,7 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
           <input
             value={restoreConfirm}
             onChange={(e) => setRestoreConfirm(e.target.value)}
-            className="malts-field mt-2 font-mono"
+            className="theme-field mt-2 font-mono"
             placeholder="Напишете: RESTORE_IN_PLACE"
           />
         ) : null}
@@ -765,7 +765,7 @@ export default function BackupsAdminPage({ params }: { params: Promise<{ locale:
           type="button"
           onClick={() => void runRestore()}
           disabled={restoring}
-          className="mt-4 malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
+          className="mt-4 theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold disabled:opacity-50"
         >
           {restoring ? '…' : 'Стартирай restore'}
         </button>

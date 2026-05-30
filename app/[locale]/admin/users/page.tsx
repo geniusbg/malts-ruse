@@ -125,11 +125,11 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
         />
       )}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h1 className="malts-admin-heading-font malts-admin-page-title">👥 Потребители</h1>
+        <h1 className="theme-admin-heading-font theme-admin-page-title">👥 Потребители</h1>
         {canCreateUsers && (
           <button
             onClick={() => setShowAddForm(true)}
-            className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold whitespace-nowrap transition-colors"
+            className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold whitespace-nowrap transition-colors"
           >
             + Добави потребител
           </button>
@@ -143,12 +143,12 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
             {users.map((user) => (
-              <div key={user.id} className="malts-card p-4">
+              <div key={user.id} className="theme-card p-4">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-bold">{user.name}</h3>
-                      <p className="malts-muted text-sm">{user.email}</p>
+                      <p className="theme-muted text-sm">{user.email}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -159,31 +159,31 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                     </span>
                     <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                       user.isActive
-                        ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
-                        : 'bg-[var(--malts-card)] text-[var(--malts-subtle)] border border-[var(--malts-hairline)]'
+                        ? 'bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]'
+                        : 'bg-[var(--theme-card)] text-[var(--theme-subtle)] border border-[var(--theme-hairline)]'
                     }`}>
                       {user.isActive ? 'Активен' : 'Неактивен'}
                     </span>
                   </div>
-                  <p className="malts-muted text-sm">
+                  <p className="theme-muted text-sm">
                     Създаден: {formatBulgarianDate(user.createdAt)}
                   </p>
-                  <div className="flex gap-2 pt-2 border-t border-[var(--malts-hairline)]">
+                  <div className="flex gap-2 pt-2 border-t border-[var(--theme-hairline)]">
                     <button
                       onClick={() => handleEdit(user)}
-                      className="text-[var(--malts-info)] text-sm"
+                      className="text-[var(--theme-info)] text-sm"
                     >
                       Редактирай
                     </button>
                     <button
                       onClick={() => handleTables(user)}
-                      className="text-[var(--malts-ink)] text-sm"
+                      className="text-[var(--theme-ink)] text-sm"
                     >
                       Маси
                     </button>
                     <button
                       onClick={() => handleDelete(user)}
-                      className="text-[var(--malts-danger)] text-sm"
+                      className="text-[var(--theme-danger)] text-sm"
                     >
                       Изтрий
                     </button>
@@ -194,24 +194,24 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden md:block malts-card overflow-hidden">
+          <div className="hidden md:block theme-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[var(--malts-inset)] border-b border-[var(--malts-hairline)]">
+                <thead className="bg-[var(--theme-inset)] border-b border-[var(--theme-hairline)]">
                   <tr>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Име</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Email</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Роля</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Статус</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Създаден</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold malts-subtle uppercase">Действия</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Име</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Email</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Роля</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Статус</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Създаден</th>
+                    <th className="px-4 py-4 text-left text-xs font-semibold theme-subtle uppercase">Действия</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b border-[var(--malts-hairline)] hover:bg-[var(--malts-accent-tint)]">
+                    <tr key={user.id} className="border-b border-[var(--theme-hairline)] hover:bg-[var(--theme-accent-tint)]">
                       <td className="px-4 py-4 text-sm">{user.name}</td>
-                      <td className="px-4 py-4 malts-muted text-sm">{user.email}</td>
+                      <td className="px-4 py-4 theme-muted text-sm">{user.email}</td>
                       <td className="px-4 py-4">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${roleBadgeClass(user.role)}`}
@@ -219,7 +219,7 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                           {user.role}
                         </span>
                         {user.canSeeAllTables ? (
-                          <span className="ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]">
+                          <span className="ml-2 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]">
                             Всички маси
                           </span>
                         ) : null}
@@ -227,31 +227,31 @@ export default function UsersPage({ params }: { params: Promise<{ locale: string
                       <td className="px-4 py-4">
                         <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                           user.isActive
-                            ? 'bg-[rgba(22,101,52,0.12)] text-[var(--malts-success)] border border-[rgba(22,101,52,0.25)]'
-                            : 'bg-[var(--malts-card)] text-[var(--malts-subtle)] border border-[var(--malts-hairline)]'
+                            ? 'bg-[rgba(22,101,52,0.12)] text-[var(--theme-success)] border border-[rgba(22,101,52,0.25)]'
+                            : 'bg-[var(--theme-card)] text-[var(--theme-subtle)] border border-[var(--theme-hairline)]'
                         }`}>
                           {user.isActive ? 'Активен' : 'Неактивен'}
                         </span>
                       </td>
-                      <td className="px-4 py-4 malts-muted text-sm">
+                      <td className="px-4 py-4 theme-muted text-sm">
                         {formatBulgarianDate(user.createdAt)}
                       </td>
                       <td className="px-4 py-4 flex gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="text-[var(--malts-info)] text-sm"
+                          className="text-[var(--theme-info)] text-sm"
                         >
                           Редактирай
                         </button>
                         <button
                           onClick={() => handleTables(user)}
-                          className="text-[var(--malts-ink)] text-sm"
+                          className="text-[var(--theme-ink)] text-sm"
                         >
                           Маси
                         </button>
                         <button
                           onClick={() => handleDelete(user)}
-                          className="text-[var(--malts-danger)] text-sm"
+                          className="text-[var(--theme-danger)] text-sm"
                         >
                           Изтрий
                         </button>
@@ -395,25 +395,25 @@ function TablesAccessModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="malts-card p-6 md:p-8 max-w-2xl w-full">
+    <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="theme-card p-6 md:p-8 max-w-2xl w-full">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold text-[var(--malts-ink)]">Маси — {user.name}</h2>
-            <p className="malts-muted mt-1 text-sm">
+            <h2 className="text-2xl font-bold text-[var(--theme-ink)]">Маси — {user.name}</h2>
+            <p className="theme-muted mt-1 text-sm">
               Ако е включено „Всички маси“, потребителят вижда/получава известия за всички маси.
             </p>
           </div>
-          <button onClick={onClose} className="malts-btn-secondary malts-btn-admin-compact rounded-lg font-semibold">
+          <button onClick={onClose} className="theme-btn-secondary theme-btn-admin-compact rounded-lg font-semibold">
             ✕
           </button>
         </div>
 
         {loading ? (
-          <div className="malts-muted">Зареждане...</div>
+          <div className="theme-muted">Зареждане...</div>
         ) : (
           <>
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--malts-ink)] mb-4">
+            <label className="flex items-center gap-2 text-sm font-medium text-[var(--theme-ink)] mb-4">
               <input
                 type="checkbox"
                 checked={canSeeAllTables}
@@ -427,7 +427,7 @@ function TablesAccessModal({
               {tables.map((t) => (
                 <label
                   key={t.id}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-[var(--malts-hairline)] bg-[var(--malts-card)] hover:bg-[var(--malts-card-hover)]"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] hover:bg-[var(--theme-card-hover)]"
                 >
                   <input
                     type="checkbox"
@@ -436,9 +436,9 @@ function TablesAccessModal({
                     className="rounded"
                   />
                   <div className="min-w-0">
-                    <div className="font-semibold text-[var(--malts-ink)]">Маса {t.tableNumber}</div>
-                    {t.tableName ? <div className="text-sm malts-muted truncate">{t.tableName}</div> : null}
-                    {!t.isActive ? <div className="text-xs text-[var(--malts-danger)]">Неактивна</div> : null}
+                    <div className="font-semibold text-[var(--theme-ink)]">Маса {t.tableNumber}</div>
+                    {t.tableName ? <div className="text-sm theme-muted truncate">{t.tableName}</div> : null}
+                    {!t.isActive ? <div className="text-xs text-[var(--theme-danger)]">Неактивна</div> : null}
                   </div>
                 </label>
               ))}
@@ -448,7 +448,7 @@ function TablesAccessModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+                className="theme-btn-secondary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
               >
                 Отказ
               </button>
@@ -456,7 +456,7 @@ function TablesAccessModal({
                 type="button"
                 onClick={save}
                 disabled={saving}
-                className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                className="theme-btn-primary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
               >
                 {saving ? 'Запазване...' : 'Запази'}
               </button>
@@ -519,49 +519,49 @@ function EditUserForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="malts-card p-6 md:p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-[var(--malts-ink)] mb-6">Редактирай потребител</h2>
+    <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="theme-card p-6 md:p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-[var(--theme-ink)] mb-6">Редактирай потребител</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="malts-label">Име</label>
+            <label className="theme-label">Име</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Email</label>
+            <label className="theme-label">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Нова парола (остави празно за запазване)</label>
+            <label className="theme-label">Нова парола (остави празно за запазване)</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Роля</label>
+            <label className="theme-label">Роля</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'SUPER_ADMIN' | 'ADMIN' | 'STAFF')}
-              className="malts-field"
+              className="theme-field"
             >
               <option value="STAFF">STAFF</option>
               <option value="ADMIN">ADMIN</option>
@@ -570,7 +570,7 @@ function EditUserForm({
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-[var(--malts-ink)]">
+            <label className="flex items-center gap-2 text-sm font-medium text-[var(--theme-ink)]">
               <input
                 type="checkbox"
                 checked={isActive}
@@ -585,14 +585,14 @@ function EditUserForm({
             <button
               type="button"
               onClick={onClose}
-              className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+              className="theme-btn-secondary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
             >
               Отказ
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              className="theme-btn-primary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
             >
               {loading ? 'Запазване...' : 'Запази'}
             </button>
@@ -605,22 +605,22 @@ function EditUserForm({
 
 function DeleteConfirmModal({ user, onClose, onConfirm }: { user: User; onClose: () => void; onConfirm: () => void }) {
   return (
-    <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="malts-card p-6 md:p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-[var(--malts-ink)] mb-2">Потвърди изтриване</h2>
-        <p className="malts-muted mb-6">
+    <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="theme-card p-6 md:p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-[var(--theme-ink)] mb-2">Потвърди изтриване</h2>
+        <p className="theme-muted mb-6">
           Сигурни ли сте, че искате да изтриете потребителя <strong>{user.name}</strong> ({user.email})?
         </p>
         <div className="flex gap-4">
           <button
             onClick={onClose}
-            className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+            className="theme-btn-secondary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
           >
             Отказ
           </button>
           <button
             onClick={onConfirm}
-            className="malts-btn-danger malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+            className="theme-btn-danger theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
           >
             Изтрий
           </button>
@@ -687,50 +687,50 @@ function AddUserForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="malts-card p-6 md:p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-[var(--malts-ink)] mb-6">Добави потребител</h2>
+    <div className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="theme-card p-6 md:p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold text-[var(--theme-ink)] mb-6">Добави потребител</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="malts-label">Име</label>
+            <label className="theme-label">Име</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Email</label>
+            <label className="theme-label">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Парола</label>
+            <label className="theme-label">Парола</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="malts-field"
+              className="theme-field"
             />
           </div>
 
           <div>
-            <label className="malts-label">Роля</label>
+            <label className="theme-label">Роля</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'SUPER_ADMIN' | 'ADMIN' | 'STAFF')}
-              className="malts-field"
+              className="theme-field"
             >
               <option value="STAFF">STAFF</option>
               <option value="ADMIN">ADMIN</option>
@@ -742,14 +742,14 @@ function AddUserForm({
             <button
               type="button"
               onClick={onClose}
-              className="malts-btn-secondary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
+              className="theme-btn-secondary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors"
             >
               Отказ
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="malts-btn-primary malts-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
+              className="theme-btn-primary theme-btn-admin-compact flex-1 rounded-lg font-semibold transition-colors disabled:opacity-50"
             >
               {loading ? 'Създаване...' : 'Създай'}
             </button>

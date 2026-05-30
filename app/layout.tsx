@@ -1,7 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Rubik_Doodle_Shadow, Pangolin, Reggae_One } from "next/font/google";
 import "./globals.css";
 import { getBrandAppearanceSettings } from "@/lib/brand-appearance-settings";
+import { logosFromAppearance, serializeBrandBootstrap } from "@/lib/brand-bootstrap";
+import { getDefaultBrand } from "@/lib/brand";
+import { getLoadingUiSettings } from "@/lib/loading-ui-settings";
+import {
+  resolveSiteDescription,
+  resolveSiteShortName,
+  resolveSiteTitle,
+} from "@/lib/brand-defaults";
+import { fontVarsFromAppearance, fontVarsToCssRecord } from "@/lib/brand-fonts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,100 +22,134 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const maltsDisplay = Rubik_Doodle_Shadow({
-  variable: "--font-malts-display",
+const themeDisplay = Rubik_Doodle_Shadow({
+  variable: "--font-theme-display",
   weight: "400",
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
 });
 
-const maltsButtons = Pangolin({
-  variable: "--font-malts-buttons",
+const themeButtons = Pangolin({
+  variable: "--font-theme-buttons",
   weight: "400",
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
 });
 
-const maltsLang = Pangolin({
-  variable: "--font-malts-lang",
+const themeLang = Pangolin({
+  variable: "--font-theme-lang",
   weight: "400",
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
 });
 
-const maltsNav = Reggae_One({
-  variable: "--font-malts-nav",
+const themeNav = Reggae_One({
+  variable: "--font-theme-nav",
   weight: "400",
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Malts – Русе",
-  description: "Malts – bar, кафе, меню и добро настроение. Русе.",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Malts"
-  }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [appearance, brand] = await Promise.all([
+    getBrandAppearanceSettings().catch(() => null),
+    getDefaultBrand().catch(() => null),
+  ]);
+  const brandName = brand?.name ?? null;
+  const title = resolveSiteTitle(appearance, brandName);
+  const shortName = resolveSiteShortName(appearance, brandName);
+  const description = resolveSiteDescription(appearance, shortName);
 
-export const viewport = {
-  themeColor: '#e8e0d4',
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: true
-};
+  return {
+    title,
+    description,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: shortName,
+    },
+  };
+}
+
+export async function generateViewport(): Promise<Viewport> {
+  const appearance = await getBrandAppearanceSettings().catch(() => null);
+  const themeColor = (appearance?.themeColor || "").trim() || "#e8e0d4";
+  return {
+    themeColor,
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const appearance = await getBrandAppearanceSettings().catch(() => null);
-  const themeColor = (appearance?.themeColor || '').trim() || '#e8e0d4';
+  const [appearance, loadingUi, brand] = await Promise.all([
+    getBrandAppearanceSettings().catch(() => null),
+    getLoadingUiSettings().catch(() => null),
+    getDefaultBrand().catch(() => null),
+  ]);
+  const themeColor = (appearance?.themeColor || "").trim() || "#e8e0d4";
 
-  const faviconAny = (appearance?.faviconUrl || '').trim() || null;
-  const appIconAny = (appearance?.appIconUrl || '').trim() || null;
-  const favicon32 = faviconAny || '/favicon-32x32.png';
-  const favicon16 = faviconAny || '/favicon-16x16.png';
-  const faviconMain = faviconAny || '/favicon.png';
-  const appleTouch = appIconAny || '/apple-touch-icon.png';
-  const msTile = appIconAny || '/malts-icon-192.png';
+  const faviconAny = (appearance?.faviconUrl || "").trim() || null;
+  const appIconAny = (appearance?.appIconUrl || "").trim() || null;
+  const favicon32 = faviconAny || "/favicon-32x32.png";
+  const favicon16 = faviconAny || "/favicon-16x16.png";
+  const faviconMain = faviconAny || "/favicon.png";
+  const appleTouch = appIconAny || "/apple-touch-icon.png";
+  const msTile = appIconAny || "/apple-touch-icon.png";
+
+  const brandLogos = logosFromAppearance(
+    appearance,
+    resolveSiteShortName(appearance, brand?.name ?? null)
+  );
+  const bootstrapScript = `window.__BRAND_LOGOS__=${serializeBrandBootstrap(brandLogos)};`;
+
+  const navPreload = brandLogos.navLogoUrl;
+  const heroPreload = brandLogos.heroLogoUrl;
+  const loadingEnabled = Boolean(loadingUi?.enabled);
 
   const iconMime = (url: string) => {
     const u = url.toLowerCase();
-    if (u.endsWith('.webp')) return 'image/webp';
-    if (u.endsWith('.svg')) return 'image/svg+xml';
-    if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return 'image/jpeg';
-    return 'image/png';
+    if (u.endsWith(".webp")) return "image/webp";
+    if (u.endsWith(".svg")) return "image/svg+xml";
+    if (u.endsWith(".jpg") || u.endsWith(".jpeg")) return "image/jpeg";
+    return "image/png";
   };
 
+  const brandFonts = fontVarsFromAppearance(appearance);
+  const fontCssVars = fontVarsToCssRecord(brandFonts);
+
   const cssVars: Record<string, string | null | undefined> = {
-    '--malts-paper': appearance?.paper,
-    '--malts-ink': appearance?.ink,
-    '--malts-muted': appearance?.muted,
-    '--malts-subtle': appearance?.subtle,
-    '--malts-card': appearance?.card,
-    '--malts-card-hover': appearance?.cardHover,
-    '--malts-inset': appearance?.inset,
-    '--malts-hairline': appearance?.hairline,
+    ...fontCssVars,
+    "--theme-paper": appearance?.paper,
+    "--theme-ink": appearance?.ink,
+    "--theme-muted": appearance?.muted,
+    "--theme-subtle": appearance?.subtle,
+    "--theme-card": appearance?.card,
+    "--theme-card-hover": appearance?.cardHover,
+    "--theme-inset": appearance?.inset,
+    "--theme-hairline": appearance?.hairline,
 
-    '--malts-accent': appearance?.accent,
-    '--malts-accent-hover': appearance?.accentHover,
-    '--malts-accent-contrast': appearance?.accentContrast,
+    "--theme-accent": appearance?.accent,
+    "--theme-accent-hover": appearance?.accentHover,
+    "--theme-accent-contrast": appearance?.accentContrast,
+    "--theme-accent-contrast-hover": appearance?.accentContrastHover,
 
-    '--malts-success': appearance?.success,
-    '--malts-warning': appearance?.warning,
-    '--malts-danger': appearance?.danger,
-    '--malts-info': appearance?.info,
+    "--theme-success": appearance?.success,
+    "--theme-warning": appearance?.warning,
+    "--theme-danger": appearance?.danger,
+    "--theme-info": appearance?.info,
   };
 
   const inlineCss = (() => {
     const parts: string[] = [];
     for (const [k, v] of Object.entries(cssVars)) {
-      const s = (v ?? '').toString().trim();
+      const s = (v ?? "").toString().trim();
       if (s) parts.push(`${k}:${s}`);
     }
-    if (parts.length === 0) return '';
-    return `:root{${parts.join(';')}}`;
+    if (parts.length === 0) return "";
+    return `:root{${parts.join(";")}}`;
   })();
 
   return (
@@ -124,13 +167,22 @@ export default async function RootLayout({
         <meta name="msapplication-TileImage" content={msTile} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content={themeColor} />
-        {/* Preload loader media for Safari (avoid blank first frame). */}
-        <link rel="preload" as="image" href="/beer-mug-loader.gif" />
-        <link rel="preload" as="image" href="/beer-mug-loader.png" />
+        <script dangerouslySetInnerHTML={{ __html: bootstrapScript }} />
+        {navPreload ? <link rel="preload" as="image" href={navPreload} /> : null}
+        {heroPreload ? <link rel="preload" as="image" href={heroPreload} /> : null}
+        {loadingEnabled ? (
+          <>
+            <link rel="preload" as="image" href="/beer-mug-loader.gif" />
+            <link rel="preload" as="image" href="/beer-mug-loader.png" />
+          </>
+        ) : null}
+        {brandFonts.googleFontsCssUrl ? (
+          <link rel="stylesheet" href={brandFonts.googleFontsCssUrl} />
+        ) : null}
         {inlineCss ? <style dangerouslySetInnerHTML={{ __html: inlineCss }} /> : null}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${maltsDisplay.variable} ${maltsButtons.variable} ${maltsLang.variable} ${maltsNav.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${themeDisplay.variable} ${themeButtons.variable} ${themeLang.variable} ${themeNav.variable} antialiased`}
       >
         {children}
       </body>

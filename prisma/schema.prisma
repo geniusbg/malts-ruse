@@ -586,9 +586,10 @@ model BrandAppearanceSettings {
   inset     String?  @map("inset")
   hairline  String?  @map("hairline")
 
-  accent         String? @map("accent")
-  accentHover    String? @map("accent_hover")
-  accentContrast String? @map("accent_contrast")
+  accent              String? @map("accent")
+  accentHover         String? @map("accent_hover")
+  accentContrast      String? @map("accent_contrast")
+  accentContrastHover String? @map("accent_contrast_hover")
 
   success String? @map("success")
   warning String? @map("warning")
@@ -596,7 +597,17 @@ model BrandAppearanceSettings {
   info    String? @map("info")
 
   // Browser / PWA UI
-  themeColor String? @map("theme_color")
+  themeColor       String? @map("theme_color")
+  siteTitle        String? @map("site_title")
+  siteShortName    String? @map("site_short_name")
+  siteDescription  String? @map("site_description")
+
+  // Typography (Google Fonts link + CSS font-family stacks)
+  googleFontsCssUrl  String? @map("google_fonts_css_url")
+  fontDisplayFamily  String? @map("font_display_family")
+  fontButtonsFamily  String? @map("font_buttons_family")
+  fontNavFamily      String? @map("font_nav_family")
+  fontBodyFamily     String? @map("font_body_family")
 
   // Logos / icons (URLs)
   navLogoUrl  String? @map("nav_logo_url")

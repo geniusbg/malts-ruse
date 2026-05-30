@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { webpush } from '@/lib/web-push';
 import { getDefaultBrandId } from '@/lib/brand';
 import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
+import { resolveHeroLogoUrl } from '@/lib/brand-defaults';
 
 export async function POST(request: Request) {
   try {
@@ -105,8 +106,8 @@ export async function POST(request: Request) {
     const appearance = await getBrandAppearanceSettings().catch(() => null);
     const notificationIcon =
       (appearance?.appIconUrl || '').trim() ||
-      (appearance?.heroLogoUrl || '').trim() ||
-      '/malts-logo-hero.webp';
+      resolveHeroLogoUrl(appearance?.heroLogoUrl) ||
+      '/apple-touch-icon.png';
 
     console.log(`📤 Sending push to ${filteredSubscriptions.length} devices...`);
 
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
             icon: notificationIcon,
             badge: notificationIcon,
             url: url || '/bg/staff',
-            tag: 'malts-notification',
+            tag: 'theme-notification',
             requireInteraction: true,
             vibrate: [200, 100, 200, 100, 200],
             timestamp: Date.now()

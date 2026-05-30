@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ImageUpload from '@/components/ImageUpload';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
+import { defaultVenueLocationPlaceholder, partnerEventNotAtVenue } from '@/lib/brand-copy';
+import { useSiteDisplayName } from '@/lib/use-site-display-name';
 
 interface EventFormProps {
   initialData?: Partial<EventFormData>;
@@ -57,6 +59,8 @@ const defaultEventFormData: EventFormData = {
 };
 
 export default function EventForm({ initialData, onSubmit, locale }: EventFormProps) {
+  const siteName = useSiteDisplayName();
+  const [defaultVenueLocation, setDefaultVenueLocation] = useState('');
   const [formData, setFormData] = useState<EventFormData>({
     ...defaultEventFormData,
     ...(initialData || {})
@@ -65,6 +69,20 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
   const [loading, setLoading] = useState(false);
   const [translatingField, setTranslatingField] = useState<string | null>(null);
   const [translationError, setTranslationError] = useState<string | null>(null);
+
+  const venueLocationFallback =
+    defaultVenueLocation.trim() || defaultVenueLocationPlaceholder(siteName);
+
+  useEffect(() => {
+    void fetch('/api/location-settings')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const s = data?.settings ?? data;
+        const addr = (s?.addressBg || s?.addressEn || '').trim();
+        if (addr) setDefaultVenueLocation(addr);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -142,7 +160,7 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
     try {
       const location = formData.is_external
         ? (formData.location_bg?.trim() || formData.location?.trim() || '')
-        : (formData.location?.trim() || 'Malts, Русе');
+        : (formData.location?.trim() || venueLocationFallback);
       const locationBg = formData.is_external ? formData.location_bg?.trim() || null : null;
       const locationEn = formData.is_external ? formData.location_en?.trim() || null : null;
       const locationRo = formData.is_external ? formData.location_ro?.trim() || null : null;
@@ -196,24 +214,24 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       {/* Titles */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="malts-label">Заглавие (БГ) *</label>
+          <label className="theme-label">Заглавие (БГ) *</label>
           <input
             type="text"
             name="title_bg"
             value={formData.title_bg}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Title (EN) *</label>
+            <label className="theme-label mb-0">Title (EN) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('title_en', 'en')}
               disabled={!formData.title_bg || translatingField === 'title_en'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'title_en' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -223,18 +241,18 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             name="title_en"
             value={formData.title_en}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Title (RO) *</label>
+            <label className="theme-label mb-0">Title (RO) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('title_ro', 'ro')}
               disabled={!formData.title_bg || translatingField === 'title_ro'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'title_ro' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -244,7 +262,7 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             name="title_ro"
             value={formData.title_ro}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
@@ -253,24 +271,24 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       {/* Descriptions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="malts-label">Описание (БГ) *</label>
+          <label className="theme-label">Описание (БГ) *</label>
           <textarea
             name="description_bg"
             value={formData.description_bg}
             onChange={handleChange}
             rows={4}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Description (EN) *</label>
+            <label className="theme-label mb-0">Description (EN) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('description_en', 'en')}
               disabled={!formData.description_bg || translatingField === 'description_en'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'description_en' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -280,18 +298,18 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             value={formData.description_en}
             onChange={handleChange}
             rows={4}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Description (RO) *</label>
+            <label className="theme-label mb-0">Description (RO) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('description_ro', 'ro')}
               disabled={!formData.description_bg || translatingField === 'description_ro'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'description_ro' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -301,7 +319,7 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             value={formData.description_ro}
             onChange={handleChange}
             rows={4}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
@@ -309,13 +327,13 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
 
       {/* Event Date */}
       <div>
-        <label className="malts-label">Дата и час *</label>
+        <label className="theme-label">Дата и час *</label>
         <input
           type="datetime-local"
           name="event_date"
           value={formData.event_date}
           onChange={handleChange}
-          className="malts-field"
+          className="theme-field"
           required
         />
       </div>
@@ -324,25 +342,25 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
       {formData.is_external ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="malts-label">Локация (БГ) *</label>
+            <label className="theme-label">Локация (БГ) *</label>
             <input
               type="text"
               name="location_bg"
               value={formData.location_bg}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="София, бул. Витоша 1"
               required
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="malts-label mb-0">Location (EN)</label>
+              <label className="theme-label mb-0">Location (EN)</label>
               <button
                 type="button"
                 onClick={() => handleTranslate('location_en', 'en')}
                 disabled={!formData.location_bg || translatingField === 'location_en'}
-                className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+                className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
               >
                 {translatingField === 'location_en' ? 'Превеждам...' : 'Авто превод'}
               </button>
@@ -352,18 +370,18 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
               name="location_en"
               value={formData.location_en}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="Sofia, Vitosha Blvd 1"
             />
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="malts-label mb-0">Location (RO)</label>
+              <label className="theme-label mb-0">Location (RO)</label>
               <button
                 type="button"
                 onClick={() => handleTranslate('location_ro', 'ro')}
                 disabled={!formData.location_bg || translatingField === 'location_ro'}
-                className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+                className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
               >
                 {translatingField === 'location_ro' ? 'Превеждам...' : 'Авто превод'}
               </button>
@@ -373,34 +391,34 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
               name="location_ro"
               value={formData.location_ro}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="Sofia, Vitosha Blvd 1"
             />
           </div>
         </div>
       ) : (
         <div>
-          <label className="malts-label">Локация *</label>
+          <label className="theme-label">Локация *</label>
           <input
             type="text"
             name="location"
             value={formData.location}
             onChange={handleChange}
-            className="malts-field"
-            placeholder="Malts, Русе"
+            className="theme-field"
+            placeholder={venueLocationFallback}
             required
           />
         </div>
       )}
 
       {translationError && (
-        <MaltsInlineFeedback tone="error" role="alert">
+        <ThemeInlineFeedback tone="error" role="alert">
           {translationError}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
 
       {/* Images: card (list) vs detail page — upload is compressed client-side before /api/upload */}
-      <div className="space-y-6 border-t border-[var(--malts-hairline)] pt-6">
+      <div className="space-y-6 border-t border-[var(--theme-hairline)] pt-6">
         <div className="space-y-3">
           <ImageUpload
             label="Снимка за картичка / списък"
@@ -411,13 +429,13 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             compressionOptions={{ maxWidthOrHeight: 800, maxSizeMB: 0.85 }}
           />
           <div>
-            <label className="malts-label mb-1">Или URL (картичка)</label>
+            <label className="theme-label mb-1">Или URL (картичка)</label>
             <input
               type="url"
               name="image_card_url"
               value={formData.image_card_url}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="https://..."
             />
           </div>
@@ -432,18 +450,18 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
             compressionOptions={{ maxWidthOrHeight: 1600, maxSizeMB: 1.75 }}
           />
           <div>
-            <label className="malts-label mb-1">Или URL (страница на събитието)</label>
+            <label className="theme-label mb-1">Или URL (страница на събитието)</label>
             <input
               type="url"
               name="image_detail_url"
               value={formData.image_detail_url}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="https://..."
             />
           </div>
         </div>
-        <p className="malts-help text-sm">
+        <p className="theme-help text-sm">
           Картичката ползва „за картичка“, страницата — „за страницата“. Ако някое липсва, пада се към другото или към
           стария единичен URL в базата.
         </p>
@@ -451,7 +469,7 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
 
       {/* Checkboxes */}
       <div className="flex flex-col md:flex-row gap-6">
-        <label className="flex items-center gap-2 text-[var(--malts-ink)] cursor-pointer">
+        <label className="flex items-center gap-2 text-[var(--theme-ink)] cursor-pointer">
           <input
             type="checkbox"
             name="is_external"
@@ -469,21 +487,21 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
                 return {
                   ...prev,
                   is_external: false,
-                  location: prev.location?.trim() || prev.location_bg?.trim() || 'Malts, Русе',
+                  location: prev.location?.trim() || prev.location_bg?.trim() || venueLocationFallback,
                 };
               });
             }}
-            className="w-5 h-5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] focus:ring-[var(--malts-accent-tint-border)]"
+            className="w-5 h-5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] focus:ring-[var(--theme-accent-tint-border)]"
           />
-          <span>Партньорско събитие (не в Malts)</span>
+          <span>{partnerEventNotAtVenue(locale, siteName)}</span>
         </label>
-        <label className="flex items-center gap-2 text-[var(--malts-ink)] cursor-pointer">
+        <label className="flex items-center gap-2 text-[var(--theme-ink)] cursor-pointer">
           <input
             type="checkbox"
             name="is_published"
             checked={formData.is_published}
             onChange={handleChange}
-            className="w-5 h-5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-ink)] focus:ring-[var(--malts-accent-tint-border)]"
+            className="w-5 h-5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-ink)] focus:ring-[var(--theme-accent-tint-border)]"
           />
           <span>Публикувано</span>
         </label>
@@ -491,55 +509,55 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
 
       {/* External Event Fields - Show only when is_external is checked */}
       {formData.is_external && (
-        <div className="malts-card p-6 space-y-4">
-          <h3 className="text-xl font-bold text-[var(--malts-ink)] mb-4">📌 Информация за партньорско събитие</h3>
+        <div className="theme-card p-6 space-y-4">
+          <h3 className="text-xl font-bold text-[var(--theme-ink)] mb-4">📌 Информация за партньорско събитие</h3>
           
           <div>
-            <label className="malts-label">URL на събитието</label>
+            <label className="theme-label">URL на събитието</label>
             <input
               type="url"
               name="external_url"
               value={formData.external_url}
               onChange={handleChange}
-              className="malts-field"
+              className="theme-field"
               placeholder="https://example.com/event"
             />
-            <p className="malts-help mt-1">Линк към страницата на събитието</p>
+            <p className="theme-help mt-1">Линк към страницата на събитието</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="malts-label">Телефон</label>
+              <label className="theme-label">Телефон</label>
               <input
                 type="tel"
                 name="contact_phone"
                 value={formData.contact_phone}
                 onChange={handleChange}
-                className="malts-field"
+                className="theme-field"
                 placeholder="+359 888 123 456"
               />
             </div>
             
             <div>
-              <label className="malts-label">Email</label>
+              <label className="theme-label">Email</label>
               <input
                 type="email"
                 name="contact_email"
                 value={formData.contact_email}
                 onChange={handleChange}
-                className="malts-field"
+                className="theme-field"
                 placeholder="contact@example.com"
               />
             </div>
             
             <div>
-              <label className="malts-label">Facebook</label>
+              <label className="theme-label">Facebook</label>
               <input
                 type="text"
                 name="contact_facebook"
                 value={formData.contact_facebook}
                 onChange={handleChange}
-                className="malts-field"
+                className="theme-field"
                 placeholder="/eventpage"
               />
             </div>
@@ -552,14 +570,14 @@ export default function EventForm({ initialData, onSubmit, locale }: EventFormPr
         <button
           type="submit"
           disabled={loading}
-          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
+          className="theme-btn-primary theme-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
         >
           {loading ? 'Запазване...' : 'Запази'}
         </button>
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="malts-btn-secondary malts-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
+          className="theme-btn-secondary theme-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
         >
           Отказ
         </button>

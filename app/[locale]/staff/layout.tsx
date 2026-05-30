@@ -1,15 +1,19 @@
 import { Metadata } from 'next';
 import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
+import { resolveSiteDisplayName } from '@/lib/site-display-name';
 
-export const metadata: Metadata = {
-  title: 'Malts Staff Dashboard',
-  manifest: '/manifest-staff.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Malts Staff'
-  }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const siteName = await resolveSiteDisplayName();
+  return {
+    title: `${siteName} – Staff`,
+    manifest: '/manifest-staff.json',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: `${siteName} Staff`,
+    },
+  };
+}
 
 export async function generateViewport() {
   const appearance = await getBrandAppearanceSettings().catch(() => null);
@@ -36,7 +40,7 @@ export default async function StaffLayout({
   return (
     <>
       <link rel="manifest" href="/manifest-staff.json" />
-      <div className="malts-surface">{children}</div>
+      <div className="theme-surface">{children}</div>
     </>
   );
 }

@@ -253,7 +253,7 @@ export async function downloadGoogleDriveArtifactToTemp(
   }
   const { fileId } = parsed;
   const config = { ...((destination.config as Record<string, unknown>) || {}) };
-  const tmpDir = process.env.BACKUP_TEMP_DIR || join(tmpdir(), 'malts-backups');
+  const tmpDir = process.env.BACKUP_TEMP_DIR || join(tmpdir(), 'theme-backups');
   await fs.mkdir(tmpDir, { recursive: true });
   const tmpPath = join(tmpDir, `restore-${randomUUID()}.dump`);
 
@@ -364,7 +364,7 @@ export async function uploadMaltsBackupToGoogleDrive(
   });
   const drive = google.drive({ version: 'v3', auth });
 
-  const fileName = `malts-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
+  const fileName = `theme-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
   const createRes = await drive.files.create({
     requestBody: { name: fileName, parents: [folderId] },
     media: { mimeType: 'application/octet-stream', body: createReadStream(sourceFilePath) },
@@ -403,7 +403,7 @@ async function uploadWithOauth(
   });
 
   const drive = google.drive({ version: 'v3', auth: authClient });
-  const fileName = `malts-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
+  const fileName = `theme-backup-${new Date().toISOString().replace(/[:.]/g, '-')}-${jobId}.dump`;
 
   const createRes = await drive.files.create({
     requestBody: { name: fileName, parents: [folderId] },

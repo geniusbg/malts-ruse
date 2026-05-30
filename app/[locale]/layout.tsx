@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 import ConditionalNav from '@/components/ConditionalNav';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
+import { resolveSiteShortName } from '@/lib/brand-defaults';
+import { getDefaultBrand } from '@/lib/brand';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -20,5 +23,16 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  return <ConditionalNav>{children}</ConditionalNav>;
+  const [appearance, brand] = await Promise.all([
+    getBrandAppearanceSettings().catch(() => null),
+    getDefaultBrand().catch(() => null),
+  ]);
+  const initialNavLogoUrl = (appearance?.navLogoUrl || '').trim() || null;
+  const initialSiteShortName = resolveSiteShortName(appearance, brand?.name ?? null);
+
+  return (
+    <ConditionalNav initialNavLogoUrl={initialNavLogoUrl} initialSiteShortName={initialSiteShortName}>
+      {children}
+    </ConditionalNav>
+  );
 }

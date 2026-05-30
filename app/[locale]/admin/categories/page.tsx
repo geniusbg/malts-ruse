@@ -171,10 +171,10 @@ export default function AdminCategoriesPage() {
             <div key={cat.id} className="space-y-2">
               <div
                 className={[
-                  'malts-card transition-all',
+                  'theme-card transition-all',
                   isRoot
-                    ? 'border-2 border-[var(--malts-hairline)] p-4 hover:border-[var(--malts-accent-tint-border)] md:p-5'
-                    : 'border border-[var(--malts-hairline)] p-3 hover:border-[var(--malts-accent-tint-border)]',
+                    ? 'border-2 border-[var(--theme-hairline)] p-4 hover:border-[var(--theme-accent-tint-border)] md:p-5'
+                    : 'border border-[var(--theme-hairline)] p-3 hover:border-[var(--theme-accent-tint-border)]',
                 ].join(' ')}
               >
                 <div className="flex items-start justify-between">
@@ -193,7 +193,7 @@ export default function AdminCategoriesPage() {
                             e.stopPropagation();
                             toggleExpanded(cat.id);
                           }}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] text-lg font-bold leading-none text-[var(--malts-ink)] transition-colors hover:border-[var(--malts-accent-tint-border)] hover:bg-[var(--malts-card-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--malts-accent)]"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-card)] text-lg font-bold leading-none text-[var(--theme-ink)] transition-colors hover:border-[var(--theme-accent-tint-border)] hover:bg-[var(--theme-card-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                           aria-expanded={isExpanded}
                           aria-label={isExpanded ? 'Свий подкатегориите' : 'Разгъни подкатегориите'}
                         >
@@ -203,12 +203,12 @@ export default function AdminCategoriesPage() {
                       <h3
                         className={
                           isRoot
-                            ? 'flex min-w-0 flex-1 items-start gap-2 text-lg font-bold text-[var(--malts-ink)] md:text-xl'
-                            : 'flex min-w-0 flex-1 items-start gap-2 text-base font-semibold text-[var(--malts-ink)]'
+                            ? 'flex min-w-0 flex-1 items-start gap-2 text-lg font-bold text-[var(--theme-ink)] md:text-xl'
+                            : 'flex min-w-0 flex-1 items-start gap-2 text-base font-semibold text-[var(--theme-ink)]'
                         }
                         onClick={hasChildren ? () => toggleExpanded(cat.id) : undefined}
                       >
-                        <span className="shrink-0 pt-0.5 text-[var(--malts-accent)]" aria-hidden>
+                        <span className="shrink-0 pt-0.5 text-[var(--theme-accent)]" aria-hidden>
                           {isRoot ? '📁' : '└─'}
                         </span>
                         <span className="min-w-0 flex-1 break-words leading-snug">{cat.nameBg}</span>
@@ -217,35 +217,35 @@ export default function AdminCategoriesPage() {
 
                     <div className="mb-2 space-y-1">
                       <div className="flex items-start gap-2">
-                        <span className="malts-subtle w-[5.5rem] shrink-0 text-xs uppercase leading-snug sm:w-24">
+                        <span className="theme-subtle w-[5.5rem] shrink-0 text-xs uppercase leading-snug sm:w-24">
                           EN:
                         </span>
-                        <span className="malts-muted min-w-0 flex-1 text-sm leading-snug">{cat.nameEn}</span>
+                        <span className="theme-muted min-w-0 flex-1 text-sm leading-snug">{cat.nameEn}</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="malts-subtle w-[5.5rem] shrink-0 text-xs uppercase leading-snug sm:w-24">
+                        <span className="theme-subtle w-[5.5rem] shrink-0 text-xs uppercase leading-snug sm:w-24">
                           RO:
                         </span>
-                        <span className="malts-muted min-w-0 flex-1 text-sm leading-snug">{cat.nameRo}</span>
+                        <span className="theme-muted min-w-0 flex-1 text-sm leading-snug">{cat.nameRo}</span>
                       </div>
                     </div>
-                    <div className="mb-2 space-y-1 border-t border-[var(--malts-hairline)] pt-2">
+                    <div className="mb-2 space-y-1 border-t border-[var(--theme-hairline)] pt-2">
                       <div className="flex items-start gap-2">
-                        <span className="malts-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">Slug</span>
-                        <span className="malts-muted min-w-0 flex-1 break-all font-mono text-xs leading-snug sm:text-sm">
+                        <span className="theme-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">Slug</span>
+                        <span className="theme-muted min-w-0 flex-1 break-all font-mono text-xs leading-snug sm:text-sm">
                           {cat.slug}
                         </span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="malts-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">Подредба</span>
-                        <span className="malts-muted min-w-0 flex-1 text-sm leading-snug">{cat.order}</span>
+                        <span className="theme-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">Подредба</span>
+                        <span className="theme-muted min-w-0 flex-1 text-sm leading-snug">{cat.order}</span>
                       </div>
                       {hasChildren && (
                         <div className="flex items-start gap-2">
-                          <span className="malts-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">
+                          <span className="theme-subtle w-[5.5rem] shrink-0 text-xs leading-snug sm:w-24">
                             Подкатегории
                           </span>
-                          <span className="malts-muted min-w-0 flex-1 text-sm leading-snug">
+                          <span className="theme-muted min-w-0 flex-1 text-sm leading-snug">
                             {categories.filter((c: any) => c.parentCategoryId === cat.id).length}
                           </span>
                         </div>
@@ -255,13 +255,13 @@ export default function AdminCategoriesPage() {
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
                         onClick={() => handleOpenEdit(cat)}
-                        className="malts-btn-secondary w-full rounded-lg px-3 py-2 text-sm font-semibold transition-all sm:flex-1 sm:py-1.5"
+                        className="theme-btn-secondary w-full rounded-lg px-3 py-2 text-sm font-semibold transition-all sm:flex-1 sm:py-1.5"
                       >
                         Редактирай
                       </button>
                       <button
                         onClick={() => setDeleteTarget({ id: cat.id, name: cat.nameBg })}
-                        className="malts-btn-danger w-full rounded-lg px-3 py-2 text-sm font-semibold transition-all sm:w-auto sm:py-1.5"
+                        className="theme-btn-danger w-full rounded-lg px-3 py-2 text-sm font-semibold transition-all sm:w-auto sm:py-1.5"
                       >
                         Изтрий
                       </button>
@@ -271,7 +271,7 @@ export default function AdminCategoriesPage() {
               </div>
 
               {hasChildren && isExpanded && (
-                <div className="ml-4 border-l-2 border-[var(--malts-hairline)] pl-4 md:ml-5 md:pl-5">
+                <div className="ml-4 border-l-2 border-[var(--theme-hairline)] pl-4 md:ml-5 md:pl-5">
                   {renderCategoryTree(cat.id, depth + 1)}
                 </div>
               )}
@@ -295,25 +295,25 @@ export default function AdminCategoriesPage() {
 
       {/* Header with Add Button */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:mb-8">
-        <h1 className="malts-admin-heading-font malts-admin-page-title">Категории</h1>
+        <h1 className="theme-admin-heading-font theme-admin-page-title">Категории</h1>
         <button
           onClick={handleOpenAdd}
           type="button"
-          className="malts-btn-primary malts-btn-admin-compact w-full shrink-0 rounded-lg text-center font-semibold transition-all sm:w-auto"
+          className="theme-btn-primary theme-btn-admin-compact w-full shrink-0 rounded-lg text-center font-semibold transition-all sm:w-auto"
         >
           + Добави категория
         </button>
       </div>
 
       {/* List */}
-      <div className="malts-card p-4 md:p-6">
+      <div className="theme-card p-4 md:p-6">
         {categories.length === 0 ? (
-          <p className="malts-muted">Няма категории. Добави първата категория!</p>
+          <p className="theme-muted">Няма категории. Добави първата категория!</p>
         ) : (
           <>
-            <p className="malts-muted mb-4 text-sm leading-snug">
+            <p className="theme-muted mb-4 text-sm leading-snug">
               Редовете с подкатегории са свити по подразбиране — натисни{' '}
-              <span className="font-mono text-[var(--malts-ink)]">+</span> или името на категорията, за да ги
+              <span className="font-mono text-[var(--theme-ink)]">+</span> или името на категорията, за да ги
               видиш.
             </p>
             <div>{renderCategoryTree(null, 0)}</div>

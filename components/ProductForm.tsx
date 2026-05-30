@@ -5,7 +5,7 @@ import { Category } from '@/lib/types';
 import { bgnToEur, eurToBgn } from '@/lib/currency';
 import ImageUpload from './ImageUpload';
 import CategorySelectCombobox from './CategorySelectCombobox';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 interface ProductFormProps {
   categories: Category[];
@@ -224,7 +224,7 @@ export default function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Category: search + tree (+/−) */}
       <div>
-        <label className="malts-label" id="product-category-label">
+        <label className="theme-label" id="product-category-label">
           Категория *
         </label>
         <CategorySelectCombobox
@@ -239,24 +239,24 @@ export default function ProductForm({
       {/* Names */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="malts-label">Име (БГ) *</label>
+          <label className="theme-label">Име (БГ) *</label>
           <input
             type="text"
             name="name_bg"
             value={formData.name_bg}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Name (EN) *</label>
+            <label className="theme-label mb-0">Name (EN) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('name_en', 'en')}
               disabled={!formData.name_bg || translatingField === 'name_en'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'name_en' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -266,18 +266,18 @@ export default function ProductForm({
             name="name_en"
             value={formData.name_en}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Name (RO) *</label>
+            <label className="theme-label mb-0">Name (RO) *</label>
             <button
               type="button"
               onClick={() => handleTranslate('name_ro', 'ro')}
               disabled={!formData.name_bg || translatingField === 'name_ro'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'name_ro' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -287,7 +287,7 @@ export default function ProductForm({
             name="name_ro"
             value={formData.name_ro}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           />
         </div>
@@ -296,23 +296,23 @@ export default function ProductForm({
       {/* Descriptions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="malts-label">Описание (БГ)</label>
+          <label className="theme-label">Описание (БГ)</label>
           <textarea
             name="description_bg"
             value={formData.description_bg}
             onChange={handleChange}
             rows={3}
-            className="malts-field"
+            className="theme-field"
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Description (EN)</label>
+            <label className="theme-label mb-0">Description (EN)</label>
             <button
               type="button"
               onClick={() => handleTranslate('description_en', 'en')}
               disabled={!formData.description_bg || translatingField === 'description_en'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'description_en' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -322,17 +322,17 @@ export default function ProductForm({
             value={formData.description_en}
             onChange={handleChange}
             rows={3}
-            className="malts-field"
+            className="theme-field"
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Description (RO)</label>
+            <label className="theme-label mb-0">Description (RO)</label>
             <button
               type="button"
               onClick={() => handleTranslate('description_ro', 'ro')}
               disabled={!formData.description_bg || translatingField === 'description_ro'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'description_ro' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -342,7 +342,7 @@ export default function ProductForm({
             value={formData.description_ro}
             onChange={handleChange}
             rows={3}
-            className="malts-field"
+            className="theme-field"
           />
         </div>
       </div>
@@ -350,25 +350,25 @@ export default function ProductForm({
       {/* Allergens */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="malts-label">Алергени (БГ)</label>
+          <label className="theme-label">Алергени (БГ)</label>
           <textarea
             name="allergens_bg"
             value={formData.allergens_bg}
             onChange={handleChange}
             rows={2}
-            className="malts-field"
+            className="theme-field"
             placeholder="напр. Глутен, мляко, яйца"
           />
-          <p className="malts-help mt-1">Свободен текст. Показва се само ако е попълнено.</p>
+          <p className="theme-help mt-1">Свободен текст. Показва се само ако е попълнено.</p>
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Allergens (EN)</label>
+            <label className="theme-label mb-0">Allergens (EN)</label>
             <button
               type="button"
               onClick={() => handleTranslate('allergens_en', 'en')}
               disabled={!formData.allergens_bg || translatingField === 'allergens_en'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'allergens_en' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -378,18 +378,18 @@ export default function ProductForm({
             value={formData.allergens_en}
             onChange={handleChange}
             rows={2}
-            className="malts-field"
+            className="theme-field"
             placeholder="e.g. Gluten, milk, eggs"
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="malts-label mb-0">Alergeni (RO)</label>
+            <label className="theme-label mb-0">Alergeni (RO)</label>
             <button
               type="button"
               onClick={() => handleTranslate('allergens_ro', 'ro')}
               disabled={!formData.allergens_bg || translatingField === 'allergens_ro'}
-              className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+              className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
             >
               {translatingField === 'allergens_ro' ? 'Превеждам...' : 'Авто превод'}
             </button>
@@ -399,18 +399,18 @@ export default function ProductForm({
             value={formData.allergens_ro}
             onChange={handleChange}
             rows={2}
-            className="malts-field"
+            className="theme-field"
             placeholder="ex. Gluten, lapte, ouă"
           />
         </div>
       </div>
 
       {/* Variants */}
-      <div className="malts-card p-6">
-        <h3 className="text-[var(--malts-ink)] font-semibold mb-2">
+      <div className="theme-card p-6">
+        <h3 className="text-[var(--theme-ink)] font-semibold mb-2">
           Варианти (по избор)
         </h3>
-        <p className="malts-help mb-4">
+        <p className="theme-help mb-4">
           Добави варианти като отделни опции. Пример за “Сок Cappy”: портокал, кайсия, праскова.
         </p>
 
@@ -425,13 +425,13 @@ export default function ProductForm({
                 addVariant(newVariant);
               }
             }}
-            className="malts-field"
+            className="theme-field"
             placeholder="напр. портокал"
           />
           <button
             type="button"
             onClick={() => addVariant(newVariant)}
-            className="malts-btn-primary malts-btn-admin-compact whitespace-nowrap font-semibold"
+            className="theme-btn-primary theme-btn-admin-compact whitespace-nowrap font-semibold"
           >
             + Добави
           </button>
@@ -444,8 +444,8 @@ export default function ProductForm({
                 key={`${String(v?.label ?? '')}::${i}`}
                 className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
                   v.enabled
-                    ? 'border-[var(--malts-hairline)] bg-[var(--malts-inset)] text-[var(--malts-ink)]'
-                    : 'border-[var(--malts-hairline)] bg-[var(--malts-paper)] text-[var(--malts-subtle)]'
+                    ? 'border-[var(--theme-hairline)] bg-[var(--theme-inset)] text-[var(--theme-ink)]'
+                    : 'border-[var(--theme-hairline)] bg-[var(--theme-paper)] text-[var(--theme-subtle)]'
                 }`}
               >
                 <button
@@ -453,8 +453,8 @@ export default function ProductForm({
                   onClick={() => toggleVariantEnabled(v.label)}
                   className={`rounded-full px-1.5 py-0.5 text-xs font-bold border ${
                     v.enabled
-                      ? 'border-[rgba(22,101,52,0.25)] text-[var(--malts-success)] hover:bg-[rgba(22,101,52,0.08)]'
-                      : 'border-[rgba(146,64,14,0.25)] text-[var(--malts-warning)] hover:bg-[rgba(146,64,14,0.08)]'
+                      ? 'border-[rgba(22,101,52,0.25)] text-[var(--theme-success)] hover:bg-[rgba(22,101,52,0.08)]'
+                      : 'border-[rgba(146,64,14,0.25)] text-[var(--theme-warning)] hover:bg-[rgba(146,64,14,0.08)]'
                   }`}
                   aria-label={`${v.enabled ? 'Маркирай като неналичен' : 'Маркирай като наличен'}: ${v.label}`}
                   title={v.enabled ? 'Налично' : 'Временно неналично'}
@@ -465,7 +465,7 @@ export default function ProductForm({
                 <button
                   type="button"
                   onClick={() => removeVariant(v.label)}
-                  className="rounded-full px-1.5 py-0.5 text-xs font-bold text-[var(--malts-danger)] hover:bg-[rgba(127,29,29,0.08)]"
+                  className="rounded-full px-1.5 py-0.5 text-xs font-bold text-[var(--theme-danger)] hover:bg-[rgba(127,29,29,0.08)]"
                   aria-label={`Премахни вариант ${v.label}`}
                   title="Премахни"
                 >
@@ -478,15 +478,15 @@ export default function ProductForm({
       </div>
       
       {translationError && (
-        <MaltsInlineFeedback tone="error" role="alert">
+        <ThemeInlineFeedback tone="error" role="alert">
           {translationError}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
 
       {/* Price and Order */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="malts-label">Цена (€) *</label>
+          <label className="theme-label">Цена (€) *</label>
           <input
             type="number"
             name="price_eur"
@@ -494,18 +494,18 @@ export default function ProductForm({
             onChange={handleChange}
             step="0.01"
             min="0"
-            className="malts-field"
+            className="theme-field"
             placeholder="0.00"
             required
           />
-          <p className="malts-help mt-1">
+          <p className="theme-help mt-1">
             ≈ {eurToBgn(resolvePriceEur(formData.price_eur)).toFixed(2)} лв.
           </p>
         </div>
         <div>
-          <label className="malts-label">
+          <label className="theme-label">
             Подредба
-            <span className="ml-2 text-sm malts-muted font-normal">
+            <span className="ml-2 text-sm theme-muted font-normal">
               (по-малко число = показва се по-рано)
             </span>
           </label>
@@ -514,10 +514,10 @@ export default function ProductForm({
             name="order"
             value={formData.order}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             placeholder="0, 1, 2, 3..."
           />
-          <p className="malts-help mt-1">
+          <p className="theme-help mt-1">
             Използвай за да контролираш реда на продуктите в менюто
           </p>
         </div>
@@ -526,12 +526,12 @@ export default function ProductForm({
       {/* Unit and Quantity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="malts-label">Мерна единица *</label>
+          <label className="theme-label">Мерна единица *</label>
           <select
             name="unit"
             value={formData.unit}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             required
           >
             <option value="pcs">бр. (броя)</option>
@@ -541,17 +541,17 @@ export default function ProductForm({
           </select>
         </div>
         <div>
-          <label className="malts-label">Количество *</label>
+          <label className="theme-label">Количество *</label>
           <input
             type="number"
             name="quantity"
             value={formData.quantity}
             onChange={handleChange}
             min="1"
-            className="malts-field"
+            className="theme-field"
             required
           />
-          <p className="malts-help mt-1">
+          <p className="theme-help mt-1">
             Пример: 500 (ml), 200 (g), 1 (kg), 1 (pcs)
           </p>
         </div>
@@ -560,39 +560,39 @@ export default function ProductForm({
       {/* Image Upload */}
       <div className="space-y-4">
         <div>
-          <label className="malts-label">
+          <label className="theme-label">
             Снимка на продукта
           </label>
-          <p className="malts-help mb-4">
+          <p className="theme-help mb-4">
             💡 Избери ЕДИН от двата начина:
           </p>
         </div>
 
         {/* Option 1: Upload local file */}
-        <div className="malts-card p-4">
-          <h3 className="text-[var(--malts-ink)] font-semibold mb-3">Вариант 1: Добави снимка</h3>
+        <div className="theme-card p-4">
+          <h3 className="text-[var(--theme-ink)] font-semibold mb-3">Вариант 1: Добави снимка</h3>
           <ImageUpload
             currentImageUrl={formData.image_url}
             onImageUploaded={(url) => setFormData({ ...formData, image_url: url })}
             bucket="product-images"
           />
-          <p className="malts-muted text-xs mt-2">
+          <p className="theme-muted text-xs mt-2">
             Снимките се запазват в /public/uploads/ и се достъпват чрез /uploads/filename.jpg
           </p>
         </div>
 
         {/* Option 2: External URL */}
-        <div className="malts-card p-4">
-          <h3 className="text-[var(--malts-ink)] font-semibold mb-3">Вариант 2: Външен URL (от интернет)</h3>
+        <div className="theme-card p-4">
+          <h3 className="text-[var(--theme-ink)] font-semibold mb-3">Вариант 2: Външен URL (от интернет)</h3>
           <input
             type="text"
             name="image_url"
             value={formData.image_url}
             onChange={handleChange}
-            className="malts-field"
+            className="theme-field"
             placeholder="https://example.com/image.jpg"
           />
-          <p className="malts-help mt-2">
+          <p className="theme-help mt-2">
             Ако използваш upload (Вариант 1), това поле ще се попълни автоматично
           </p>
         </div>
@@ -600,52 +600,52 @@ export default function ProductForm({
 
       {/* Checkboxes */}
       <div className="space-y-4">
-        <div className="malts-card p-6">
-          <h3 className="text-[var(--malts-ink)] font-semibold mb-4">Видимост и статус</h3>
+        <div className="theme-card p-6">
+          <h3 className="text-[var(--theme-ink)] font-semibold mb-4">Видимост и статус</h3>
           <div className="space-y-3">
-            <label className="flex items-start gap-3 text-[var(--malts-ink)] cursor-pointer">
+            <label className="flex items-start gap-3 text-[var(--theme-ink)] cursor-pointer">
               <input
                 type="checkbox"
                 name="is_available"
                 checked={formData.is_available}
                 onChange={handleChange}
-                className="w-5 h-5 mt-0.5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-success)] focus:ring-[var(--malts-success)]"
+                className="w-5 h-5 mt-0.5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-success)] focus:ring-[var(--theme-success)]"
               />
               <div>
                 <span className="font-semibold">✅ Налично</span>
-                <p className="text-sm malts-muted mt-1">
+                <p className="text-sm theme-muted mt-1">
                   Махни отметката ако продукта е временно неналичен. Ще се показва в менюто с избледнял ефект и &quot;Не е наличен&quot; етикет.
                 </p>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 text-[var(--malts-ink)] cursor-pointer">
+            <label className="flex items-start gap-3 text-[var(--theme-ink)] cursor-pointer">
               <input
                 type="checkbox"
                 name="is_hidden"
                 checked={formData.is_hidden}
                 onChange={handleChange}
-                className="w-5 h-5 mt-0.5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-danger)] focus:ring-[var(--malts-danger)]"
+                className="w-5 h-5 mt-0.5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-danger)] focus:ring-[var(--theme-danger)]"
               />
               <div>
                 <span className="font-semibold">🚫 Скрит</span>
-                <p className="text-sm malts-muted mt-1">
+                <p className="text-sm theme-muted mt-1">
                   Продуктът НЕ се показва в менюто. Използвай за продукти които временно не предлагаш или са в подготовка.
                 </p>
               </div>
             </label>
 
-            <label className="flex items-start gap-3 text-[var(--malts-ink)] cursor-pointer">
+            <label className="flex items-start gap-3 text-[var(--theme-ink)] cursor-pointer">
               <input
                 type="checkbox"
                 name="is_featured"
                 checked={formData.is_featured}
                 onChange={handleChange}
-                className="w-5 h-5 mt-0.5 rounded border-[var(--malts-hairline)] bg-[var(--malts-card)] text-[var(--malts-warning)] focus:ring-[var(--malts-warning)]"
+                className="w-5 h-5 mt-0.5 rounded border-[var(--theme-hairline)] bg-[var(--theme-card)] text-[var(--theme-warning)] focus:ring-[var(--theme-warning)]"
               />
               <div>
                 <span className="font-semibold">⭐ Препоръчано</span>
-                <p className="text-sm malts-muted mt-1">
+                <p className="text-sm theme-muted mt-1">
                   Продуктът ще има звезда икона за да се откроява като специална препоръка.
                 </p>
               </div>
@@ -659,14 +659,14 @@ export default function ProductForm({
         <button
           type="submit"
           disabled={loading}
-          className="malts-btn-primary malts-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
+          className="theme-btn-primary theme-btn-admin-compact w-full font-semibold transition-all disabled:opacity-50 sm:flex-1"
         >
           {loading ? 'Запазване...' : 'Запази'}
         </button>
         <button
           type="button"
           onClick={() => window.history.back()}
-          className="malts-btn-secondary malts-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
+          className="theme-btn-secondary theme-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
         >
           Отказ
         </button>

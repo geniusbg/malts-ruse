@@ -11,7 +11,7 @@ console.log('  Private key:', vapidPrivateKey ? '✅ Present' : '❌ MISSING');
 
 if (vapidPublicKey && vapidPrivateKey) {
   webpush.setVapidDetails(
-    'mailto:info@malts-ruse.com',
+    'mailto:info@theme-ruse.com',
     vapidPublicKey,
     vapidPrivateKey
   );

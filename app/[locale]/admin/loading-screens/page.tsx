@@ -122,7 +122,7 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
         setSettings(next);
         try {
           if (typeof BroadcastChannel !== 'undefined') {
-            const ch = new BroadcastChannel('malts.loading-ui-settings');
+            const ch = new BroadcastChannel('app.loading-ui-settings');
             ch.postMessage({ settings: next });
             ch.close();
           }
@@ -179,32 +179,35 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
       <div className="mb-8">
         <button
           onClick={() => router.push(`/${locale}/admin`)}
-          className="malts-muted mb-4 flex items-center gap-2 transition-colors hover:text-[var(--malts-ink)]"
+          className="theme-muted mb-4 flex items-center gap-2 transition-colors hover:text-[var(--theme-ink)]"
         >
           <span>←</span>
           <span>Назад към Dashboard</span>
         </button>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h1 className="malts-admin-heading-font malts-admin-page-title">Loading екрани</h1>
-            <p className="malts-muted mt-2">Управлявай визията и правилата за показване на loading overlay по страници.</p>
+            <h1 className="theme-admin-heading-font theme-admin-page-title">Loading екрани</h1>
+            <p className="theme-muted mt-2">Управлявай визията и правилата за показване на loading overlay по страници.</p>
           </div>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="malts-btn-primary malts-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="theme-btn-primary theme-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {saving ? 'Запазване...' : 'Запази'}
           </button>
         </div>
       </div>
 
-      <div className="malts-card space-y-8 rounded-xl p-6 md:p-8">
+      <div className="theme-card space-y-8 rounded-xl p-6 md:p-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-[var(--malts-ink)]">Глобално</h2>
-            <p className="malts-muted mt-1 text-sm">Включи/изключи loading екрана за целия сайт.</p>
+            <h2 className="text-xl font-bold text-[var(--theme-ink)]">Глобално</h2>
+            <p className="theme-muted mt-1 text-sm">
+              Изключено = няма route overlay в публичното приложение и няма пълен loading екран с GIF/видео в админ,
+              staff и поръчка (само малък спинър при зареждане на данни). Правилата по-долу важат само когато е включено.
+            </p>
           </div>
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input
@@ -219,10 +222,10 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[var(--malts-ink)]">Assets</h2>
-              <p className="malts-muted mt-1 text-sm">Качи GIF/PNG/JPG/WebP или MP4/WebM и ги използвай като loading визия.</p>
+              <h2 className="text-xl font-bold text-[var(--theme-ink)]">Assets</h2>
+              <p className="theme-muted mt-1 text-sm">Качи GIF/PNG/JPG/WebP или MP4/WebM и ги използвай като loading визия.</p>
             </div>
-            <label className="malts-btn-secondary inline-flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold">
+            <label className="theme-btn-secondary inline-flex cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold">
               Качи файл
               <input
                 type="file"
@@ -238,10 +241,10 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)]/50 p-4">
-              <label className="malts-label">Default asset</label>
+            <div className="rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-inset)]/50 p-4">
+              <label className="theme-label">Default asset</label>
               <select
-                className="malts-field"
+                className="theme-field"
                 value={settings.defaultAssetId ?? ''}
                 onChange={(e) => setSettings({ ...settings, defaultAssetId: e.target.value || null })}
               >
@@ -254,8 +257,8 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
               </select>
             </div>
 
-            <div className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-inset)]/50 p-4">
-              <label className="malts-label">Preview</label>
+            <div className="rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-inset)]/50 p-4">
+              <label className="theme-label">Preview</label>
               <div className="mt-2 flex min-h-24 items-center justify-center overflow-hidden rounded-lg bg-black/5 p-3">
                 {settings.defaultAssetId && assetsById.get(settings.defaultAssetId)?.type === 'video' ? (
                   <video
@@ -276,7 +279,7 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                     unoptimized
                   />
                 ) : (
-                  <span className="malts-muted text-sm">Избери default asset</span>
+                  <span className="theme-muted text-sm">Избери default asset</span>
                 )}
               </div>
             </div>
@@ -284,12 +287,12 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
 
           <div className="space-y-3">
             {(settings.assets ?? []).length === 0 ? (
-              <p className="malts-muted text-sm">Няма качени assets.</p>
+              <p className="theme-muted text-sm">Няма качени assets.</p>
             ) : (
               (settings.assets ?? []).map((a) => (
                 <div
                   key={a.id}
-                  className="flex flex-col gap-3 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-card)] p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="h-14 w-14 overflow-hidden rounded-lg bg-black/5">
@@ -307,13 +310,13 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-[var(--malts-ink)]">{a.name}</p>
-                      <p className="malts-muted text-xs">{a.url}</p>
+                      <p className="truncate font-semibold text-[var(--theme-ink)]">{a.name}</p>
+                      <p className="theme-muted text-xs">{a.url}</p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="malts-btn-secondary shrink-0 rounded-lg px-3 py-2 text-sm font-semibold"
+                    className="theme-btn-secondary shrink-0 rounded-lg px-3 py-2 text-sm font-semibold"
                     onClick={() => {
                       const nextAssets = (settings.assets ?? []).filter((x) => x.id !== a.id);
                       const nextRules = (settings.rules ?? []).map((r) =>
@@ -338,14 +341,14 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[var(--malts-ink)]">Rules (по път)</h2>
-              <p className="malts-muted mt-1 text-sm">
+              <h2 className="text-xl font-bold text-[var(--theme-ink)]">Rules (по път)</h2>
+              <p className="theme-muted mt-1 text-sm">
                 Можеш да зададеш правило за точен път или за път + всички под-пътища (prefix).
               </p>
             </div>
             <button
               type="button"
-              className="malts-btn-primary rounded-lg px-4 py-2 text-sm font-semibold"
+              className="theme-btn-primary rounded-lg px-4 py-2 text-sm font-semibold"
               onClick={() => {
                 const next: LoadingRule = {
                   id: uuid(),
@@ -364,18 +367,18 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
           </div>
 
           {(settings.rules ?? []).length === 0 ? (
-            <p className="malts-muted text-sm">Няма правила.</p>
+            <p className="theme-muted text-sm">Няма правила.</p>
           ) : (
             <div className="space-y-3">
               {(settings.rules ?? []).map((r) => (
-                <div key={r.id} className="rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] p-4">
+                <div key={r.id} className="rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-card)] p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0 flex-1 space-y-3">
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                         <div>
-                          <label className="malts-label">Път (dropdown)</label>
+                          <label className="theme-label">Път (dropdown)</label>
                           <select
-                            className="malts-field"
+                            className="theme-field"
                             value={routes.some((x) => x.path === r.path) ? r.path : ''}
                             onChange={(e) => {
                               const v = e.target.value;
@@ -394,9 +397,9 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                           </select>
                         </div>
                         <div>
-                          <label className="malts-label">Път (custom)</label>
+                          <label className="theme-label">Път (custom)</label>
                           <input
-                            className="malts-field"
+                            className="theme-field"
                             value={r.path}
                             onChange={(e) => {
                               const v = e.target.value;
@@ -428,9 +431,9 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
 
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                         <div className="md:col-span-2">
-                          <label className="malts-label">Asset</label>
+                          <label className="theme-label">Asset</label>
                           <select
-                            className="malts-field"
+                            className="theme-field"
                             value={r.assetId ?? ''}
                             onChange={(e) => {
                               const v = e.target.value || null;
@@ -449,12 +452,12 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                           </select>
                         </div>
                         <div>
-                          <label className="malts-label">Min (ms)</label>
+                          <label className="theme-label">Min (ms)</label>
                           <input
                             type="number"
                             min={0}
                             max={60000}
-                            className="malts-field"
+                            className="theme-field"
                             value={r.minMs}
                             onChange={(e) => {
                               const v = clampMs(e.target.value, 0);
@@ -466,12 +469,12 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                           />
                         </div>
                         <div>
-                          <label className="malts-label">Extra (ms)</label>
+                          <label className="theme-label">Extra (ms)</label>
                           <input
                             type="number"
                             min={0}
                             max={60000}
-                            className="malts-field"
+                            className="theme-field"
                             value={r.extraMs}
                             onChange={(e) => {
                               const v = clampMs(e.target.value, 0);
@@ -502,7 +505,7 @@ export default function LoadingScreensAdminPage({ params }: { params: Promise<{ 
                     <div className="flex shrink-0 flex-col gap-2 md:items-end">
                       <button
                         type="button"
-                        className="malts-btn-secondary rounded-lg px-3 py-2 text-sm font-semibold"
+                        className="theme-btn-secondary rounded-lg px-3 py-2 text-sm font-semibold"
                         onClick={() =>
                           setSettings({ ...settings, rules: settings.rules.filter((x) => x.id !== r.id) })
                         }

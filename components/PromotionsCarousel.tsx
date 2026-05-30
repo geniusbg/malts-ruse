@@ -86,10 +86,10 @@ export default function PromotionsCarousel({
   return (
     <section className="mt-16 md:mt-24">
       <div className="text-center mb-10 md:mb-12">
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-3">{title}</h2>
+        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-3">{title}</h2>
         <Link
           href={`/${locale}/menu?category=promotions`}
-          className="mt-3 inline-block text-sm font-semibold text-[var(--malts-accent)] hover:opacity-90"
+          className="mt-3 inline-block text-sm font-semibold text-[var(--theme-accent)] hover:opacity-90"
         >
           {locale === 'bg' ? 'Виж всички →' : locale === 'en' ? 'View all →' : 'Vezi tot →'}
         </Link>
@@ -99,7 +99,7 @@ export default function PromotionsCarousel({
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--theme-card)]/90 hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Предишни' : locale === 'en' ? 'Previous' : 'Zurück'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,14 +133,14 @@ export default function PromotionsCarousel({
                 <div key={p.id} className="flex-shrink-0 w-64 md:w-72 snap-center group">
                   <Link
                     href={`/${locale}/menu?category=${encodeURIComponent(categorySlug)}&product=${encodeURIComponent(productParamForUrl(p as any))}`}
-                    className="group malts-card rounded-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block relative"
+                    className="group theme-card rounded-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 block relative"
                   >
-                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
+                    <div className="absolute top-4 left-3 z-10 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
                       {badge}
                     </div>
 
                     {p.imageUrl ? (
-                      <div className="relative h-56 w-full overflow-hidden bg-[var(--malts-inset)]">
+                      <div className="relative h-56 w-full overflow-hidden bg-[var(--theme-inset)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={p.imageUrl}
@@ -154,17 +154,17 @@ export default function PromotionsCarousel({
 
                     <div className="p-6">
                       <div className="min-w-0">
-                        <p className="text-lg font-bold text-[var(--malts-ink)] truncate">{name}</p>
-                        {desc ? <p className="mt-2 text-sm malts-muted whitespace-pre-line">{desc}</p> : null}
+                        <p className="text-lg font-bold text-[var(--theme-ink)] truncate">{name}</p>
+                        {desc ? <p className="mt-2 text-sm theme-muted whitespace-pre-line">{desc}</p> : null}
                       </div>
-                      <div className="mt-4 flex items-end justify-between gap-3 border-t border-[var(--malts-hairline)] pt-4">
+                      <div className="mt-4 flex items-end justify-between gap-3 border-t border-[var(--theme-hairline)] pt-4">
                         <div className="min-w-0">
                           {p.basePriceBgn != null && (
-                            <div className="text-sm text-[var(--malts-subtle)] line-through whitespace-nowrap">
+                            <div className="text-sm text-[var(--theme-subtle)] line-through whitespace-nowrap">
                               <Price priceBgn={Number(p.basePriceBgn)} inline showBoth />
                             </div>
                           )}
-                          <div className="text-lg font-semibold text-[var(--malts-ink)] whitespace-nowrap">
+                          <div className="text-lg font-semibold text-[var(--theme-ink)] whitespace-nowrap">
                             <Price
                               priceBgn={Number(p.priceBgn)}
                               inline
@@ -186,7 +186,7 @@ export default function PromotionsCarousel({
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--theme-card)]/90 hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Следващи' : locale === 'en' ? 'Next' : 'Weiter'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

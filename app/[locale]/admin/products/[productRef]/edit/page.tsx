@@ -143,11 +143,11 @@ export default function EditProductPage({
   if (notFound) {
     return (
       <div className="max-w-lg mx-auto text-center py-16">
-        <h1 className="malts-admin-heading-font malts-admin-page-title mb-4">Продуктът не е намерен</h1>
+        <h1 className="theme-admin-heading-font theme-admin-page-title mb-4">Продуктът не е намерен</h1>
         <button
           type="button"
           onClick={() => router.push(`/${locale}/admin/products`)}
-          className="malts-btn-primary malts-btn-admin-compact rounded-lg font-semibold"
+          className="theme-btn-primary theme-btn-admin-compact rounded-lg font-semibold"
         >
           Към списъка с продукти
         </button>
@@ -161,9 +161,9 @@ export default function EditProductPage({
 
   return (
     <div>
-      <h1 className="malts-admin-heading-font malts-admin-page-title mb-8">Редактирай продукт</h1>
+      <h1 className="theme-admin-heading-font theme-admin-page-title mb-8">Редактирай продукт</h1>
 
-      <div className="malts-card rounded-xl p-8">
+      <div className="theme-card rounded-xl p-8">
         <ProductForm
           categories={categories}
           initialData={product}
@@ -173,7 +173,7 @@ export default function EditProductPage({
             <button
               type="button"
               onClick={() => setDeleteOpen(true)}
-              className="malts-btn-danger malts-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
+              className="theme-btn-danger theme-btn-admin-compact w-full font-semibold transition-all sm:w-auto"
             >
               Изтрий
             </button>

@@ -120,7 +120,7 @@ export default function AppLoadingOverlay() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') return;
-    const ch = new BroadcastChannel('malts.loading-ui-settings');
+    const ch = new BroadcastChannel('app.loading-ui-settings');
     ch.onmessage = (ev) => {
       const next = (ev?.data?.settings ?? null) as LoadingUiSettings | null;
       if (next) setSettings(next);
@@ -195,7 +195,7 @@ export default function AppLoadingOverlay() {
   };
 
   const startForTarget = useCallback((targetPath: string) => {
-    if (!settings?.enabled) return;
+    if (settings === null || !settings.enabled) return;
 
     const { raw, canonical } = normalizePathForRules(targetPath);
     const rule = resolveRuleForPath(rules, raw, canonical);
@@ -210,7 +210,8 @@ export default function AppLoadingOverlay() {
 
   // Apply rules reliably on route changes (works for router.push, back/forward, direct loads).
   useEffect(() => {
-    if (!settings?.enabled) return;
+    if (settings === null) return;
+    if (!settings.enabled) return;
 
     const { raw, canonical } = normalizePathForRules(pathname);
     const rule = resolveRuleForPath(rules, raw, canonical);

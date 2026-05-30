@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { readBrandBootstrap } from '@/lib/brand-bootstrap';
 
 export type BrandAppearance = {
   navLogoUrl: string | null;
@@ -8,6 +9,17 @@ export type BrandAppearance = {
   appIconUrl: string | null;
   faviconUrl: string | null;
 };
+
+function appearanceFromBootstrap(): BrandAppearance | null {
+  const b = readBrandBootstrap();
+  if (!b) return null;
+  return {
+    navLogoUrl: b.navLogoUrl,
+    heroLogoUrl: b.heroLogoUrl,
+    appIconUrl: null,
+    faviconUrl: null,
+  };
+}
 
 let cached: BrandAppearance | null = null;
 let inFlight: Promise<BrandAppearance | null> | null = null;
@@ -30,15 +42,17 @@ async function fetchAppearance(): Promise<BrandAppearance | null> {
 }
 
 export function useBrandAppearance(): BrandAppearance | null {
-  const [value, setValue] = useState<BrandAppearance | null>(cached);
+  // Do not read window/bootstrap in useState — SSR and first client paint must match.
+  const [value, setValue] = useState<BrandAppearance | null>(null);
 
   useEffect(() => {
     let alive = true;
-    if (cached) {
+    const boot = appearanceFromBootstrap();
+    if (boot) {
+      cached = boot;
+      setValue(boot);
+    } else if (cached) {
       setValue(cached);
-      return () => {
-        alive = false;
-      };
     }
 
     inFlight =

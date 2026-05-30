@@ -63,9 +63,9 @@ function MenuPageContent() {
       const el = document.getElementById(`product-${productId}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('ring-2', 'ring-[var(--malts-accent)]', 'ring-opacity-60');
+        el.classList.add('ring-2', 'ring-[var(--theme-accent)]', 'ring-opacity-60');
         setTimeout(() => {
-          el.classList.remove('ring-2', 'ring-[var(--malts-accent)]', 'ring-opacity-60');
+          el.classList.remove('ring-2', 'ring-[var(--theme-accent)]', 'ring-opacity-60');
         }, 2000);
       }
     }, 400);
@@ -293,7 +293,7 @@ function MenuPageContent() {
       : '';
 
   return (
-    <main className="min-h-screen malts-surface text-[var(--malts-ink)]">
+    <main className="min-h-screen theme-surface text-[var(--theme-ink)]">
       {/* Hero Header with gradient */}
       <div 
         className={`relative overflow-hidden bg-gradient-to-br from-[#ebe4dc] via-[#e4dcd0] to-[#dcd4c8] py-12 md:py-16 ${
@@ -329,8 +329,8 @@ function MenuPageContent() {
                 priority
               />
               <h1
-                className="text-4xl md:text-6xl font-bold malts-display"
-                style={{ color: (menuSettings as any)?.titleColor || 'var(--malts-ink)' }}
+                className="text-4xl md:text-6xl font-bold theme-display"
+                style={{ color: (menuSettings as any)?.titleColor || 'var(--theme-ink)' }}
               >
                 {menuSettings
                   ? stripLeadingEmoji(
@@ -349,7 +349,7 @@ function MenuPageContent() {
             </div>
             <p
               className="text-lg md:text-xl mb-6"
-              style={{ color: (menuSettings as any)?.subtitleColor || 'var(--malts-muted)' }}
+              style={{ color: (menuSettings as any)?.subtitleColor || 'var(--theme-muted)' }}
             >
               {menuSettings
                 ? (locale === 'bg' ? menuSettings.subtitleBg : locale === 'en' ? menuSettings.subtitleEn : menuSettings.subtitleRo)
@@ -360,13 +360,13 @@ function MenuPageContent() {
             </p>
 
             {/* Dual Currency Info */}
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-[rgba(245,240,230,0.72)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] backdrop-blur-sm shadow-sm">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-[rgba(245,240,230,0.72)] border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] backdrop-blur-sm shadow-sm">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="font-medium text-sm">
                 {locale === 'bg' ? 'Цени в' : locale === 'en' ? 'Prices in' : 'Prețuri în'}{' '}
-                <span className="font-bold text-[var(--malts-ink)]">EUR / BGN</span>
+                <span className="font-bold text-[var(--theme-ink)]">EUR / BGN</span>
               </span>
             </div>
           </div>
@@ -375,15 +375,15 @@ function MenuPageContent() {
 
       <div className="container mx-auto px-4 py-8 md:py-12">
         {breadcrumbIds.length > 0 && (
-          <nav aria-label="Breadcrumb" className="mb-4 text-sm malts-muted flex flex-wrap items-center gap-1 malts-breadcrumb-font">
+          <nav aria-label="Breadcrumb" className="mb-4 text-sm theme-muted flex flex-wrap items-center gap-1 theme-breadcrumb-font">
             {breadcrumbIds.map((bid, i) => {
               const cat = categories.find((c: any) => c.id === bid);
               if (!cat) return null;
               const label = getCategoryName(cat, locale);
               return (
                 <span key={bid} className="flex items-center gap-1">
-                  {i > 0 && <span className="text-[var(--malts-subtle)] px-1">/</span>}
-                  <span className={i === breadcrumbIds.length - 1 ? 'font-semibold text-[var(--malts-ink)]' : ''}>{label}</span>
+                  {i > 0 && <span className="text-[var(--theme-subtle)] px-1">/</span>}
+                  <span className={i === breadcrumbIds.length - 1 ? 'font-semibold text-[var(--theme-ink)]' : ''}>{label}</span>
                 </span>
               );
             })}
@@ -391,7 +391,7 @@ function MenuPageContent() {
         )}
 
         {/* Category Tabs — до MALLS_MAX_CATEGORY_DEPTH нива (редове с табове) */}
-        <div className="sticky md:static top-16 z-30 bg-[var(--malts-paper)]/95 backdrop-blur-lg border-y border-[var(--malts-hairline)] py-4 -mx-4 px-4 mb-4">
+        <div className="sticky md:static top-16 z-30 bg-[var(--theme-paper)]/95 backdrop-blur-lg border-y border-[var(--theme-hairline)] py-4 -mx-4 px-4 mb-4">
           {Array.from({ length: MALLS_MAX_CATEGORY_DEPTH }, (_, depth) => {
             const tierItems =
               depth === 0
@@ -411,19 +411,19 @@ function MenuPageContent() {
               depth === 0
                 ? `px-6 py-3 rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] shadow-md scale-[1.02]'
-                      : 'bg-[rgba(245,240,230,0.85)] text-[var(--malts-ink)] hover:bg-[rgba(245,240,230,0.95)] border border-[var(--malts-hairline)] shadow-sm'
+                      ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] shadow-md scale-[1.02]'
+                      : 'bg-[rgba(245,240,230,0.85)] text-[var(--theme-ink)] hover:bg-[rgba(245,240,230,0.95)] border border-[var(--theme-hairline)] shadow-sm'
                   }`
                 : tierStyle1
                   ? `px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap text-sm ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] border-2 border-[var(--malts-accent)]'
-                        : 'bg-[var(--malts-card)] text-[var(--malts-ink)] hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)]'
+                        ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] border-2 border-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-card)] text-[var(--theme-ink)] hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)]'
                     }`
                   : `px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${
                       isActive
-                        ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                        : 'bg-amber-50/90 text-[var(--malts-ink)] border border-amber-200/80'
+                        ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                        : 'bg-amber-50/90 text-[var(--theme-ink)] border border-amber-200/80'
                     }`;
 
             return (
@@ -487,9 +487,9 @@ function MenuPageContent() {
         {categoryProducts.length > 0 && categoryName ? (
           <div className="mb-8 mt-2">
             <div className="flex items-center gap-3">
-              <div className="h-1 w-8 bg-[var(--malts-accent)] rounded-full"></div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--malts-ink)]">{categoryName}</h2>
-              <div className="flex-1 h-px bg-[var(--malts-hairline)]"></div>
+              <div className="h-1 w-8 bg-[var(--theme-accent)] rounded-full"></div>
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--theme-ink)]">{categoryName}</h2>
+              <div className="flex-1 h-px bg-[var(--theme-hairline)]"></div>
             </div>
           </div>
         ) : null}
@@ -500,7 +500,7 @@ function MenuPageContent() {
             <div className="text-6xl mb-4">
               {!categoryPath.length && parentCategories.length > 0 ? '🍽️' : '🔍'}
             </div>
-            <p className="malts-muted text-xl max-w-lg mx-auto leading-relaxed">
+            <p className="theme-muted text-xl max-w-lg mx-auto leading-relaxed">
               {!categoryPath.length && parentCategories.length > 0
                 ? locale === 'bg'
                   ? 'Изберете раздел от менюто, за да разгледате предложенията ни.'
@@ -566,15 +566,15 @@ function MenuPageContent() {
                       selectProductInUrl(product);
                     }
                   }}
-                  className={`group relative malts-card rounded-2xl overflow-hidden shadow-sm hover:border-[var(--malts-accent)]/40 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer ${
+                  className={`group relative theme-card rounded-2xl overflow-hidden shadow-sm hover:border-[var(--theme-accent)]/40 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer ${
                     !product.isAvailable ? 'opacity-60' : ''
                   }`}
                 >
                   {product.isPromoted && (
-                    <div className="h-1.5 w-full bg-gradient-to-r from-[var(--malts-accent)] to-amber-600/90" aria-hidden />
+                    <div className="h-1.5 w-full bg-gradient-to-r from-[var(--theme-accent)] to-amber-600/90" aria-hidden />
                   )}
                   {product.isPromoted && (
-                    <div className="absolute top-4 left-3 z-10 bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
+                    <div className="absolute top-4 left-3 z-10 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
                       {product.promotionLabel?.trim()
                         ? product.promotionLabel
                         : locale === 'bg'
@@ -586,7 +586,7 @@ function MenuPageContent() {
                   )}
                   {/* Unavailable Badge */}
                   {!product.isAvailable && (
-                    <div className="absolute top-3 right-3 bg-[var(--malts-danger)] text-[var(--malts-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold z-10 shadow-lg">
+                    <div className="absolute top-3 right-3 bg-[var(--theme-danger)] text-[var(--theme-accent-contrast)] px-3 py-1.5 rounded-full text-xs font-bold z-10 shadow-lg">
                       {locale === 'bg' ? '✕ Не е наличен' : 
                        locale === 'en' ? '✕ Unavailable' : 
                        '✕ Indisponibil'}
@@ -596,7 +596,7 @@ function MenuPageContent() {
                   {/* Product Image */}
                   {product.imageUrl && (
                     <div
-                      className={`relative h-56 w-full overflow-hidden bg-[var(--malts-inset)] ${
+                      className={`relative h-56 w-full overflow-hidden bg-[var(--theme-inset)] ${
                         !product.isAvailable ? 'grayscale' : ''
                       }`}
                     >
@@ -615,26 +615,26 @@ function MenuPageContent() {
                   <div
                     className={`p-6 ${product.isPromoted && !product.imageUrl ? 'pt-12' : ''}`}
                   >
-                    <h3 className="text-xl font-bold text-[var(--malts-ink)] mb-2 group-hover:text-[var(--malts-accent)] transition-colors">
+                    <h3 className="text-xl font-bold text-[var(--theme-ink)] mb-2 group-hover:text-[var(--theme-accent)] transition-colors">
                       {productName}
                     </h3>
                     
                     {productDesc && (
-                      <p className="malts-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
+                      <p className="theme-muted text-sm mb-4 leading-relaxed break-words whitespace-pre-wrap">
                         {productDesc}
                       </p>
                     )}
 
                     {variants.length > 0 ? (
                       <div className="mb-4">
-                        <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                        <div className="text-[11px] uppercase tracking-wide theme-muted mb-1">
                           {locale === 'bg' ? 'Варианти' : locale === 'en' ? 'Variants' : 'Variante'}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {variants.map((v: string) => (
                             <span
                               key={v}
-                              className="inline-flex items-center rounded-full border border-[var(--malts-hairline)] bg-[var(--malts-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--malts-ink)]"
+                              className="inline-flex items-center rounded-full border border-[var(--theme-hairline)] bg-[var(--theme-inset)] px-3 py-1.5 text-sm font-semibold text-[var(--theme-ink)]"
                             >
                               {v}
                             </span>
@@ -645,36 +645,36 @@ function MenuPageContent() {
 
                     {productAllergens && String(productAllergens).trim() !== '' ? (
                       <div className="mb-4">
-                        <div className="text-[11px] uppercase tracking-wide malts-muted mb-1">
+                        <div className="text-[11px] uppercase tracking-wide theme-muted mb-1">
                           {locale === 'bg' ? 'Алергени' : locale === 'en' ? 'Allergens' : 'Alergeni'}
                         </div>
-                        <p className="text-sm text-[var(--malts-ink)]/85 leading-relaxed whitespace-pre-line break-words">
+                        <p className="text-sm text-[var(--theme-ink)]/85 leading-relaxed whitespace-pre-line break-words">
                           {productAllergens}
                         </p>
                       </div>
                     ) : null}
                     
                     {/* Price and Unit */}
-                    <div className="pt-4 border-t border-[var(--malts-hairline)] flex justify-between items-center gap-2">
+                    <div className="pt-4 border-t border-[var(--theme-hairline)] flex justify-between items-center gap-2">
                       <div className="flex flex-col items-start gap-0.5">
                         {product.basePriceBgn != null && (
-                          <span className="text-[var(--malts-subtle)] line-through text-sm inline-block">
+                          <span className="text-[var(--theme-subtle)] line-through text-sm inline-block">
                             <Price
                               priceBgn={Number(product.basePriceBgn)}
                               inline
-                              className="text-[var(--malts-subtle)]"
+                              className="text-[var(--theme-subtle)]"
                             />
                           </span>
                         )}
                         <Price
                           priceBgn={Number(product.priceBgn)}
-                          className="text-xl font-bold text-[var(--malts-ink)] whitespace-nowrap"
+                          className="text-xl font-bold text-[var(--theme-ink)] whitespace-nowrap"
                           showBoth={true}
                           inline={true}
                         />
                       </div>
                       {product.unit && product.quantity && (
-                        <span className="text-sm malts-muted whitespace-nowrap">
+                        <span className="text-sm theme-muted whitespace-nowrap">
                           {product.quantity} {product.unit === 'pcs' ? 'бр.' : product.unit}
                         </span>
                       )}

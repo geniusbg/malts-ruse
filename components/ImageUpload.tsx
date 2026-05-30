@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 import imageCompression from 'browser-image-compression';
 
 interface ImageUploadProps {
@@ -90,16 +90,16 @@ export default function ImageUpload({
 
   return (
     <div className="space-y-4">
-      <label className="malts-label">{label}</label>
+      <label className="theme-label">{label}</label>
 
       {uploadError && (
-        <MaltsInlineFeedback tone="error" role="alert">
+        <ThemeInlineFeedback tone="error" role="alert">
           {uploadError}
-        </MaltsInlineFeedback>
+        </ThemeInlineFeedback>
       )}
       
       {preview && (
-        <div className={`relative w-full rounded-lg overflow-hidden bg-[var(--malts-inset)] border border-[var(--malts-hairline)] ${
+        <div className={`relative w-full rounded-lg overflow-hidden bg-[var(--theme-inset)] border border-[var(--theme-hairline)] ${
           bucket === 'menu-backgrounds' ? 'h-48' : 'h-64'
         }`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,7 +123,7 @@ export default function ImageUpload({
             disabled={uploading}
           />
           <div
-            className={`malts-btn-primary malts-btn-admin-compact rounded-lg text-center font-semibold transition-all ${
+            className={`theme-btn-primary theme-btn-admin-compact rounded-lg text-center font-semibold transition-all ${
               uploading ? 'cursor-not-allowed opacity-50' : ''
             }`}
           >
@@ -138,14 +138,14 @@ export default function ImageUpload({
               setPreview('');
               onImageUploaded('');
             }}
-            className="malts-btn-danger malts-btn-admin-compact w-full rounded-lg font-semibold transition-all sm:w-auto"
+            className="theme-btn-danger theme-btn-admin-compact w-full rounded-lg font-semibold transition-all sm:w-auto"
           >
             Премахни
           </button>
         )}
       </div>
 
-      <p className="malts-help">
+      <p className="theme-help">
         {recommendedSize ? `Препоръчителни размери: ${recommendedSize}, максимум 5MB` : 'Препоръчителни размери: 800x600px, максимум 5MB'}
       </p>
     </div>

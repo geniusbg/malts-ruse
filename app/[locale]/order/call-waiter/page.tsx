@@ -6,7 +6,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Toast from '@/components/Toast';
 import { useLockScroll } from '@/lib/use-lock-scroll';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 function CallWaiterContent() {
   const searchParams = useSearchParams();
@@ -225,7 +225,7 @@ function CallWaiterContent() {
 
   if (called) {
     return (
-      <div className="min-h-screen malts-surface flex items-center justify-center">
+      <div className="min-h-screen theme-surface flex items-center justify-center">
         <div className="text-center">
           <div className="text-8xl mb-8">✅</div>
           <h1 className="text-4xl font-bold mb-4">
@@ -233,7 +233,7 @@ function CallWaiterContent() {
              locale === 'en' ? 'Waiter has been called!' : 
              'Kellner wurde gerufen!'}
           </h1>
-          <p className="text-xl malts-muted">
+          <p className="text-xl theme-muted">
             {locale === 'bg' ? 'Маса' : locale === 'en' ? 'Table' : 'Tisch'} {tableNumber}
           </p>
         </div>
@@ -242,7 +242,7 @@ function CallWaiterContent() {
   }
 
   return (
-    <div className="min-h-screen malts-surface">
+    <div className="min-h-screen theme-surface">
       {/* Toast Notifications */}
       {toast && (
         <Toast
@@ -260,25 +260,25 @@ function CallWaiterContent() {
                locale === 'en' ? 'Call Waiter' : 
                'Kellner rufen'}
             </h1>
-            <p className="text-2xl malts-muted">
+            <p className="text-2xl theme-muted">
               {locale === 'bg' ? 'Маса' : locale === 'en' ? 'Table' : 'Tisch'} {tableNumber}
             </p>
           </div>
 
           {publicOps && !publicOps.waiterCallEnabled ? (
             <div className="space-y-8">
-              <MaltsInlineFeedback tone="warning" className="text-left" role="status">
+              <ThemeInlineFeedback tone="warning" className="text-left" role="status">
                 {locale === 'bg'
                   ? 'Повикването на сервитьор е временно изключено.'
                   : locale === 'en'
                     ? 'Waiter call is temporarily disabled.'
                     : 'Apelarea chelnerului este temporar dezactivată.'}
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
               <div className="text-center">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="px-8 py-3 malts-btn-secondary rounded-lg font-semibold transition-all"
+                  className="px-8 py-3 theme-btn-secondary rounded-lg font-semibold transition-all"
                 >
                   ← {locale === 'bg' ? 'Назад към менюто' : 
                        locale === 'en' ? 'Back to Menu' : 
@@ -292,12 +292,12 @@ function CallWaiterContent() {
             <button
               onClick={() => callWaiter('payment_cash')}
               disabled={calling || sessionStatus !== 'valid'}
-              className="malts-card p-12 hover:bg-[var(--malts-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="theme-card p-12 hover:bg-[var(--theme-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {calling ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 border-4 border-[var(--malts-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="malts-muted">
+                  <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Изпращане...' : locale === 'en' ? 'Sending...' : 'Se trimite...'}
                   </p>
                 </div>
@@ -309,7 +309,7 @@ function CallWaiterContent() {
                      locale === 'en' ? 'Payment with Cash' : 
                      'Zahlung mit Bargeld'}
                   </h2>
-                  <p className="malts-muted">
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Сервитьорът ще дойде с бележката' : 
                      locale === 'en' ? 'Waiter will come with the bill' : 
                      'Kellner kommt mit der Rechnung'}
@@ -322,12 +322,12 @@ function CallWaiterContent() {
             <button
               onClick={() => callWaiter('payment_card')}
               disabled={calling || sessionStatus !== 'valid'}
-              className="malts-card p-12 hover:bg-[var(--malts-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="theme-card p-12 hover:bg-[var(--theme-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {calling ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 border-4 border-[var(--malts-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="malts-muted">
+                  <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Изпращане...' : locale === 'en' ? 'Sending...' : 'Se trimite...'}
                   </p>
                 </div>
@@ -339,7 +339,7 @@ function CallWaiterContent() {
                      locale === 'en' ? 'Payment with Card' : 
                      'Zahlung mit Karte'}
                   </h2>
-                  <p className="malts-muted">
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Сервитьорът ще донесе POS терминал' : 
                      locale === 'en' ? 'Waiter will bring POS terminal' : 
                      'Kellner bringt POS-Terminal'}
@@ -352,12 +352,12 @@ function CallWaiterContent() {
             <button
               onClick={() => callWaiter('help')}
               disabled={calling || sessionStatus !== 'valid'}
-              className="malts-card rounded-2xl p-12 hover:bg-[var(--malts-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed md:col-span-2"
+              className="theme-card rounded-2xl p-12 hover:bg-[var(--theme-card-hover)] transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed md:col-span-2"
             >
               {calling ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 border-4 border-[var(--malts-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="malts-muted">
+                  <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Изпращане...' : locale === 'en' ? 'Sending...' : 'Se trimite...'}
                   </p>
                 </div>
@@ -369,7 +369,7 @@ function CallWaiterContent() {
                      locale === 'en' ? 'I Need Help' : 
                      'Ich brauche Hilfe'}
                   </h2>
-                  <p className="malts-muted">
+                  <p className="theme-muted">
                     {locale === 'bg' ? 'Сервитьорът ще дойде веднага' : 
                      locale === 'en' ? 'Waiter will come immediately' : 
                      'Kellner kommt sofort'}
@@ -385,7 +385,7 @@ function CallWaiterContent() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-8 py-3 malts-btn-secondary rounded-lg font-semibold transition-all"
+              className="px-8 py-3 theme-btn-secondary rounded-lg font-semibold transition-all"
             >
               ← {locale === 'bg' ? 'Назад към менюто' : 
                    locale === 'en' ? 'Back to Menu' : 
@@ -397,13 +397,13 @@ function CallWaiterContent() {
       </div>
 
       {sessionStatus !== 'valid' && (
-        <div className="fixed inset-0 z-40 bg-[var(--malts-paper)]/85 backdrop-blur-md px-6 flex items-center justify-center text-center">
+        <div className="fixed inset-0 z-40 bg-[var(--theme-paper)]/85 backdrop-blur-md px-6 flex items-center justify-center text-center">
           <div className="max-w-2xl">
             <div className="text-6xl mb-6">
               {sessionStatus === 'checking' ? '🔄' : '🔒'}
             </div>
             <h2 className="text-3xl font-bold mb-4">{sessionOverlayTitle}</h2>
-            <p className="malts-muted text-lg mb-8 whitespace-pre-line">
+            <p className="theme-muted text-lg mb-8 whitespace-pre-line">
               {sessionOverlayBody}
             </p>
 
@@ -411,20 +411,20 @@ function CallWaiterContent() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => validateSession()}
-                  className="px-6 py-3 malts-btn-primary rounded-xl font-semibold transition-all"
+                  className="px-6 py-3 theme-btn-primary rounded-xl font-semibold transition-all"
                 >
                   🔄 {locale === 'bg' ? 'Провери отново' : locale === 'en' ? 'Check again' : 'Erneut prüfen'}
                 </button>
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-6 py-3 malts-btn-secondary rounded-xl font-semibold transition-all"
+                  className="px-6 py-3 theme-btn-secondary rounded-xl font-semibold transition-all"
                 >
                   ↻ {locale === 'bg' ? 'Обнови страницата' : locale === 'en' ? 'Refresh page' : 'Reîncarcă pagina'}
                 </button>
               </div>
             ) : (
               <div className="flex justify-center">
-                <div className="w-12 h-12 border-4 border-[var(--malts-accent)] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
           </div>

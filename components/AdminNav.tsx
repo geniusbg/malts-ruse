@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useBrandAppearance } from '@/lib/use-brand-appearance';
+import { resolveNavLogoUrl } from '@/lib/brand-defaults';
 
 function buildNavLinks(locale: string, isSuper: boolean) {
   const links = [
@@ -14,7 +15,7 @@ function buildNavLinks(locale: string, isSuper: boolean) {
     { href: `/${locale}/admin/orders`, label: '🧾 Поръчки' },
     { href: `/${locale}/admin/categories`, label: '🗂️ Категории' },
     { href: `/${locale}/admin/products`, label: '🍽️ Продукти' },
-    { href: `/${locale}/admin/promotions`, label: '🏷️ Промоции' },
+    { href: `/${locale}/admin/promotions`, label: '-% Промоции' },
     { href: `/${locale}/admin/events`, label: '🎉 Събития' },
     { href: `/${locale}/admin/qr`, label: '📱 QR Кодове' },
     { href: `/${locale}/admin/loading-screens`, label: '⏳ Loading' },
@@ -39,16 +40,17 @@ function buildNavLinks(locale: string, isSuper: boolean) {
 
 interface AdminNavProps {
   locale: string;
+  initialNavLogoUrl?: string | null;
 }
 
-export default function AdminNav({ locale }: AdminNavProps) {
+export default function AdminNav({ locale, initialNavLogoUrl = null }: AdminNavProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const appearance = useBrandAppearance();
-  const navLogoSrc = appearance?.navLogoUrl || '/malts-logo-nav.webp';
+  const navLogoSrc = resolveNavLogoUrl(appearance?.navLogoUrl, initialNavLogoUrl);
 
   // Don't show nav on login page
   if (pathname?.includes('/login')) {
@@ -101,7 +103,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--malts-paper)]/92 backdrop-blur-md border-b border-[var(--malts-hairline)]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--theme-paper)]/92 backdrop-blur-md border-b border-[var(--theme-hairline)]">
         <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6 py-0.5 md:py-1">
           <div className="flex w-full min-w-0 items-center justify-between gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
           {/* Logo: винаги вляво (мобилен + десктоп) */}
@@ -109,15 +111,19 @@ export default function AdminNav({ locale }: AdminNavProps) {
             href={`/${locale}/admin`}
             className="flex h-12 max-h-12 min-w-0 shrink-0 items-center md:h-14 md:max-h-14 xl:h-[4.25rem] xl:max-h-[4.25rem] 2xl:h-20 2xl:max-h-20"
           >
-            <Image
-              src={navLogoSrc}
-              alt="Malt's"
-              width={400}
-              height={331}
-              sizes="(max-width: 768px) 140px, (max-width: 1280px) 160px, 220px, 260px"
-              className="malts-brand-filter h-full w-auto max-h-12 min-h-0 min-w-0 shrink-0 object-contain object-left md:max-h-14 xl:max-h-[4.25rem] 2xl:max-h-20"
-              priority
-            />
+            {navLogoSrc ? (
+              <Image
+                src={navLogoSrc}
+                alt=""
+                width={400}
+                height={331}
+                sizes="(max-width: 768px) 140px, (max-width: 1280px) 160px, 220px, 260px"
+                className="theme-brand-filter h-full w-auto max-h-12 min-h-0 min-w-0 shrink-0 object-contain object-left md:max-h-14 xl:max-h-[4.25rem] 2xl:max-h-20"
+                priority
+              />
+            ) : (
+              <span className="text-sm font-bold text-[var(--theme-ink)] md:text-base">Admin</span>
+            )}
           </Link>
 
           {/* Desktop Navigation: под xl само икони (+ native title); при нужда хоризонтален скрол */}
@@ -131,10 +137,10 @@ export default function AdminNav({ locale }: AdminNavProps) {
                   key={link.href}
                   href={link.href}
                   title={link.label.trim()}
-                  className={`malts-admin-nav-tab shrink-0 rounded-lg px-1 py-1 transition-colors md:rounded-xl md:px-1.5 md:py-1.5 xl:rounded-2xl xl:px-3 xl:py-2 2xl:px-4 2xl:py-3 ${
+                  className={`theme-admin-nav-tab shrink-0 rounded-lg px-1 py-1 transition-colors md:rounded-xl md:px-1.5 md:py-1.5 xl:rounded-2xl xl:px-3 xl:py-2 2xl:px-4 2xl:py-3 ${
                     isActive(link.href)
-                      ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                      : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                      ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                      : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
                   }`}
                 >
                   <span className="flex flex-col items-center justify-center gap-0 leading-tight xl:gap-0.5">
@@ -161,25 +167,25 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 type="button"
                 title={(session?.user as any)?.name || 'Профил'}
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-1.5 rounded-lg border border-[var(--malts-hairline)] bg-[var(--malts-card)] px-1.5 py-1 transition-colors hover:bg-[var(--malts-card-hover)] md:rounded-xl md:px-2 md:py-1.5 xl:px-3 xl:py-2"
+                className="flex items-center gap-1.5 rounded-lg border border-[var(--theme-hairline)] bg-[var(--theme-card)] px-1.5 py-1 transition-colors hover:bg-[var(--theme-card-hover)] md:rounded-xl md:px-2 md:py-1.5 xl:px-3 xl:py-2"
               >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--malts-accent)] text-sm font-bold text-[var(--malts-accent-contrast)] md:h-7 md:w-7">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--theme-accent)] text-sm font-bold text-[var(--theme-accent-contrast)] md:h-7 md:w-7">
                   {(session?.user as any)?.name?.[0] || 'A'}
                 </div>
-                <span className="text-[var(--malts-ink)] text-sm font-medium hidden xl:block">
+                <span className="text-[var(--theme-ink)] text-sm font-medium hidden xl:block">
                   {(session?.user as any)?.name || 'Admin'}
                 </span>
-                <svg className="w-3 h-3 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 text-[var(--theme-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-[var(--malts-card)] border border-[var(--malts-hairline)] rounded-xl shadow-xl z-50">
-                  <div className="p-4 border-b border-[var(--malts-hairline)]">
-                    <p className="text-[var(--malts-ink)] font-semibold">{(session?.user as any)?.name}</p>
-                    <p className="text-sm malts-muted">{(session?.user as any)?.email}</p>
-                    <span className="mt-2 inline-flex items-center px-2.5 py-1 text-xs rounded-full bg-[var(--malts-accent-tint)] border border-[var(--malts-accent-tint-border)] text-[var(--malts-accent)]">
+                <div className="absolute right-0 mt-2 w-56 bg-[var(--theme-card)] border border-[var(--theme-hairline)] rounded-xl shadow-xl z-50">
+                  <div className="p-4 border-b border-[var(--theme-hairline)]">
+                    <p className="text-[var(--theme-ink)] font-semibold">{(session?.user as any)?.name}</p>
+                    <p className="text-sm theme-muted">{(session?.user as any)?.email}</p>
+                    <span className="mt-2 inline-flex items-center px-2.5 py-1 text-xs rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] text-[var(--theme-accent)]">
                       {(session?.user as any)?.role}
                     </span>
                   </div>
@@ -188,7 +194,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
                       setShowUserMenu(false);
                       setShowLogoutConfirm(true);
                     }}
-                    className="w-full text-left px-4 py-3 text-[var(--malts-danger)] hover:bg-[var(--malts-accent-tint)] transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-3 text-[var(--theme-danger)] hover:bg-[var(--theme-accent-tint)] transition-colors flex items-center gap-2"
                   >
                     <span>🚪</span>
                     Изход
@@ -199,7 +205,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] rounded-xl p-2 transition-colors"
+              className="md:hidden text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] rounded-xl p-2 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -217,7 +223,7 @@ export default function AdminNav({ locale }: AdminNavProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-[var(--malts-hairline)] py-4 mt-2 max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain touch-pan-y pr-1">
+          <div className="md:hidden border-t border-[var(--theme-hairline)] py-4 mt-2 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain touch-pan-y pr-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {navLinks.map((link) => (
               (() => {
                 const { icon, text } = splitEmojiLabel(link.label);
@@ -226,15 +232,15 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`malts-admin-nav-tab block py-4 px-4 rounded-2xl transition-colors mb-2 ${
+                className={`theme-admin-nav-tab block py-4 px-4 rounded-2xl transition-colors mb-2 ${
                   isActive(link.href)
-                    ? 'bg-[var(--malts-accent)] text-[var(--malts-accent-contrast)]'
-                    : 'text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)]'
+                    ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
+                    : 'text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)]'
                 }`}
               >
                 <span className="flex flex-col items-center justify-center gap-1 leading-tight">
                   {icon ? <span className="text-2xl leading-none">{icon}</span> : null}
-                  <span className="malts-admin-nav-tab-label">{text}</span>
+                  <span className="theme-admin-nav-tab-label">{text}</span>
                 </span>
               </Link>
                 );
@@ -245,11 +251,11 @@ export default function AdminNav({ locale }: AdminNavProps) {
                 setMobileMenuOpen(false);
                 setShowLogoutConfirm(true);
               }}
-              className="malts-admin-nav-tab block w-full py-4 px-4 rounded-2xl transition-colors mb-2 text-[var(--malts-danger)] hover:bg-[var(--malts-accent-tint)]"
+              className="theme-admin-nav-tab block w-full py-4 px-4 rounded-2xl transition-colors mb-2 text-[var(--theme-danger)] hover:bg-[var(--theme-accent-tint)]"
             >
               <span className="flex flex-col items-center justify-center gap-1 leading-tight">
                 <span className="text-2xl leading-none" aria-hidden>🚪</span>
-                <span className="malts-admin-nav-tab-label">Изход</span>
+                <span className="theme-admin-nav-tab-label">Изход</span>
               </span>
             </button>
           </div>

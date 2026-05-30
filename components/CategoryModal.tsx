@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLockScroll } from '@/lib/use-lock-scroll';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -150,7 +150,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain">
       <div
-        className="fixed inset-0 bg-[var(--malts-paper)]/70 backdrop-blur-sm"
+        className="fixed inset-0 bg-[var(--theme-paper)]/70 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
@@ -160,7 +160,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
       >
         <div
           data-modal-scroll
-          className="malts-card w-full max-w-2xl max-h-[min(88dvh,92svh)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg touch-pan-y"
+          className="theme-card w-full max-w-2xl max-h-[min(88dvh,92svh)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg touch-pan-y"
           role="dialog"
           aria-modal="true"
           aria-labelledby="category-modal-title"
@@ -174,10 +174,10 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
             </h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-[var(--malts-accent-tint)] rounded-lg transition-colors"
+              className="p-2 hover:bg-[var(--theme-accent-tint)] rounded-lg transition-colors"
               aria-label="Close"
             >
-              <svg className="w-6 h-6 text-[var(--malts-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-[var(--theme-subtle)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -186,7 +186,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="malts-label">Име (БГ) *</label>
+              <label className="theme-label">Име (БГ) *</label>
               <input
                 type="text"
                 value={formData.name_bg}
@@ -196,7 +196,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
                     name_bg: e.target.value
                   }))
                 }
-                className="malts-field"
+                className="theme-field"
                 required
                 autoFocus
               />
@@ -204,12 +204,12 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="malts-label mb-0">Name (EN) *</label>
+                <label className="theme-label mb-0">Name (EN) *</label>
                 <button
                   type="button"
                   onClick={() => handleTranslate('name_en', 'en')}
                   disabled={!formData.name_bg || translatingField === 'name_en'}
-                  className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+                  className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
                 >
                   {translatingField === 'name_en' ? 'Превеждам...' : 'Авто превод'}
                 </button>
@@ -223,19 +223,19 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
                     name_en: e.target.value
                   }))
                 }
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="malts-label mb-0">Name (RO) *</label>
+                <label className="theme-label mb-0">Name (RO) *</label>
                 <button
                   type="button"
                   onClick={() => handleTranslate('name_ro', 'ro')}
                   disabled={!formData.name_bg || translatingField === 'name_ro'}
-                  className="text-sm px-3 py-1 rounded-md border border-[var(--malts-hairline)] text-[var(--malts-ink)] hover:bg-[var(--malts-accent-tint)] disabled:opacity-50"
+                  className="text-sm px-3 py-1 rounded-md border border-[var(--theme-hairline)] text-[var(--theme-ink)] hover:bg-[var(--theme-accent-tint)] disabled:opacity-50"
                 >
                   {translatingField === 'name_ro' ? 'Превеждам...' : 'Авто превод'}
                 </button>
@@ -249,26 +249,26 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
                     name_ro: e.target.value
                   }))
                 }
-                className="malts-field"
+                className="theme-field"
                 required
               />
             </div>
 
             {translationError && (
-              <MaltsInlineFeedback tone="error" role="alert">
+              <ThemeInlineFeedback tone="error" role="alert">
                 {translationError}
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
 
             <div>
-              <label className="malts-label">
+              <label className="theme-label">
                 Родителска категория
-                <span className="ml-2 text-sm malts-muted font-normal">(остави празно за главна категория)</span>
+                <span className="ml-2 text-sm theme-muted font-normal">(остави празно за главна категория)</span>
               </label>
               <select
                 value={formData.parent_category_id}
                 onChange={(e) => setFormData({ ...formData, parent_category_id: e.target.value })}
-                className="malts-field"
+                className="theme-field"
               >
                 <option value="">-- Главна категория --</option>
                 {flatCategories
@@ -287,15 +287,15 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
             </div>
 
             <div>
-              <label className="malts-label">
+              <label className="theme-label">
                 Подредба
-                <span className="ml-2 text-sm malts-muted font-normal">(по-малко = показва се по-рано)</span>
+                <span className="ml-2 text-sm theme-muted font-normal">(по-малко = показва се по-рано)</span>
               </label>
               <input
                 type="number"
                 value={formData.order}
                 onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                className="malts-field"
+                className="theme-field"
               />
             </div>
 
@@ -304,7 +304,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
               <button
                 type="submit"
                 disabled={loading}
-                className="malts-btn-primary malts-btn-admin-compact order-2 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-1 sm:flex-1"
+                className="theme-btn-primary theme-btn-admin-compact order-2 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-1 sm:flex-1"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -322,7 +322,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, category, cat
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="malts-btn-secondary malts-btn-admin-compact order-1 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-2 sm:w-auto"
+                className="theme-btn-secondary theme-btn-admin-compact order-1 w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:order-2 sm:w-auto"
               >
                 Отказ
               </button>

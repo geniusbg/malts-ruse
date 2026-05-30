@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import BrandedHeroLogo from '@/components/BrandedHeroLogo';
-import { MaltsInlineFeedback } from '@/components/MaltsInlineFeedback';
+import { ThemeInlineFeedback } from '@/components/ThemeInlineFeedback';
 const backToSiteLabel: Record<string, string> = {
   bg: 'Назад към сайта',
   en: 'Back to site',
@@ -91,33 +91,33 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 malts-surface flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="fixed inset-0 theme-surface flex items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-md">
-        <div className="malts-card p-6 sm:p-8 shadow-2xl">
+        <div className="theme-card p-6 sm:p-8 shadow-2xl">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center">
               <BrandedHeroLogo
                 width={834}
                 height={812}
                 sizes="(max-width: 768px) 90vw, 380px"
-                className="malts-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[360px]"
+                className="theme-hero-logo h-auto w-full max-w-[min(100%,300px)] md:max-w-[360px]"
                 priority
               />
             </div>
-            <p className="malts-admin-panel-title mt-6 sm:mt-7 text-center text-lg sm:text-xl md:text-2xl leading-snug px-1">
+            <p className="theme-admin-panel-title mt-6 sm:mt-7 text-center text-lg sm:text-xl md:text-2xl leading-snug px-1">
               {adminPortalLabel[locale] ?? adminPortalLabel.bg}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             {error && (
-              <MaltsInlineFeedback tone="error" role="alert">
+              <ThemeInlineFeedback tone="error" role="alert">
                 {error}
-              </MaltsInlineFeedback>
+              </ThemeInlineFeedback>
             )}
 
             <div>
-              <label htmlFor="email" className="malts-label">
+              <label htmlFor="email" className="theme-label">
                 Email
               </label>
               <input
@@ -128,13 +128,13 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="malts-label">
+              <label htmlFor="password" className="theme-label">
                 Парола
               </label>
               <input
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="malts-field"
+                className="theme-field"
                 placeholder="••••••••"
               />
             </div>
@@ -153,7 +153,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="malts-btn-primary malts-btn-admin-compact w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
+              className="theme-btn-primary theme-btn-admin-compact w-full rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Влизане...' : 'Вход'}
             </button>
@@ -161,7 +161,7 @@ export default function AdminLoginPage() {
 
           <Link
             href={`/${locale}`}
-            className="malts-btn-secondary malts-btn-admin-compact mt-4 flex w-full items-center justify-center gap-2 rounded-lg font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--malts-accent)] focus-visible:ring-offset-2"
+            className="theme-btn-secondary theme-btn-admin-compact mt-4 flex w-full items-center justify-center gap-2 rounded-lg font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] focus-visible:ring-offset-2"
           >
             <svg
               className="h-4 w-4 shrink-0"
@@ -180,8 +180,8 @@ export default function AdminLoginPage() {
             <span>{backToSiteLabel[locale] ?? backToSiteLabel.bg}</span>
           </Link>
 
-          <p className="text-center malts-muted text-xs sm:text-sm mt-6 pt-6 border-t border-[var(--malts-hairline)]">
-            Контакт: <span className="font-medium text-[var(--malts-ink)]">support@gsoft.bg</span>
+          <p className="text-center theme-muted text-xs sm:text-sm mt-6 pt-6 border-t border-[var(--theme-hairline)]">
+            Контакт: <span className="font-medium text-[var(--theme-ink)]">support@gsoft.bg</span>
           </p>
         </div>
       </div>

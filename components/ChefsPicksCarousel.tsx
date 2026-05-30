@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Price from '@/components/Price';
 import { productParamForUrl } from '@/lib/product-url';
+import { useSiteDisplayName } from '@/lib/use-site-display-name';
 
 interface Product {
   id: string;
@@ -49,6 +50,7 @@ export default function ChefsPicksCarousel({
   addDisabled = false,
   hideScrollHint = false,
 }: ChefsPicksCarouselProps) {
+  const siteName = useSiteDisplayName();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -106,10 +108,10 @@ export default function ChefsPicksCarousel({
   return (
     <section className="mt-16 md:mt-24">
       <div className="text-center mb-10 md:mb-12">
-        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight malts-display mb-3">
+        <h2 className="text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-3">
           {locale === 'bg' ? 'Избрани от нас' : locale === 'en' ? "Chef's Picks" : 'Unsere Auswahl'}
         </h2>
-        <p className="malts-muted text-lg md:text-xl malts-display-secondary">
+        <p className="theme-muted text-lg md:text-xl theme-display-secondary">
           {locale === 'bg' 
             ? 'Специални предложения и любими вкусове' 
             : locale === 'en' 
@@ -123,7 +125,7 @@ export default function ChefsPicksCarousel({
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--theme-card)]/90 hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Предишни' : locale === 'en' ? 'Previous' : 'Zurück'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,9 +160,9 @@ export default function ChefsPicksCarousel({
                   key={product.id}
                   className="flex-shrink-0 w-64 md:w-72 snap-center group"
                 >
-                  <div className="malts-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
+                  <div className="theme-card overflow-hidden transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
                     {product.imageUrl ? (
-                      <div className="relative h-48 w-full overflow-hidden bg-[var(--malts-inset)]">
+                      <div className="relative h-48 w-full overflow-hidden bg-[var(--theme-inset)]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={product.imageUrl}
@@ -172,10 +174,10 @@ export default function ChefsPicksCarousel({
                         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,24,16,0.65)] via-transparent to-transparent opacity-60"></div>
                       </div>
                     ) : (
-                      <div className="relative h-48 w-full overflow-hidden bg-[var(--malts-inset)] flex items-center justify-center px-4 py-3 border-b border-[var(--malts-hairline)]/60">
+                      <div className="relative h-48 w-full overflow-hidden bg-[var(--theme-inset)] flex items-center justify-center px-4 py-3 border-b border-[var(--theme-hairline)]/60">
                         <Image
                           src="/malts-logo-landscape.svg"
-                          alt="Malt's"
+                          alt={siteName}
                           width={320}
                           height={120}
                           className="w-full max-w-[min(100%,320px)] h-auto max-h-[9rem] object-contain opacity-80"
@@ -185,11 +187,11 @@ export default function ChefsPicksCarousel({
                     
                     <div className="p-6 flex-1 flex flex-col">
                       <div className="mb-2">
-                        <span className="text-xs uppercase tracking-[0.2em] malts-subtle">{categoryName}</span>
+                        <span className="text-xs uppercase tracking-[0.2em] theme-subtle">{categoryName}</span>
                       </div>
                       <h3 className="text-xl font-bold mb-2 line-clamp-2">{productName}</h3>
                       {(product.descriptionBg || product.descriptionEn || product.descriptionRo) && (
-                        <p className="malts-muted text-sm mb-4 line-clamp-2 flex-1">
+                        <p className="theme-muted text-sm mb-4 line-clamp-2 flex-1">
                           {locale === 'bg' ? product.descriptionBg : 
                            locale === 'en' ? product.descriptionEn : 
                            product.descriptionRo}
@@ -200,9 +202,9 @@ export default function ChefsPicksCarousel({
                           <Price
                             priceBgn={Number(product.priceBgn)}
                             inline
-                            className="text-sm md:text-base text-[var(--malts-ink)]"
+                            className="text-sm md:text-base text-[var(--theme-ink)]"
                           />
-                          <span className="text-sm malts-muted tabular-nums">
+                          <span className="text-sm theme-muted tabular-nums">
                             {qty} {unitSuffix}
                           </span>
                         </div>
@@ -211,14 +213,14 @@ export default function ChefsPicksCarousel({
                             type="button"
                             disabled={addDisabled}
                             onClick={() => onAddToCart(product)}
-                            className="w-full px-4 py-2.5 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
+                            className="w-full px-4 py-2.5 theme-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
                           >
                             {locale === 'bg' ? '+ Добави' : locale === 'en' ? '+ Add' : '+ Adaugă'}
                           </button>
                         ) : (
                           <Link
                             href={`/${locale}/menu?category=${encodeURIComponent(product.categorySlug || product.categoryId)}&product=${encodeURIComponent(productParamForUrl(product))}`}
-                            className="w-full px-4 py-2.5 malts-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center text-center"
+                            className="w-full px-4 py-2.5 theme-btn-primary rounded-lg font-semibold text-sm transition-colors min-h-[48px] flex items-center justify-center text-center"
                           >
                             {locale === 'bg' ? 'Виж' : locale === 'en' ? 'View' : 'Vezi'}
                           </Link>
@@ -236,7 +238,7 @@ export default function ChefsPicksCarousel({
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--malts-card)]/90 hover:bg-[var(--malts-card-hover)] border border-[var(--malts-hairline)] rounded-full text-[var(--malts-ink)] transition-all shadow-lg"
+            className="flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 items-center justify-center bg-[var(--theme-card)]/90 hover:bg-[var(--theme-card-hover)] border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] transition-all shadow-lg"
             aria-label={locale === 'bg' ? 'Следващи' : locale === 'en' ? 'Next' : 'Weiter'}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +250,7 @@ export default function ChefsPicksCarousel({
         {/* Scroll hint - Mobile only */}
         {!hideScrollHint && products.length > 3 && (
           <div className="text-center mt-6 md:hidden">
-            <p className="malts-muted text-sm">
+            <p className="theme-muted text-sm">
               {locale === 'bg' ? '← Плъзни за повече →' : locale === 'en' ? '← Scroll for more →' : '← Glisează pentru mai mult →'}
             </p>
           </div>

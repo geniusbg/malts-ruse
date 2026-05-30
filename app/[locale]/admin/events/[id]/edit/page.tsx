@@ -113,11 +113,11 @@ export default function EditEventPage() {
         />
       )}
       <div className="mb-8">
-        <h1 className="malts-admin-heading-font malts-admin-page-title mb-2">Редактирай събитие</h1>
-        <p className="malts-muted">Актуализирай информацията за събитието</p>
+        <h1 className="theme-admin-heading-font theme-admin-page-title mb-2">Редактирай събитие</h1>
+        <p className="theme-muted">Актуализирай информацията за събитието</p>
       </div>
 
-      <div className="malts-card p-4 md:p-8">
+      <div className="theme-card p-4 md:p-8">
         <EventForm
           initialData={event}
           onSubmit={handleSubmit}
