@@ -140,6 +140,21 @@ export default async function RootLayout({
     "--theme-hero-mood-bg": appearance?.heroMoodBg,
     "--theme-homepage-accent": appearance?.homepageAccent,
 
+    "--theme-menu-active-bg": appearance?.menuActiveBg,
+    "--theme-menu-active-text": appearance?.menuActiveText,
+    "--theme-menu-active-border": appearance?.menuActiveBorder,
+    "--theme-menu-inactive-bg": appearance?.menuInactiveBg,
+    "--theme-menu-inactive-text": appearance?.menuInactiveText,
+    "--theme-menu-inactive-border": appearance?.menuInactiveBorder,
+    "--theme-menu-hover-bg": appearance?.menuHoverBg,
+    "--theme-menu-hover-border": appearance?.menuHoverBorder,
+
+    "--theme-nav-active-bg": appearance?.navActiveBg,
+    "--theme-nav-active-text": appearance?.navActiveText,
+    "--theme-nav-active-border": appearance?.navActiveBorder,
+    "--theme-nav-hover-text": appearance?.navHoverText,
+    "--theme-nav-mobile-active-bg": appearance?.navMobileActiveBg,
+
     "--theme-btn-secondary-bg": appearance?.btnSecondaryBg,
     "--theme-btn-secondary-text": appearance?.btnSecondaryText,
     "--theme-btn-secondary-border": appearance?.btnSecondaryBorder,

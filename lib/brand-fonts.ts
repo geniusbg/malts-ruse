@@ -2,6 +2,69 @@
 
 const GOOGLE_FONTS_HOSTS = new Set(['fonts.googleapis.com', 'fonts.gstatic.com']);
 
+export const GOOGLE_FONT_EFFECTS = [
+  'none',
+  'anaglyph',
+  'brick-sign',
+  'canvas-print',
+  'crackle',
+  'decaying',
+  'destruction',
+  'distressed',
+  'distressed-wood',
+  'emboss',
+  'fire',
+  'fire-animation',
+  'fragile',
+  'grass',
+  'ice',
+  'mitosis',
+  'neon',
+  'outline',
+  'putting-green',
+  'scuffed-steel',
+  'shadow-multiple',
+  'splintered',
+  'static',
+  'stonewash',
+  '3d',
+  '3d-float',
+  'vintage',
+  'wallpaper',
+] as const;
+
+const GOOGLE_FONT_EFFECT_SET = new Set<string>(GOOGLE_FONT_EFFECTS);
+
+export function normalizeGoogleFontEffect(raw: string | null | undefined): string | null {
+  const s = (raw ?? '').trim();
+  if (!s || s === 'none') return null;
+  return GOOGLE_FONT_EFFECT_SET.has(s) ? s : null;
+}
+
+export function googleFontEffectClass(raw: string | null | undefined): string {
+  const effect = normalizeGoogleFontEffect(raw);
+  return effect ? `font-effect-${effect}` : '';
+}
+
+function addGoogleFontEffects(cssUrl: string | null, effects: Array<string | null | undefined>): string | null {
+  if (!cssUrl) return null;
+  const requested = effects.map(normalizeGoogleFontEffect).filter(Boolean) as string[];
+  if (requested.length === 0) return cssUrl;
+
+  try {
+    const u = new URL(cssUrl);
+    const existing = (u.searchParams.get('effect') || '')
+      .split('|')
+      .map(normalizeGoogleFontEffect)
+      .filter(Boolean) as string[];
+    const merged = [...new Set([...existing, ...requested])];
+    if (merged.length > 0) u.searchParams.set('effect', merged.join('|'));
+    return u.toString();
+  } catch {
+    return cssUrl;
+  }
+}
+
 /** Allow only Google Fonts stylesheet URLs (no arbitrary CSS injection). */
 export function sanitizeGoogleFontsCssUrl(raw: string | null | undefined): string | null {
   const s = (raw ?? '').trim();
@@ -40,6 +103,8 @@ export type BrandFontVars = {
   buttons: string | null;
   nav: string | null;
   body: string | null;
+  displayEffectClass: string;
+  moodEffectClass: string;
 };
 
 export function fontVarsFromAppearance(row: {
@@ -48,6 +113,8 @@ export function fontVarsFromAppearance(row: {
   fontButtonsFamily?: string | null;
   fontNavFamily?: string | null;
   fontBodyFamily?: string | null;
+  fontDisplayEffect?: string | null;
+  fontMoodEffect?: string | null;
 } | null | undefined): BrandFontVars {
   const display = normalizeFontFamilyStack(row?.fontDisplayFamily);
   const buttons = normalizeFontFamilyStack(row?.fontButtonsFamily);
@@ -66,8 +133,17 @@ export function fontVarsFromAppearance(row: {
       .filter((f) => f && !f.includes(','));
     googleFontsCssUrl = buildGoogleFontsCssUrl(names);
   }
+  googleFontsCssUrl = addGoogleFontEffects(googleFontsCssUrl, [row?.fontDisplayEffect, row?.fontMoodEffect]);
 
-  return { googleFontsCssUrl, display, buttons, nav, body };
+  return {
+    googleFontsCssUrl,
+    display,
+    buttons,
+    nav,
+    body,
+    displayEffectClass: googleFontEffectClass(row?.fontDisplayEffect),
+    moodEffectClass: googleFontEffectClass(row?.fontMoodEffect),
+  };
 }
 
 export function fontVarsToCssRecord(vars: BrandFontVars): Record<string, string> {

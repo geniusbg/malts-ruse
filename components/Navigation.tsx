@@ -121,8 +121,8 @@ export default function Navigation({
                 onClick={(e) => onNavLinkClick(e, link.href, link.fullReloadIfActive)}
                 className={`whitespace-nowrap transition-colors font-medium ${
                   isActive(link.href, link.exact)
-                    ? 'text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]'
-                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-accent)]'
+                    ? 'text-[var(--theme-nav-active-text)] border-b-2 border-[var(--theme-nav-active-border)]'
+                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-nav-hover-text)]'
                 }`}
               >
                 {link.label}
@@ -139,7 +139,7 @@ export default function Navigation({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="shrink-0 md:hidden text-[var(--theme-ink)] hover:text-[var(--theme-accent)] p-2"
+              className="shrink-0 md:hidden text-[var(--theme-ink)] hover:text-[var(--theme-nav-hover-text)] p-2"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -172,8 +172,8 @@ export default function Navigation({
                 }}
                 className={`block py-3 px-4 rounded-lg transition-colors font-medium ${
                   isActive(link.href, link.exact)
-                    ? 'text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border-l-4 border-[var(--theme-accent)]'
-                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-card-hover)]'
+                    ? 'text-[var(--theme-nav-active-text)] bg-[var(--theme-nav-mobile-active-bg)] border-l-4 border-[var(--theme-nav-active-border)]'
+                    : 'text-[var(--theme-ink)] hover:text-[var(--theme-nav-hover-text)] hover:bg-[var(--theme-card-hover)]'
                 }`}
               >
                 {link.label}

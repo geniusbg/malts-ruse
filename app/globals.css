@@ -26,6 +26,21 @@
   --theme-accent-tint: rgba(176, 22, 47, 0.1);
   --theme-accent-tint-border: rgba(176, 22, 47, 0.25);
 
+  --theme-menu-active-bg: var(--theme-accent);
+  --theme-menu-active-text: var(--theme-accent-contrast);
+  --theme-menu-active-border: var(--theme-accent);
+  --theme-menu-inactive-bg: var(--theme-card);
+  --theme-menu-inactive-text: var(--theme-ink);
+  --theme-menu-inactive-border: var(--theme-hairline);
+  --theme-menu-hover-bg: var(--theme-card-hover);
+  --theme-menu-hover-border: var(--theme-hover-border);
+
+  --theme-nav-active-bg: var(--theme-accent-tint);
+  --theme-nav-active-text: var(--theme-accent);
+  --theme-nav-active-border: var(--theme-accent);
+  --theme-nav-hover-text: var(--theme-accent);
+  --theme-nav-mobile-active-bg: var(--theme-accent-tint);
+
   --theme-success: #166534;
   --theme-warning: #92400e;
   --theme-danger: #991b1b;

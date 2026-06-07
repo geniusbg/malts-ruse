@@ -595,6 +595,21 @@ model BrandAppearanceSettings {
   heroMoodBg          String? @map("hero_mood_bg")
   homepageAccent      String? @map("homepage_accent")
 
+  menuActiveBg       String? @map("menu_active_bg")
+  menuActiveText     String? @map("menu_active_text")
+  menuActiveBorder   String? @map("menu_active_border")
+  menuInactiveBg     String? @map("menu_inactive_bg")
+  menuInactiveText   String? @map("menu_inactive_text")
+  menuInactiveBorder String? @map("menu_inactive_border")
+  menuHoverBg        String? @map("menu_hover_bg")
+  menuHoverBorder    String? @map("menu_hover_border")
+
+  navActiveBg       String? @map("nav_active_bg")
+  navActiveText     String? @map("nav_active_text")
+  navActiveBorder   String? @map("nav_active_border")
+  navHoverText      String? @map("nav_hover_text")
+  navMobileActiveBg String? @map("nav_mobile_active_bg")
+
   btnSecondaryBg       String? @map("btn_secondary_bg")
   btnSecondaryText     String? @map("btn_secondary_text")
   btnSecondaryBorder   String? @map("btn_secondary_border")
@@ -621,6 +636,8 @@ model BrandAppearanceSettings {
   fontButtonsFamily  String? @map("font_buttons_family")
   fontNavFamily      String? @map("font_nav_family")
   fontBodyFamily     String? @map("font_body_family")
+  fontDisplayEffect  String? @map("font_display_effect")
+  fontMoodEffect     String? @map("font_mood_effect")
 
   // Logos / icons (URLs)
   navLogoUrl  String? @map("nav_logo_url")

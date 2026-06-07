@@ -16,6 +16,7 @@ import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
 import { resolveHeroLogoUrl } from '@/lib/brand-defaults';
 import { resolveSiteDisplayName } from '@/lib/site-display-name';
 import { upcomingEventsIntro } from '@/lib/brand-copy';
+import { googleFontEffectClass } from '@/lib/brand-fonts';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,8 @@ export default async function HomePage({
   ]);
 
   const heroLogoSrc = resolveHeroLogoUrl(brandAppearance?.heroLogoUrl);
+  const moodFontEffectClass = googleFontEffectClass(brandAppearance?.fontMoodEffect);
+  const displayFontEffectClass = googleFontEffectClass(brandAppearance?.fontDisplayEffect);
 
   const highlightsLabel =
     locale === 'bg'
@@ -375,7 +378,7 @@ export default async function HomePage({
 
             {/* Tagline — red frame + glow; един ред (размерът се смалява леко на тесен екран) */}
             <div className="mb-8 md:mb-12 flex justify-center px-3 py-6 md:py-8">
-              <p className="theme-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[var(--theme-accent-contrast)] font-normal tracking-wide theme-display px-8 py-4 md:px-14 md:py-5">
+              <p className={`theme-mood-banner inline-block whitespace-nowrap text-center text-[clamp(0.95rem,3.5vw,2.55rem)] text-[var(--theme-accent-contrast)] font-normal tracking-wide theme-display px-8 py-4 md:px-14 md:py-5 ${moodFontEffectClass}`}>
                 {moodText}
               </p>
             </div>
@@ -451,10 +454,10 @@ export default async function HomePage({
             </div>
 
             <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
-              <span className="theme-homepage-accent-pill inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] border theme-section-label-font">
+              <span className={`theme-homepage-accent-pill inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] border theme-section-label-font ${displayFontEffectClass}`}>
                 {sectionLabel}
               </span>
-              <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight theme-display">
+              <h2 className={`mt-6 text-3xl md:text-5xl font-semibold tracking-tight theme-display ${displayFontEffectClass}`}>
                 {offeringsTitle}
               </h2>
               <p className="mt-4 text-lg md:text-xl theme-muted theme-display-secondary">
@@ -487,7 +490,7 @@ export default async function HomePage({
 
             {cardsHeading?.trim() ? (
               <div className="relative mt-10 text-center">
-                <p className="text-2xl md:text-4xl font-semibold tracking-tight theme-display">
+                <p className={`text-2xl md:text-4xl font-semibold tracking-tight theme-display ${displayFontEffectClass}`}>
                   {cardsHeading}
                 </p>
               </div>
@@ -599,7 +602,7 @@ export default async function HomePage({
           <div className="mt-16 md:mt-24">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 md:mb-12 gap-4">
               <div>
-                <h2 className="text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-2">
+                <h2 className={`text-3xl md:text-5xl font-semibold tracking-tight theme-display mb-2 ${displayFontEffectClass}`}>
                   {locale === 'bg' ? 'Предстоящи събития' : locale === 'en' ? 'Upcoming Events' : 'Evenimente viitoare'}
                 </h2>
                 <p className="text-lg md:text-xl theme-muted theme-display-secondary max-w-3xl">

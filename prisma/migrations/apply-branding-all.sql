@@ -55,7 +55,9 @@ ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS font_display_family TEXT,
   ADD COLUMN IF NOT EXISTS font_buttons_family TEXT,
   ADD COLUMN IF NOT EXISTS font_nav_family TEXT,
-  ADD COLUMN IF NOT EXISTS font_body_family TEXT;
+  ADD COLUMN IF NOT EXISTS font_body_family TEXT,
+  ADD COLUMN IF NOT EXISTS font_display_effect TEXT,
+  ADD COLUMN IF NOT EXISTS font_mood_effect TEXT;
 
 -- 4) Primary button text on hover
 ALTER TABLE brand_appearance_settings
@@ -77,3 +79,19 @@ ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS hero_glow TEXT,
   ADD COLUMN IF NOT EXISTS hero_mood_bg TEXT,
   ADD COLUMN IF NOT EXISTS homepage_accent TEXT;
+
+-- 7) Public menu buttons + main navigation colors
+ALTER TABLE brand_appearance_settings
+  ADD COLUMN IF NOT EXISTS menu_active_bg TEXT,
+  ADD COLUMN IF NOT EXISTS menu_active_text TEXT,
+  ADD COLUMN IF NOT EXISTS menu_active_border TEXT,
+  ADD COLUMN IF NOT EXISTS menu_inactive_bg TEXT,
+  ADD COLUMN IF NOT EXISTS menu_inactive_text TEXT,
+  ADD COLUMN IF NOT EXISTS menu_inactive_border TEXT,
+  ADD COLUMN IF NOT EXISTS menu_hover_bg TEXT,
+  ADD COLUMN IF NOT EXISTS menu_hover_border TEXT,
+  ADD COLUMN IF NOT EXISTS nav_active_bg TEXT,
+  ADD COLUMN IF NOT EXISTS nav_active_text TEXT,
+  ADD COLUMN IF NOT EXISTS nav_active_border TEXT,
+  ADD COLUMN IF NOT EXISTS nav_hover_text TEXT,
+  ADD COLUMN IF NOT EXISTS nav_mobile_active_bg TEXT;

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ManagedLoadingScreen from '@/components/ManagedLoadingScreen';
 import Toast from '@/components/Toast';
-import { fontVarsFromAppearance, normalizeFontFamilyStack } from '@/lib/brand-fonts';
+import { GOOGLE_FONT_EFFECTS, fontVarsFromAppearance, normalizeFontFamilyStack } from '@/lib/brand-fonts';
 
 type BrandAppearanceSettings = {
   id: string;
@@ -27,6 +27,21 @@ type BrandAppearanceSettings = {
   heroGlow: string | null;
   heroMoodBg: string | null;
   homepageAccent: string | null;
+
+  menuActiveBg: string | null;
+  menuActiveText: string | null;
+  menuActiveBorder: string | null;
+  menuInactiveBg: string | null;
+  menuInactiveText: string | null;
+  menuInactiveBorder: string | null;
+  menuHoverBg: string | null;
+  menuHoverBorder: string | null;
+
+  navActiveBg: string | null;
+  navActiveText: string | null;
+  navActiveBorder: string | null;
+  navHoverText: string | null;
+  navMobileActiveBg: string | null;
 
   btnSecondaryBg: string | null;
   btnSecondaryText: string | null;
@@ -52,6 +67,8 @@ type BrandAppearanceSettings = {
   fontButtonsFamily: string | null;
   fontNavFamily: string | null;
   fontBodyFamily: string | null;
+  fontDisplayEffect: string | null;
+  fontMoodEffect: string | null;
 
   navLogoUrl: string | null;
   heroLogoUrl: string | null;
@@ -76,6 +93,19 @@ const DEFAULTS = {
   heroGlow: '#b0162f',
   heroMoodBg: '#000000',
   homepageAccent: '#b0162f',
+  menuActiveBg: '#b0162f',
+  menuActiveText: '#f5f0e6',
+  menuActiveBorder: '#b0162f',
+  menuInactiveBg: '#ebe4d6',
+  menuInactiveText: '#1a1810',
+  menuInactiveBorder: '#c9bda8',
+  menuHoverBg: '#e4dcc8',
+  menuHoverBorder: '#c65a6b',
+  navActiveBg: '#f2d9de',
+  navActiveText: '#b0162f',
+  navActiveBorder: '#b0162f',
+  navHoverText: '#b0162f',
+  navMobileActiveBg: '#f2d9de',
   success: '#166534',
   warning: '#92400e',
   danger: '#991b1b',
@@ -117,6 +147,31 @@ const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }
       { key: 'heroGlow', label: 'Hero glow / mood рамка', hint: 'Пулсацията около голямото лого и рамката около Food • Drinks…' },
       { key: 'heroMoodBg', label: 'Фон вътре в mood банера', hint: 'Вътрешният фон зад текста Food • Drinks…' },
       { key: 'homepageAccent', label: 'Предложения и Акценти', hint: 'Етикет „Предложения“, badge-ове и accent елементи в cards' },
+    ],
+  },
+  {
+    title: 'Menu бутони',
+    description: 'Категории и табове в публичното меню (/bg/menu).',
+    fields: [
+      { key: 'menuActiveBg', label: 'Активен фон', hint: 'Избрана категория / активен таб' },
+      { key: 'menuActiveText', label: 'Активен текст', hint: 'Текст върху активния фон' },
+      { key: 'menuActiveBorder', label: 'Активна рамка', hint: 'Рамка на избраната категория' },
+      { key: 'menuInactiveBg', label: 'Неактивен фон', hint: 'Категории, които не са избрани' },
+      { key: 'menuInactiveText', label: 'Неактивен текст', hint: 'Текст на неактивните категории' },
+      { key: 'menuInactiveBorder', label: 'Неактивна рамка', hint: 'Рамка на неактивните категории' },
+      { key: 'menuHoverBg', label: 'Фон при hover', hint: 'Фон при посочване' },
+      { key: 'menuHoverBorder', label: 'Рамка при hover', hint: 'Рамка при посочване' },
+    ],
+  },
+  {
+    title: 'Основна навигация',
+    description: 'Горното публично меню: Начало, Меню, Събития, Контакти.',
+    fields: [
+      { key: 'navActiveBg', label: 'Активен фон', hint: 'Mobile active фон; desktop остава с подчертаване' },
+      { key: 'navActiveText', label: 'Активен текст', hint: 'Цвят на текущата страница' },
+      { key: 'navActiveBorder', label: 'Активна линия/рамка', hint: 'Desktop underline и mobile left border' },
+      { key: 'navHoverText', label: 'Текст при hover', hint: 'Цвят при посочване върху линк' },
+      { key: 'navMobileActiveBg', label: 'Mobile активен фон', hint: 'Фон на активния линк в мобилното меню' },
     ],
   },
   {
@@ -267,6 +322,19 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       heroGlow: c('heroGlow'),
       heroMoodBg: c('heroMoodBg'),
       homepageAccent: c('homepageAccent'),
+      menuActiveBg: c('menuActiveBg'),
+      menuActiveText: c('menuActiveText'),
+      menuActiveBorder: c('menuActiveBorder'),
+      menuInactiveBg: c('menuInactiveBg'),
+      menuInactiveText: c('menuInactiveText'),
+      menuInactiveBorder: c('menuInactiveBorder'),
+      menuHoverBg: c('menuHoverBg'),
+      menuHoverBorder: c('menuHoverBorder'),
+      navActiveBg: c('navActiveBg'),
+      navActiveText: c('navActiveText'),
+      navActiveBorder: c('navActiveBorder'),
+      navHoverText: c('navHoverText'),
+      navMobileActiveBg: c('navMobileActiveBg'),
       btnSecondaryBg: coalesceColor(settings.btnSecondaryBg, c('card')),
       btnSecondaryText: coalesceColor(settings.btnSecondaryText, c('ink')),
       btnSecondaryBorder: coalesceColor(settings.btnSecondaryBorder, c('hairline')),
@@ -282,6 +350,8 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       fontButtons: fonts.buttons || undefined,
       fontNav: fonts.nav || undefined,
       fontBody: fonts.body || undefined,
+      displayEffectClass: fonts.displayEffectClass,
+      moodEffectClass: fonts.moodEffectClass,
       navLogo: (settings.navLogoUrl || '').trim(),
       siteTitle: (settings.siteShortName || settings.siteTitle || 'Вашият бранд').trim(),
     };
@@ -321,10 +391,23 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
           </span>
         </div>
 
+        <div className="flex flex-wrap items-center gap-3 border-b px-3 py-2 text-xs" style={{ borderColor: p.hairline }}>
+          <span className="border-b-2 font-semibold" style={{ color: p.navActiveText, borderColor: p.navActiveBorder }}>
+            Меню
+          </span>
+          <span style={{ color: p.navHoverText }}>Hover</span>
+          <span
+            className="rounded-lg border-l-4 px-2 py-1"
+            style={{ color: p.navActiveText, background: p.navMobileActiveBg, borderColor: p.navActiveBorder }}
+          >
+            Mobile
+          </span>
+        </div>
+
         <div className="space-y-3 p-3">
           {/* mood banner mock */}
           <p
-            className="mx-auto max-w-full rounded-full border-2 px-4 py-2 text-center text-sm"
+            className={`mx-auto max-w-full rounded-full border-2 px-4 py-2 text-center text-sm ${p.moodEffectClass}`}
             style={{
               fontFamily: p.fontDisplay,
               borderColor: p.heroGlow,
@@ -338,16 +421,37 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
 
           <div className="flex flex-wrap justify-center gap-2 text-xs font-medium">
             <span
-              className="rounded-full border px-3 py-1 uppercase tracking-[0.18em]"
+              className={`rounded-full border px-3 py-1 uppercase tracking-[0.18em] ${p.displayEffectClass}`}
               style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
             >
               Предложения
             </span>
             <span
-              className="rounded-full border px-3 py-1"
+              className={`rounded-full border px-3 py-1 ${p.displayEffectClass}`}
               style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
             >
               Класика
+            </span>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            <span
+              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              style={{ background: p.menuActiveBg, color: p.menuActiveText, borderColor: p.menuActiveBorder }}
+            >
+              Активна категория
+            </span>
+            <span
+              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              style={{ background: p.menuInactiveBg, color: p.menuInactiveText, borderColor: p.menuInactiveBorder }}
+            >
+              Категория
+            </span>
+            <span
+              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              style={{ background: p.menuHoverBg, color: p.menuInactiveText, borderColor: p.menuHoverBorder }}
+            >
+              Hover
             </span>
           </div>
 
@@ -626,6 +730,33 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
                         : undefined
                     }
                   />
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {[
+                ['fontMoodEffect', 'Ефект за mood банера', 'Food • Drinks… в hero секцията'],
+                ['fontDisplayEffect', 'Ефект за display заглавия', 'Големи заглавия и етикети на началната'],
+              ].map(([key, label, hint]) => (
+                <div key={key} className="space-y-1">
+                  <label className="theme-label">{label}</label>
+                  <p className="theme-muted text-xs">{hint}</p>
+                  <select
+                    className="theme-field"
+                    value={(settings as any)[key] ?? 'none'}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        [key]: e.target.value === 'none' ? null : e.target.value,
+                      } as any)
+                    }
+                  >
+                    {GOOGLE_FONT_EFFECTS.map((effect) => (
+                      <option key={effect} value={effect}>
+                        {effect === 'none' ? 'Без ефект' : effect}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               ))}
             </div>

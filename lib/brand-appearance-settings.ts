@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { getDefaultBrandId } from '@/lib/brand';
-import { sanitizeGoogleFontsCssUrl } from '@/lib/brand-fonts';
+import { normalizeGoogleFontEffect, sanitizeGoogleFontsCssUrl } from '@/lib/brand-fonts';
 
 export type BrandAppearanceSettings = {
   id: string;
@@ -24,6 +24,21 @@ export type BrandAppearanceSettings = {
   heroGlow: string | null;
   heroMoodBg: string | null;
   homepageAccent: string | null;
+
+  menuActiveBg: string | null;
+  menuActiveText: string | null;
+  menuActiveBorder: string | null;
+  menuInactiveBg: string | null;
+  menuInactiveText: string | null;
+  menuInactiveBorder: string | null;
+  menuHoverBg: string | null;
+  menuHoverBorder: string | null;
+
+  navActiveBg: string | null;
+  navActiveText: string | null;
+  navActiveBorder: string | null;
+  navHoverText: string | null;
+  navMobileActiveBg: string | null;
 
   btnSecondaryBg: string | null;
   btnSecondaryText: string | null;
@@ -49,6 +64,8 @@ export type BrandAppearanceSettings = {
   fontButtonsFamily: string | null;
   fontNavFamily: string | null;
   fontBodyFamily: string | null;
+  fontDisplayEffect: string | null;
+  fontMoodEffect: string | null;
 
   navLogoUrl: string | null;
   heroLogoUrl: string | null;
@@ -82,6 +99,21 @@ function sanitize(row: any): BrandAppearanceSettings {
     heroMoodBg: row.heroMoodBg ?? null,
     homepageAccent: row.homepageAccent ?? null,
 
+    menuActiveBg: row.menuActiveBg ?? null,
+    menuActiveText: row.menuActiveText ?? null,
+    menuActiveBorder: row.menuActiveBorder ?? null,
+    menuInactiveBg: row.menuInactiveBg ?? null,
+    menuInactiveText: row.menuInactiveText ?? null,
+    menuInactiveBorder: row.menuInactiveBorder ?? null,
+    menuHoverBg: row.menuHoverBg ?? null,
+    menuHoverBorder: row.menuHoverBorder ?? null,
+
+    navActiveBg: row.navActiveBg ?? null,
+    navActiveText: row.navActiveText ?? null,
+    navActiveBorder: row.navActiveBorder ?? null,
+    navHoverText: row.navHoverText ?? null,
+    navMobileActiveBg: row.navMobileActiveBg ?? null,
+
     btnSecondaryBg: row.btnSecondaryBg ?? null,
     btnSecondaryText: row.btnSecondaryText ?? null,
     btnSecondaryBorder: row.btnSecondaryBorder ?? null,
@@ -106,6 +138,8 @@ function sanitize(row: any): BrandAppearanceSettings {
     fontButtonsFamily: row.fontButtonsFamily ?? null,
     fontNavFamily: row.fontNavFamily ?? null,
     fontBodyFamily: row.fontBodyFamily ?? null,
+    fontDisplayEffect: row.fontDisplayEffect ?? null,
+    fontMoodEffect: row.fontMoodEffect ?? null,
 
     navLogoUrl: row.navLogoUrl ?? null,
     heroLogoUrl: row.heroLogoUrl ?? null,
@@ -153,6 +187,19 @@ type UpdateDto = Partial<
     | 'heroGlow'
     | 'heroMoodBg'
     | 'homepageAccent'
+    | 'menuActiveBg'
+    | 'menuActiveText'
+    | 'menuActiveBorder'
+    | 'menuInactiveBg'
+    | 'menuInactiveText'
+    | 'menuInactiveBorder'
+    | 'menuHoverBg'
+    | 'menuHoverBorder'
+    | 'navActiveBg'
+    | 'navActiveText'
+    | 'navActiveBorder'
+    | 'navHoverText'
+    | 'navMobileActiveBg'
     | 'btnSecondaryBg'
     | 'btnSecondaryText'
     | 'btnSecondaryBorder'
@@ -174,6 +221,8 @@ type UpdateDto = Partial<
     | 'fontButtonsFamily'
     | 'fontNavFamily'
     | 'fontBodyFamily'
+    | 'fontDisplayEffect'
+    | 'fontMoodEffect'
     | 'navLogoUrl'
     | 'heroLogoUrl'
     | 'appIconUrl'
@@ -192,7 +241,7 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
   const brandId = await getDefaultBrandId();
   const existing = await prisma.brandAppearanceSettings.findUnique({ where: { brandId } });
   if (existing) {
-    const updated = await prisma.brandAppearanceSettings.update({
+    const updated = await (prisma.brandAppearanceSettings as any).update({
       where: { id: existing.id },
       data: {
         paper: cleanText(dto.paper),
@@ -212,6 +261,21 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         heroGlow: cleanText(dto.heroGlow),
         heroMoodBg: cleanText(dto.heroMoodBg),
         homepageAccent: cleanText(dto.homepageAccent),
+
+        menuActiveBg: cleanText(dto.menuActiveBg),
+        menuActiveText: cleanText(dto.menuActiveText),
+        menuActiveBorder: cleanText(dto.menuActiveBorder),
+        menuInactiveBg: cleanText(dto.menuInactiveBg),
+        menuInactiveText: cleanText(dto.menuInactiveText),
+        menuInactiveBorder: cleanText(dto.menuInactiveBorder),
+        menuHoverBg: cleanText(dto.menuHoverBg),
+        menuHoverBorder: cleanText(dto.menuHoverBorder),
+
+        navActiveBg: cleanText(dto.navActiveBg),
+        navActiveText: cleanText(dto.navActiveText),
+        navActiveBorder: cleanText(dto.navActiveBorder),
+        navHoverText: cleanText(dto.navHoverText),
+        navMobileActiveBg: cleanText(dto.navMobileActiveBg),
 
         btnSecondaryBg: cleanText(dto.btnSecondaryBg),
         btnSecondaryText: cleanText(dto.btnSecondaryText),
@@ -237,6 +301,8 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         fontButtonsFamily: cleanText(dto.fontButtonsFamily),
         fontNavFamily: cleanText(dto.fontNavFamily),
         fontBodyFamily: cleanText(dto.fontBodyFamily),
+        fontDisplayEffect: normalizeGoogleFontEffect(cleanText(dto.fontDisplayEffect)),
+        fontMoodEffect: normalizeGoogleFontEffect(cleanText(dto.fontMoodEffect)),
 
         navLogoUrl: cleanText(dto.navLogoUrl),
         heroLogoUrl: cleanText(dto.heroLogoUrl),
@@ -247,7 +313,7 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
     return sanitize(updated);
   }
 
-  const created = await prisma.brandAppearanceSettings.create({
+  const created = await (prisma.brandAppearanceSettings as any).create({
     data: {
       brandId,
       paper: cleanText(dto.paper),
@@ -267,6 +333,21 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       heroGlow: cleanText(dto.heroGlow),
       heroMoodBg: cleanText(dto.heroMoodBg),
       homepageAccent: cleanText(dto.homepageAccent),
+
+      menuActiveBg: cleanText(dto.menuActiveBg),
+      menuActiveText: cleanText(dto.menuActiveText),
+      menuActiveBorder: cleanText(dto.menuActiveBorder),
+      menuInactiveBg: cleanText(dto.menuInactiveBg),
+      menuInactiveText: cleanText(dto.menuInactiveText),
+      menuInactiveBorder: cleanText(dto.menuInactiveBorder),
+      menuHoverBg: cleanText(dto.menuHoverBg),
+      menuHoverBorder: cleanText(dto.menuHoverBorder),
+
+      navActiveBg: cleanText(dto.navActiveBg),
+      navActiveText: cleanText(dto.navActiveText),
+      navActiveBorder: cleanText(dto.navActiveBorder),
+      navHoverText: cleanText(dto.navHoverText),
+      navMobileActiveBg: cleanText(dto.navMobileActiveBg),
 
       btnSecondaryBg: cleanText(dto.btnSecondaryBg),
       btnSecondaryText: cleanText(dto.btnSecondaryText),
@@ -292,6 +373,8 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       fontButtonsFamily: cleanText(dto.fontButtonsFamily),
       fontNavFamily: cleanText(dto.fontNavFamily),
       fontBodyFamily: cleanText(dto.fontBodyFamily),
+      fontDisplayEffect: normalizeGoogleFontEffect(cleanText(dto.fontDisplayEffect)),
+      fontMoodEffect: normalizeGoogleFontEffect(cleanText(dto.fontMoodEffect)),
 
       navLogoUrl: cleanText(dto.navLogoUrl),
       heroLogoUrl: cleanText(dto.heroLogoUrl),
