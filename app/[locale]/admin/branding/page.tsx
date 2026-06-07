@@ -18,12 +18,14 @@ type BrandAppearanceSettings = {
   cardHover: string | null;
   inset: string | null;
   hairline: string | null;
+  hoverBorder: string | null;
 
   accent: string | null;
   accentHover: string | null;
   accentContrast: string | null;
   accentContrastHover: string | null;
   heroGlow: string | null;
+  heroMoodBg: string | null;
   homepageAccent: string | null;
 
   btnSecondaryBg: string | null;
@@ -66,11 +68,13 @@ const DEFAULTS = {
   cardHover: '#e4dcc8',
   inset: '#dfd4c4',
   hairline: '#c9bda8',
+  hoverBorder: '#c65a6b',
   accent: '#b0162f',
   accentHover: '#921226',
   accentContrast: '#f5f0e6',
   accentContrastHover: '#f5f0e6',
   heroGlow: '#b0162f',
+  heroMoodBg: '#000000',
   homepageAccent: '#b0162f',
   success: '#166534',
   warning: '#92400e',
@@ -111,6 +115,7 @@ const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }
     description: 'Логото и mood текста в hero, както и таговете в секцията „Предложения“.',
     fields: [
       { key: 'heroGlow', label: 'Hero glow / mood рамка', hint: 'Пулсацията около голямото лого и рамката около Food • Drinks…' },
+      { key: 'heroMoodBg', label: 'Фон вътре в mood банера', hint: 'Вътрешният фон зад текста Food • Drinks…' },
       { key: 'homepageAccent', label: 'Предложения и Акценти', hint: 'Етикет „Предложения“, badge-ове и accent елементи в cards' },
     ],
   },
@@ -123,6 +128,7 @@ const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }
       { key: 'cardHover', label: 'Картичка при hover', hint: 'Леко потъмняване при посочване' },
       { key: 'inset', label: 'Вдлъбнати полета', hint: 'Input полета, вътрешни панели' },
       { key: 'hairline', label: 'Рамки / разделители', hint: 'Граници между секции' },
+      { key: 'hoverBorder', label: 'Рамки при hover', hint: 'Цвят на рамката при посочване върху картички, вторични бутони и pills' },
     ],
   },
   {
@@ -252,12 +258,14 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       muted: c('muted'),
       card: c('card'),
       hairline: c('hairline'),
+      hoverBorder: c('hoverBorder'),
       inset: c('inset'),
       accent: c('accent'),
       accentHover: c('accentHover'),
       accentContrast: c('accentContrast'),
       accentContrastHover: coalesceColor(settings.accentContrastHover, c('accentContrast')),
       heroGlow: c('heroGlow'),
+      heroMoodBg: c('heroMoodBg'),
       homepageAccent: c('homepageAccent'),
       btnSecondaryBg: coalesceColor(settings.btnSecondaryBg, c('card')),
       btnSecondaryText: coalesceColor(settings.btnSecondaryText, c('ink')),
@@ -320,7 +328,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             style={{
               fontFamily: p.fontDisplay,
               borderColor: p.heroGlow,
-              background: 'rgba(0,0,0,0.85)',
+              background: p.heroMoodBg,
               color: p.accentContrast,
               boxShadow: `0 0 22px ${p.heroGlow}55`,
             }}
@@ -406,7 +414,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
 
           <div
             className="rounded-xl border p-3 text-sm"
-            style={{ background: p.card, borderColor: p.hairline, color: p.ink }}
+            style={{ background: p.card, borderColor: p.hoverBorder, color: p.ink }}
           >
             <p className="font-semibold">Примерна картичка</p>
             <p style={{ color: p.muted }}>Вторичен текст в меню или админ.</p>

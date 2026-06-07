@@ -130,12 +130,14 @@ export default async function RootLayout({
     "--theme-card-hover": appearance?.cardHover,
     "--theme-inset": appearance?.inset,
     "--theme-hairline": appearance?.hairline,
+    "--theme-hover-border": appearance?.hoverBorder,
 
     "--theme-accent": appearance?.accent,
     "--theme-accent-hover": appearance?.accentHover,
     "--theme-accent-contrast": appearance?.accentContrast,
     "--theme-accent-contrast-hover": appearance?.accentContrastHover,
     "--theme-hero-glow": appearance?.heroGlow,
+    "--theme-hero-mood-bg": appearance?.heroMoodBg,
     "--theme-homepage-accent": appearance?.homepageAccent,
 
     "--theme-btn-secondary-bg": appearance?.btnSecondaryBg,

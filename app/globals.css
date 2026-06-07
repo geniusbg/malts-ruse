@@ -14,12 +14,14 @@
   --theme-card-hover: #e4dcc8;
   --theme-inset: #dfd4c4;
   --theme-hairline: #c9bda8;
+  --theme-hover-border: var(--theme-accent-tint-border);
 
   --theme-accent: #b0162f;
   --theme-accent-hover: #921226;
   --theme-accent-contrast: #f5f0e6;
   --theme-accent-contrast-hover: var(--theme-accent-contrast);
   --theme-hero-glow: var(--theme-accent);
+  --theme-hero-mood-bg: rgba(0, 0, 0, 0.88);
   --theme-homepage-accent: var(--theme-accent);
   --theme-accent-tint: rgba(176, 22, 47, 0.1);
   --theme-accent-tint-border: rgba(176, 22, 47, 0.25);
@@ -222,7 +224,7 @@ select option {
 }
 
 .theme-outline-glow:hover {
-  border-color: var(--theme-accent-tint-border);
+  border-color: var(--theme-hover-border);
 }
 
 /* Universal paper primitives */
@@ -235,7 +237,7 @@ select option {
 
 .theme-card:hover {
   background: var(--theme-card-hover);
-  border-color: var(--theme-accent-tint-border);
+  border-color: var(--theme-hover-border);
 }
 
 .theme-inset {
@@ -283,7 +285,7 @@ select option {
 
 .theme-btn-secondary:hover {
   background: var(--theme-btn-secondary-bg-hover, var(--theme-card-hover));
-  border-color: var(--theme-accent-tint-border);
+  border-color: var(--theme-hover-border);
   color: var(--theme-btn-secondary-text-hover, var(--theme-btn-secondary-text, var(--theme-ink)));
 }
 
@@ -450,7 +452,7 @@ img[src='/malts-logo-landscape.svg'],
 .theme-mood-banner {
   border: 4px solid var(--theme-hero-glow);
   border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.88);
+  background: var(--theme-hero-mood-bg);
   box-shadow:
     0 0 0 2px color-mix(in srgb, var(--theme-hero-glow) 40%, transparent),
     0 0 22px color-mix(in srgb, var(--theme-hero-glow) 34%, transparent),

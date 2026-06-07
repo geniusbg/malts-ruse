@@ -585,12 +585,14 @@ model BrandAppearanceSettings {
   cardHover String?  @map("card_hover")
   inset     String?  @map("inset")
   hairline  String?  @map("hairline")
+  hoverBorder String? @map("hover_border")
 
   accent              String? @map("accent")
   accentHover         String? @map("accent_hover")
   accentContrast      String? @map("accent_contrast")
   accentContrastHover String? @map("accent_contrast_hover")
   heroGlow            String? @map("hero_glow")
+  heroMoodBg          String? @map("hero_mood_bg")
   homepageAccent      String? @map("homepage_accent")
 
   btnSecondaryBg       String? @map("btn_secondary_bg")

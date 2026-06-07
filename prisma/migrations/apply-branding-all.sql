@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS brand_appearance_settings (
   card_hover TEXT,
   inset TEXT,
   hairline TEXT,
+  hover_border TEXT,
 
   accent TEXT,
   accent_hover TEXT,
@@ -44,6 +45,10 @@ ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS site_short_name TEXT,
   ADD COLUMN IF NOT EXISTS site_description TEXT;
 
+-- 2b) Hover border color
+ALTER TABLE brand_appearance_settings
+  ADD COLUMN IF NOT EXISTS hover_border TEXT;
+
 -- 3) Typography (Google Fonts)
 ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS google_fonts_css_url TEXT,
@@ -70,4 +75,5 @@ ALTER TABLE brand_appearance_settings
 -- 6) Homepage hero glow + offering accent tags
 ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS hero_glow TEXT,
+  ADD COLUMN IF NOT EXISTS hero_mood_bg TEXT,
   ADD COLUMN IF NOT EXISTS homepage_accent TEXT;

@@ -15,12 +15,14 @@ export type BrandAppearanceSettings = {
   cardHover: string | null;
   inset: string | null;
   hairline: string | null;
+  hoverBorder: string | null;
 
   accent: string | null;
   accentHover: string | null;
   accentContrast: string | null;
   accentContrastHover: string | null;
   heroGlow: string | null;
+  heroMoodBg: string | null;
   homepageAccent: string | null;
 
   btnSecondaryBg: string | null;
@@ -70,12 +72,14 @@ function sanitize(row: any): BrandAppearanceSettings {
     cardHover: row.cardHover ?? null,
     inset: row.inset ?? null,
     hairline: row.hairline ?? null,
+    hoverBorder: row.hoverBorder ?? null,
 
     accent: row.accent ?? null,
     accentHover: row.accentHover ?? null,
     accentContrast: row.accentContrast ?? null,
     accentContrastHover: row.accentContrastHover ?? null,
     heroGlow: row.heroGlow ?? null,
+    heroMoodBg: row.heroMoodBg ?? null,
     homepageAccent: row.homepageAccent ?? null,
 
     btnSecondaryBg: row.btnSecondaryBg ?? null,
@@ -141,11 +145,13 @@ type UpdateDto = Partial<
     | 'cardHover'
     | 'inset'
     | 'hairline'
+    | 'hoverBorder'
     | 'accent'
     | 'accentHover'
     | 'accentContrast'
     | 'accentContrastHover'
     | 'heroGlow'
+    | 'heroMoodBg'
     | 'homepageAccent'
     | 'btnSecondaryBg'
     | 'btnSecondaryText'
@@ -197,12 +203,14 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         cardHover: cleanText(dto.cardHover),
         inset: cleanText(dto.inset),
         hairline: cleanText(dto.hairline),
+        hoverBorder: cleanText(dto.hoverBorder),
 
         accent: cleanText(dto.accent),
         accentHover: cleanText(dto.accentHover),
         accentContrast: cleanText(dto.accentContrast),
         accentContrastHover: cleanText(dto.accentContrastHover),
         heroGlow: cleanText(dto.heroGlow),
+        heroMoodBg: cleanText(dto.heroMoodBg),
         homepageAccent: cleanText(dto.homepageAccent),
 
         btnSecondaryBg: cleanText(dto.btnSecondaryBg),
@@ -250,12 +258,14 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       cardHover: cleanText(dto.cardHover),
       inset: cleanText(dto.inset),
       hairline: cleanText(dto.hairline),
+      hoverBorder: cleanText(dto.hoverBorder),
 
       accent: cleanText(dto.accent),
       accentHover: cleanText(dto.accentHover),
       accentContrast: cleanText(dto.accentContrast),
       accentContrastHover: cleanText(dto.accentContrastHover),
       heroGlow: cleanText(dto.heroGlow),
+      heroMoodBg: cleanText(dto.heroMoodBg),
       homepageAccent: cleanText(dto.homepageAccent),
 
       btnSecondaryBg: cleanText(dto.btnSecondaryBg),
