@@ -590,10 +590,21 @@ model BrandAppearanceSettings {
   accentHover         String? @map("accent_hover")
   accentContrast      String? @map("accent_contrast")
   accentContrastHover String? @map("accent_contrast_hover")
+  heroGlow            String? @map("hero_glow")
+  homepageAccent      String? @map("homepage_accent")
+
+  btnSecondaryBg       String? @map("btn_secondary_bg")
+  btnSecondaryText     String? @map("btn_secondary_text")
+  btnSecondaryBorder   String? @map("btn_secondary_border")
+  btnSecondaryBgHover  String? @map("btn_secondary_bg_hover")
+  btnSecondaryTextHover String? @map("btn_secondary_text_hover")
 
   success String? @map("success")
   warning String? @map("warning")
   danger  String? @map("danger")
+  dangerHover         String? @map("danger_hover")
+  dangerContrast      String? @map("danger_contrast")
+  dangerContrastHover String? @map("danger_contrast_hover")
   info    String? @map("info")
 
   // Browser / PWA UI

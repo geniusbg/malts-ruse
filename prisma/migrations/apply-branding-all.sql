@@ -55,3 +55,19 @@ ALTER TABLE brand_appearance_settings
 -- 4) Primary button text on hover
 ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS accent_contrast_hover TEXT;
+
+-- 5) Secondary + danger modal buttons
+ALTER TABLE brand_appearance_settings
+  ADD COLUMN IF NOT EXISTS btn_secondary_bg TEXT,
+  ADD COLUMN IF NOT EXISTS btn_secondary_text TEXT,
+  ADD COLUMN IF NOT EXISTS btn_secondary_border TEXT,
+  ADD COLUMN IF NOT EXISTS btn_secondary_bg_hover TEXT,
+  ADD COLUMN IF NOT EXISTS btn_secondary_text_hover TEXT,
+  ADD COLUMN IF NOT EXISTS danger_hover TEXT,
+  ADD COLUMN IF NOT EXISTS danger_contrast TEXT,
+  ADD COLUMN IF NOT EXISTS danger_contrast_hover TEXT;
+
+-- 6) Homepage hero glow + offering accent tags
+ALTER TABLE brand_appearance_settings
+  ADD COLUMN IF NOT EXISTS hero_glow TEXT,
+  ADD COLUMN IF NOT EXISTS homepage_accent TEXT;

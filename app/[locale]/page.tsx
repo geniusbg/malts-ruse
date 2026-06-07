@@ -332,6 +332,27 @@ export default async function HomePage({
   const ctaSecondary = useDbSettings
     ? (locale === 'bg' ? homepageSettings.ctaSecondaryBg : locale === 'en' ? homepageSettings.ctaSecondaryEn : homepageSettings.ctaSecondaryRo)
     : offerings.ctaSecondary;
+  const addressText =
+    locale === 'bg'
+      ? locationSettings.addressBg
+      : locale === 'en'
+        ? locationSettings.addressEn
+        : locationSettings.addressRo;
+  const hasCoordinates =
+    typeof locationSettings.latitude === 'number' &&
+    Number.isFinite(locationSettings.latitude) &&
+    typeof locationSettings.longitude === 'number' &&
+    Number.isFinite(locationSettings.longitude);
+  const mapDestination = hasCoordinates
+    ? `${locationSettings.latitude},${locationSettings.longitude}`
+    : addressText;
+  const encodedMapDestination = encodeURIComponent(mapDestination);
+  const encodedAddressLabel = encodeURIComponent(addressText);
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedMapDestination}`;
+  const appleMapsUrl = `https://maps.apple.com/?daddr=${encodedMapDestination}&q=${encodedAddressLabel}`;
+  const wazeUrl = hasCoordinates
+    ? `https://waze.com/ul?ll=${locationSettings.latitude},${locationSettings.longitude}&navigate=yes`
+    : `https://waze.com/ul?q=${encodedMapDestination}&navigate=yes`;
 
   return (
     <main className="min-h-screen theme-surface">
@@ -379,17 +400,29 @@ export default async function HomePage({
             
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               {/* Location with enhanced styling */}
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--theme-card)]/80 border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] backdrop-blur-sm">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="font-medium">
-                  {locale === 'bg' ? locationSettings.addressBg :
-                   locale === 'en' ? locationSettings.addressEn :
-                   locationSettings.addressRo}
-                </span>
-              </div>
+              <details className="group relative">
+                <summary className="inline-flex list-none items-center gap-2 px-6 py-3 bg-[var(--theme-card)]/80 border border-[var(--theme-hairline)] rounded-full text-[var(--theme-ink)] backdrop-blur-sm cursor-pointer transition hover:border-[var(--theme-accent-tint-border)] [&::-webkit-details-marker]:hidden">
+                  <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="font-medium">{addressText}</span>
+                  <svg className="h-4 w-4 shrink-0 transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="absolute left-1/2 z-30 mt-2 w-[min(92vw,260px)] -translate-x-1/2 overflow-hidden rounded-2xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] shadow-xl">
+                  <a className="block px-4 py-3 text-sm font-semibold text-[var(--theme-ink)] hover:bg-[var(--theme-inset)]" href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
+                    Google Maps
+                  </a>
+                  <a className="block px-4 py-3 text-sm font-semibold text-[var(--theme-ink)] hover:bg-[var(--theme-inset)]" href={appleMapsUrl} target="_blank" rel="noopener noreferrer">
+                    Apple Maps
+                  </a>
+                  <a className="block px-4 py-3 text-sm font-semibold text-[var(--theme-ink)] hover:bg-[var(--theme-inset)]" href={wazeUrl} target="_blank" rel="noopener noreferrer">
+                    Waze
+                  </a>
+                </div>
+              </details>
               
               {/* Today's working hours */}
               {todayHours && todayHours.isOpen && todayHours.openTime && todayHours.closeTime && (
@@ -413,12 +446,12 @@ export default async function HomePage({
         <section className="mt-16 md:mt-24 relative">
           <div className="relative overflow-hidden theme-card px-6 py-12 md:px-16 md:py-16">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-24 right-0 w-72 h-72 bg-[var(--theme-accent-tint)] blur-3xl opacity-60"></div>
+              <div className="theme-homepage-accent-glow absolute -top-24 right-0 w-72 h-72 blur-3xl opacity-60"></div>
               <div className="absolute -bottom-10 left-10 w-56 h-56 bg-[rgba(22,101,52,0.10)] blur-3xl opacity-60"></div>
             </div>
 
             <div className="relative flex flex-col items-center text-center max-w-4xl mx-auto">
-              <span className="inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] theme-section-label-font">
+              <span className="theme-homepage-accent-pill inline-flex items-center px-4 py-2 rounded-full text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.18em] md:tracking-[0.22em] border theme-section-label-font">
                 {sectionLabel}
               </span>
               <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight theme-display">
@@ -469,8 +502,8 @@ export default async function HomePage({
                   <div className="flex items-center justify-between">
                     <div className="relative group/icon">
                       {/* Icon circle with glow */}
-                      <div className="absolute inset-0 w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
-                      <div className="relative w-16 h-16 rounded-full bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] flex items-center justify-center transition-all duration-300">
+                      <div className="theme-homepage-accent-glow absolute inset-0 w-16 h-16 rounded-full blur-md transition-all duration-300 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+                      <div className="theme-homepage-accent-pill relative w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300">
                         <div className="flex items-center justify-center transform group-hover/icon:scale-110 transition-transform duration-300">
                           <OfferingCardIcon icon={card.icon} />
                         </div>
@@ -484,7 +517,7 @@ export default async function HomePage({
                         </div>
                       </div>
                     </div>
-                    <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--theme-accent)] bg-[var(--theme-accent-tint)] border border-[var(--theme-accent-tint-border)] px-3 py-1 rounded-full transition-colors">
+                    <span className="theme-homepage-accent-pill text-[11px] uppercase tracking-[0.25em] border px-3 py-1 rounded-full transition-colors">
                       {card.badge}
                     </span>
                   </div>
@@ -500,7 +533,7 @@ export default async function HomePage({
                     <ul className="space-y-2 text-sm md:text-base text-[var(--theme-ink)]">
                       {card.highlights.map((item, index) => (
                         <li key={`${card.title}-${index}`} className="flex items-center gap-2 group-hover:translate-x-1 transition-transform duration-200" style={{ transitionDelay: `${index * 50}ms` }}>
-                          <span className="inline-block h-[2px] w-6 bg-[var(--theme-hairline)] group-hover:bg-[var(--theme-accent-tint-border)] group-hover:w-8 transition-all"></span>
+                          <span className="inline-block h-[2px] w-6 bg-[var(--theme-hairline)] group-hover:bg-[color-mix(in_srgb,var(--theme-homepage-accent)_35%,transparent)] group-hover:w-8 transition-all"></span>
                           <span className="truncate transition-colors">{item}</span>
                         </li>
                       ))}

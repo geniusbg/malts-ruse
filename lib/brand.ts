@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { prisma } from './prisma';
 
 /** Tenant slug — set DEFAULT_BRAND_SLUG in .env per deployment (e.g. restorant-complexdunav). */
@@ -13,7 +14,7 @@ export async function getDefaultBrandId(): Promise<string> {
   return brand.id;
 }
 
-export async function getDefaultBrand() {
+export const getDefaultBrand = cache(async function getDefaultBrand() {
   const slug = getConfiguredBrandSlug() || DEFAULT_BRAND_SLUG;
   const brand = await prisma.brand.findUnique({ where: { slug } });
   if (!brand) {
@@ -22,4 +23,4 @@ export async function getDefaultBrand() {
     );
   }
   return brand;
-}
+});

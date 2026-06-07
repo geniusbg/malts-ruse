@@ -135,10 +135,21 @@ export default async function RootLayout({
     "--theme-accent-hover": appearance?.accentHover,
     "--theme-accent-contrast": appearance?.accentContrast,
     "--theme-accent-contrast-hover": appearance?.accentContrastHover,
+    "--theme-hero-glow": appearance?.heroGlow,
+    "--theme-homepage-accent": appearance?.homepageAccent,
+
+    "--theme-btn-secondary-bg": appearance?.btnSecondaryBg,
+    "--theme-btn-secondary-text": appearance?.btnSecondaryText,
+    "--theme-btn-secondary-border": appearance?.btnSecondaryBorder,
+    "--theme-btn-secondary-bg-hover": appearance?.btnSecondaryBgHover,
+    "--theme-btn-secondary-text-hover": appearance?.btnSecondaryTextHover,
 
     "--theme-success": appearance?.success,
     "--theme-warning": appearance?.warning,
     "--theme-danger": appearance?.danger,
+    "--theme-danger-hover": appearance?.dangerHover,
+    "--theme-danger-contrast": appearance?.dangerContrast,
+    "--theme-danger-contrast-hover": appearance?.dangerContrastHover,
     "--theme-info": appearance?.info,
   };
 

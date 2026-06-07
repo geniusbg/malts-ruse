@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { getDefaultBrandId } from '@/lib/brand';
 import { sanitizeGoogleFontsCssUrl } from '@/lib/brand-fonts';
@@ -19,10 +20,21 @@ export type BrandAppearanceSettings = {
   accentHover: string | null;
   accentContrast: string | null;
   accentContrastHover: string | null;
+  heroGlow: string | null;
+  homepageAccent: string | null;
+
+  btnSecondaryBg: string | null;
+  btnSecondaryText: string | null;
+  btnSecondaryBorder: string | null;
+  btnSecondaryBgHover: string | null;
+  btnSecondaryTextHover: string | null;
 
   success: string | null;
   warning: string | null;
   danger: string | null;
+  dangerHover: string | null;
+  dangerContrast: string | null;
+  dangerContrastHover: string | null;
   info: string | null;
 
   themeColor: string | null;
@@ -63,10 +75,21 @@ function sanitize(row: any): BrandAppearanceSettings {
     accentHover: row.accentHover ?? null,
     accentContrast: row.accentContrast ?? null,
     accentContrastHover: row.accentContrastHover ?? null,
+    heroGlow: row.heroGlow ?? null,
+    homepageAccent: row.homepageAccent ?? null,
+
+    btnSecondaryBg: row.btnSecondaryBg ?? null,
+    btnSecondaryText: row.btnSecondaryText ?? null,
+    btnSecondaryBorder: row.btnSecondaryBorder ?? null,
+    btnSecondaryBgHover: row.btnSecondaryBgHover ?? null,
+    btnSecondaryTextHover: row.btnSecondaryTextHover ?? null,
 
     success: row.success ?? null,
     warning: row.warning ?? null,
     danger: row.danger ?? null,
+    dangerHover: row.dangerHover ?? null,
+    dangerContrast: row.dangerContrast ?? null,
+    dangerContrastHover: row.dangerContrastHover ?? null,
     info: row.info ?? null,
 
     themeColor: row.themeColor ?? null,
@@ -90,11 +113,11 @@ function sanitize(row: any): BrandAppearanceSettings {
   };
 }
 
-export async function getBrandAppearanceSettings(): Promise<BrandAppearanceSettings | null> {
+export const getBrandAppearanceSettings = cache(async function getBrandAppearanceSettings(): Promise<BrandAppearanceSettings | null> {
   const brandId = await getDefaultBrandId();
   const row = await prisma.brandAppearanceSettings.findUnique({ where: { brandId } });
   return row ? sanitize(row) : null;
-}
+});
 
 export async function getOrCreateBrandAppearanceSettings(): Promise<BrandAppearanceSettings> {
   const brandId = await getDefaultBrandId();
@@ -122,9 +145,19 @@ type UpdateDto = Partial<
     | 'accentHover'
     | 'accentContrast'
     | 'accentContrastHover'
+    | 'heroGlow'
+    | 'homepageAccent'
+    | 'btnSecondaryBg'
+    | 'btnSecondaryText'
+    | 'btnSecondaryBorder'
+    | 'btnSecondaryBgHover'
+    | 'btnSecondaryTextHover'
     | 'success'
     | 'warning'
     | 'danger'
+    | 'dangerHover'
+    | 'dangerContrast'
+    | 'dangerContrastHover'
     | 'info'
     | 'themeColor'
     | 'siteTitle'
@@ -169,10 +202,21 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         accentHover: cleanText(dto.accentHover),
         accentContrast: cleanText(dto.accentContrast),
         accentContrastHover: cleanText(dto.accentContrastHover),
+        heroGlow: cleanText(dto.heroGlow),
+        homepageAccent: cleanText(dto.homepageAccent),
+
+        btnSecondaryBg: cleanText(dto.btnSecondaryBg),
+        btnSecondaryText: cleanText(dto.btnSecondaryText),
+        btnSecondaryBorder: cleanText(dto.btnSecondaryBorder),
+        btnSecondaryBgHover: cleanText(dto.btnSecondaryBgHover),
+        btnSecondaryTextHover: cleanText(dto.btnSecondaryTextHover),
 
         success: cleanText(dto.success),
         warning: cleanText(dto.warning),
         danger: cleanText(dto.danger),
+        dangerHover: cleanText(dto.dangerHover),
+        dangerContrast: cleanText(dto.dangerContrast),
+        dangerContrastHover: cleanText(dto.dangerContrastHover),
         info: cleanText(dto.info),
 
         themeColor: cleanText(dto.themeColor),
@@ -211,10 +255,21 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       accentHover: cleanText(dto.accentHover),
       accentContrast: cleanText(dto.accentContrast),
       accentContrastHover: cleanText(dto.accentContrastHover),
+      heroGlow: cleanText(dto.heroGlow),
+      homepageAccent: cleanText(dto.homepageAccent),
+
+      btnSecondaryBg: cleanText(dto.btnSecondaryBg),
+      btnSecondaryText: cleanText(dto.btnSecondaryText),
+      btnSecondaryBorder: cleanText(dto.btnSecondaryBorder),
+      btnSecondaryBgHover: cleanText(dto.btnSecondaryBgHover),
+      btnSecondaryTextHover: cleanText(dto.btnSecondaryTextHover),
 
       success: cleanText(dto.success),
       warning: cleanText(dto.warning),
       danger: cleanText(dto.danger),
+      dangerHover: cleanText(dto.dangerHover),
+      dangerContrast: cleanText(dto.dangerContrast),
+      dangerContrastHover: cleanText(dto.dangerContrastHover),
       info: cleanText(dto.info),
 
       themeColor: cleanText(dto.themeColor),

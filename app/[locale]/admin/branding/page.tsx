@@ -23,10 +23,21 @@ type BrandAppearanceSettings = {
   accentHover: string | null;
   accentContrast: string | null;
   accentContrastHover: string | null;
+  heroGlow: string | null;
+  homepageAccent: string | null;
+
+  btnSecondaryBg: string | null;
+  btnSecondaryText: string | null;
+  btnSecondaryBorder: string | null;
+  btnSecondaryBgHover: string | null;
+  btnSecondaryTextHover: string | null;
 
   success: string | null;
   warning: string | null;
   danger: string | null;
+  dangerHover: string | null;
+  dangerContrast: string | null;
+  dangerContrastHover: string | null;
   info: string | null;
 
   themeColor: string | null;
@@ -59,9 +70,14 @@ const DEFAULTS = {
   accentHover: '#921226',
   accentContrast: '#f5f0e6',
   accentContrastHover: '#f5f0e6',
+  heroGlow: '#b0162f',
+  homepageAccent: '#b0162f',
   success: '#166534',
   warning: '#92400e',
   danger: '#991b1b',
+  dangerHover: '#7f1515',
+  dangerContrast: '#ffffff',
+  dangerContrastHover: '#ffffff',
   info: '#1d4ed8',
   themeColor: '#e8e0d4',
 };
@@ -71,9 +87,33 @@ function coalesceColor(v: string | null | undefined, fallback: string) {
   return s || fallback;
 }
 
+function colorFieldFallback(key: keyof BrandAppearanceSettings): string {
+  const chain: Partial<Record<keyof BrandAppearanceSettings, keyof typeof DEFAULTS>> = {
+    btnSecondaryBg: 'card',
+    btnSecondaryText: 'ink',
+    btnSecondaryBorder: 'hairline',
+    btnSecondaryBgHover: 'cardHover',
+    btnSecondaryTextHover: 'ink',
+    dangerHover: 'danger',
+    dangerContrastHover: 'dangerContrast',
+  };
+  const mapped = chain[key];
+  if (mapped) return DEFAULTS[mapped];
+  if (key in DEFAULTS) return DEFAULTS[key as keyof typeof DEFAULTS];
+  return DEFAULTS.card;
+}
+
 type ColorField = { key: keyof BrandAppearanceSettings; label: string; hint: string };
 
 const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }[] = [
+  {
+    title: 'Homepage акценти',
+    description: 'Логото и mood текста в hero, както и таговете в секцията „Предложения“.',
+    fields: [
+      { key: 'heroGlow', label: 'Hero glow / mood рамка', hint: 'Пулсацията около голямото лого и рамката около Food • Drinks…' },
+      { key: 'homepageAccent', label: 'Предложения и Акценти', hint: 'Етикет „Предложения“, badge-ове и accent елементи в cards' },
+    ],
+  },
   {
     title: 'Фон и повърхности',
     description: 'Общ фон на сайта, картички и полета.',
@@ -105,12 +145,32 @@ const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }
     ],
   },
   {
+    title: 'Вторични бутони',
+    description: 'Отказ в modals (theme-btn-secondary). Празно поле = стойност от Фон/Текст по-горе.',
+    fields: [
+      { key: 'btnSecondaryBg', label: 'Фон', hint: 'По подразбиране: Фон на картички' },
+      { key: 'btnSecondaryText', label: 'Текст', hint: 'По подразбиране: Основен текст' },
+      { key: 'btnSecondaryBorder', label: 'Рамка', hint: 'По подразбиране: Рамки / разделители' },
+      { key: 'btnSecondaryBgHover', label: 'Фон при hover', hint: 'По подразбиране: Картичка при hover' },
+      { key: 'btnSecondaryTextHover', label: 'Текст при hover', hint: 'По подразбиране: същият като Текст' },
+    ],
+  },
+  {
+    title: 'Опасни бутони',
+    description: 'Да, излез / Изтрий (theme-btn-danger) в modals.',
+    fields: [
+      { key: 'danger', label: 'Фон', hint: 'Същото като „Грешка / опасност“ за badges' },
+      { key: 'dangerHover', label: 'Фон при hover', hint: 'По-тъмен фон при hover' },
+      { key: 'dangerContrast', label: 'Текст', hint: 'Букви върху червения фон' },
+      { key: 'dangerContrastHover', label: 'Текст при hover', hint: 'Букви при hover' },
+    ],
+  },
+  {
     title: 'Съобщения (успех / грешка)',
-    description: 'Банери и badges в админ и поръчки.',
+    description: 'Банери и badges. Червен badge ползва „Фон“ от Опасни бутони.',
     fields: [
       { key: 'success', label: 'Успех', hint: 'Потвърждения, „запазено“' },
       { key: 'warning', label: 'Предупреждение', hint: 'Внимание, изчакващи действия' },
-      { key: 'danger', label: 'Грешка / опасност', hint: 'Отказ, изтриване' },
       { key: 'info', label: 'Информация', hint: 'Неутрални съобщения' },
     ],
   },
@@ -197,9 +257,19 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       accentHover: c('accentHover'),
       accentContrast: c('accentContrast'),
       accentContrastHover: coalesceColor(settings.accentContrastHover, c('accentContrast')),
+      heroGlow: c('heroGlow'),
+      homepageAccent: c('homepageAccent'),
+      btnSecondaryBg: coalesceColor(settings.btnSecondaryBg, c('card')),
+      btnSecondaryText: coalesceColor(settings.btnSecondaryText, c('ink')),
+      btnSecondaryBorder: coalesceColor(settings.btnSecondaryBorder, c('hairline')),
+      btnSecondaryBgHover: coalesceColor(settings.btnSecondaryBgHover, c('cardHover')),
+      btnSecondaryTextHover: coalesceColor(settings.btnSecondaryTextHover, coalesceColor(settings.btnSecondaryText, c('ink'))),
       success: c('success'),
       warning: c('warning'),
       danger: c('danger'),
+      dangerHover: coalesceColor(settings.dangerHover, c('dangerHover')),
+      dangerContrast: coalesceColor(settings.dangerContrast, c('dangerContrast')),
+      dangerContrastHover: coalesceColor(settings.dangerContrastHover, coalesceColor(settings.dangerContrast, c('dangerContrast'))),
       fontDisplay: fonts.display || undefined,
       fontButtons: fonts.buttons || undefined,
       fontNav: fonts.nav || undefined,
@@ -249,13 +319,29 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             className="mx-auto max-w-full rounded-full border-2 px-4 py-2 text-center text-sm"
             style={{
               fontFamily: p.fontDisplay,
-              borderColor: p.accent,
+              borderColor: p.heroGlow,
               background: 'rgba(0,0,0,0.85)',
               color: p.accentContrast,
+              boxShadow: `0 0 22px ${p.heroGlow}55`,
             }}
           >
             Добро настроение
           </p>
+
+          <div className="flex flex-wrap justify-center gap-2 text-xs font-medium">
+            <span
+              className="rounded-full border px-3 py-1 uppercase tracking-[0.18em]"
+              style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
+            >
+              Предложения
+            </span>
+            <span
+              className="rounded-full border px-3 py-1"
+              style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
+            >
+              Класика
+            </span>
+          </div>
 
           <div className="flex flex-wrap justify-center gap-2">
             <button
@@ -277,13 +363,44 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
               type="button"
               className="rounded-xl border px-4 py-2 text-sm font-semibold"
               style={{
-                background: p.card,
-                color: p.ink,
-                borderColor: p.hairline,
+                background: p.btnSecondaryBg,
+                color: p.btnSecondaryText,
+                borderColor: p.btnSecondaryBorder,
                 fontFamily: p.fontButtons,
               }}
             >
-              Вторичен
+              Отказ
+            </button>
+            <button
+              type="button"
+              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              style={{ background: p.danger, color: p.dangerContrast, fontFamily: p.fontButtons }}
+            >
+              Да, излез
+            </button>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              className="rounded-xl border px-4 py-2 text-sm font-semibold"
+              style={{
+                background: p.btnSecondaryBgHover,
+                color: p.btnSecondaryTextHover,
+                borderColor: p.btnSecondaryBorder,
+                fontFamily: p.fontButtons,
+              }}
+              title="Отказ при hover"
+            >
+              Отказ hover
+            </button>
+            <button
+              type="button"
+              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              style={{ background: p.dangerHover, color: p.dangerContrastHover, fontFamily: p.fontButtons }}
+              title="Опасен при hover"
+            >
+              Излез hover
             </button>
           </div>
 
@@ -519,7 +636,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
                     label={field.label}
                     hint={field.hint}
                     value={(settings[field.key] as string | null) ?? ''}
-                    fallback={DEFAULTS[field.key as keyof typeof DEFAULTS]}
+                    fallback={colorFieldFallback(field.key)}
                     onChange={(v) => setSettings({ ...settings, [field.key]: v } as BrandAppearanceSettings)}
                   />
                 ))}
