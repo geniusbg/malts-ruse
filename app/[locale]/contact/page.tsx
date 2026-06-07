@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { getLocationSettings } from '@/lib/location-settings';
 import { resolveSiteDisplayName } from '@/lib/site-display-name';
 import { mapEmbedTitle, normalizeBrandLocale } from '@/lib/brand-copy';
+import { getBrandAppearanceSettings } from '@/lib/brand-appearance-settings';
+import { resolveNavLogoUrl } from '@/lib/brand-defaults';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -55,10 +57,13 @@ export default async function ContactPage({
   const { locale: loc } = await params;
   const locale = normalizeBrandLocale(loc);
   const t = copy[locale];
-  const siteName = await resolveSiteDisplayName();
+  const [siteName, brandAppearance, locationSettings] = await Promise.all([
+    resolveSiteDisplayName(),
+    getBrandAppearanceSettings(),
+    getLocationSettings(),
+  ]);
   const mapTitle = mapEmbedTitle(locale, siteName);
-
-  const locationSettings = await getLocationSettings();
+  const contactLogoSrc = resolveNavLogoUrl(brandAppearance?.navLogoUrl);
 
   const workingHours = await prisma.workingHours.findMany({
 
@@ -143,7 +148,7 @@ export default async function ContactPage({
               <div className="mb-6 -mt-4 flex justify-center">
                 <Link href={`/${locale}`} className="inline-block max-w-full">
                   <Image
-                    src="/malts-logo-nav.webp"
+                    src={contactLogoSrc}
                     alt={siteName}
                     width={400}
                     height={331}
@@ -399,4 +404,3 @@ export default async function ContactPage({
   );
 
 }
-

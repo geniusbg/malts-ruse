@@ -53,6 +53,14 @@ function addGoogleFontEffects(cssUrl: string | null, effects: Array<string | nul
 
   try {
     const u = new URL(cssUrl);
+    if (u.hostname === 'fonts.googleapis.com' && u.pathname.includes('/css2')) {
+      const families = u.searchParams.getAll('family');
+      if (families.length > 1) {
+        u.searchParams.delete('family');
+        u.searchParams.set('family', families.join('|'));
+      }
+      u.pathname = u.pathname.replace('/css2', '/css');
+    }
     const existing = (u.searchParams.get('effect') || '')
       .split('|')
       .map(normalizeGoogleFontEffect)

@@ -350,12 +350,35 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       fontButtons: fonts.buttons || undefined,
       fontNav: fonts.nav || undefined,
       fontBody: fonts.body || undefined,
+      googleFontsCssUrl: fonts.googleFontsCssUrl,
       displayEffectClass: fonts.displayEffectClass,
       moodEffectClass: fonts.moodEffectClass,
       navLogo: (settings.navLogoUrl || '').trim(),
       siteTitle: (settings.siteShortName || settings.siteTitle || 'Вашият бранд').trim(),
     };
   }, [settings]);
+
+  useEffect(() => {
+    const href = p.googleFontsCssUrl;
+    const id = 'brand-preview-google-fonts';
+    const existing = document.getElementById(id) as HTMLLinkElement | null;
+    if (!href) {
+      existing?.remove();
+      return;
+    }
+    if (existing) {
+      if (existing.href !== href) existing.href = href;
+      return;
+    }
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+    return () => {
+      document.getElementById(id)?.remove();
+    };
+  }, [p.googleFontsCssUrl]);
 
   return (
     <div className="sticky top-24 space-y-4">
