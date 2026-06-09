@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useBrandAppearance } from '@/lib/use-brand-appearance';
 import { resolveNavLogoUrl } from '@/lib/brand-defaults';
+import { googleFontEffectClass } from '@/lib/brand-fonts';
 
 // Translations
 const translations: Record<string, Record<string, string>> = {
@@ -43,6 +44,7 @@ export default function Navigation({
   const appearance = useBrandAppearance();
   const navLogoSrc = resolveNavLogoUrl(appearance?.navLogoUrl, initialNavLogoUrl);
   const brandLabel = (initialSiteShortName || '').trim() || 'Menu';
+  const navEffectClass = googleFontEffectClass(appearance?.fontNavEffect);
 
   const t = translations[locale] || translations.bg;
 
@@ -112,7 +114,7 @@ export default function Navigation({
 
           {/* Desktop Navigation Links */}
           <div
-            className={`hidden shrink-0 items-center gap-3 md:flex lg:gap-6 theme-nav-font theme-nav-links ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
+            className={`hidden shrink-0 items-center gap-3 md:flex lg:gap-6 theme-nav-font theme-nav-links ${navEffectClass} ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
           >
             {navLinks.map((link) => (
               <Link
@@ -160,7 +162,7 @@ export default function Navigation({
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div
-            className={`md:hidden py-4 border-t border-[var(--theme-hairline)] mt-2 theme-nav-font theme-nav-links ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
+            className={`md:hidden py-4 border-t border-[var(--theme-hairline)] mt-2 theme-nav-font theme-nav-links ${navEffectClass} ${locale === 'bg' ? 'theme-nav-links--bg' : ''}`}
           >
             {navLinks.map((link) => (
               <Link

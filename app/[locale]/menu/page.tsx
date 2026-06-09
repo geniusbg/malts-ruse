@@ -16,12 +16,17 @@ import {
 } from '@/lib/category-navigation';
 import { stripLeadingEmoji } from '@/lib/strip-leading-emoji';
 import { productParamForUrl, resolveProductQueryToId } from '@/lib/product-url';
+import { googleFontEffectClass } from '@/lib/brand-fonts';
+import { useBrandAppearance } from '@/lib/use-brand-appearance';
 
 function MenuPageContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const locale = pathname.split('/')[1] || 'bg';
+  const appearance = useBrandAppearance();
+  const menuEffectClass = googleFontEffectClass(appearance?.fontMenuEffect);
+  const productEffectClass = googleFontEffectClass(appearance?.fontProductEffect);
   
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -409,18 +414,18 @@ function MenuPageContent() {
 
             const btnClass = (isActive: boolean) =>
                   depth === 0
-                ? `px-6 py-3 rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
+                ? `px-6 py-3 rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${menuEffectClass} ${
                     isActive
                       ? 'bg-[var(--theme-menu-active-bg)] text-[var(--theme-menu-active-text)] border border-[var(--theme-menu-active-border)] shadow-md scale-[1.02]'
                       : 'bg-[var(--theme-menu-inactive-bg)] text-[var(--theme-menu-inactive-text)] hover:bg-[var(--theme-menu-hover-bg)] hover:border-[var(--theme-menu-hover-border)] border border-[var(--theme-menu-inactive-border)] shadow-sm'
                   }`
                 : tierStyle1
-                  ? `px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap text-sm ${
+                  ? `px-4 py-2 rounded-lg font-medium transition-all duration-300 whitespace-nowrap text-sm ${menuEffectClass} ${
                       isActive
                         ? 'bg-[var(--theme-menu-active-bg)] text-[var(--theme-menu-active-text)] border-2 border-[var(--theme-menu-active-border)]'
                         : 'bg-[var(--theme-menu-inactive-bg)] text-[var(--theme-menu-inactive-text)] hover:bg-[var(--theme-menu-hover-bg)] hover:border-[var(--theme-menu-hover-border)] border border-[var(--theme-menu-inactive-border)]'
                     }`
-                  : `px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${
+                  : `px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm ${menuEffectClass} ${
                       isActive
                         ? 'bg-[var(--theme-menu-active-bg)] text-[var(--theme-menu-active-text)] border border-[var(--theme-menu-active-border)]'
                         : 'bg-[var(--theme-menu-inactive-bg)] text-[var(--theme-menu-inactive-text)] hover:bg-[var(--theme-menu-hover-bg)] hover:border-[var(--theme-menu-hover-border)] border border-[var(--theme-menu-inactive-border)]'
@@ -615,7 +620,7 @@ function MenuPageContent() {
                   <div
                     className={`p-6 ${product.isPromoted && !product.imageUrl ? 'pt-12' : ''}`}
                   >
-                    <h3 className="text-xl font-bold text-[var(--theme-ink)] mb-2 group-hover:text-[var(--theme-accent)] transition-colors">
+                    <h3 className={`text-xl font-bold text-[var(--theme-ink)] mb-2 group-hover:text-[var(--theme-accent)] transition-colors ${productEffectClass}`}>
                       {productName}
                     </h3>
                     

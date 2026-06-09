@@ -64,6 +64,7 @@ export default async function HomePage({
   const heroLogoSrc = resolveHeroLogoUrl(brandAppearance?.heroLogoUrl);
   const moodFontEffectClass = googleFontEffectClass(brandAppearance?.fontMoodEffect);
   const displayFontEffectClass = googleFontEffectClass(brandAppearance?.fontDisplayEffect);
+  const buttonFontEffectClass = googleFontEffectClass(brandAppearance?.fontButtonEffect);
 
   const highlightsLabel =
     locale === 'bg'
@@ -387,7 +388,7 @@ export default async function HomePage({
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10 md:mb-16">
               <Link 
                 href={`/${locale}/menu`}
-                className="group relative px-8 py-4 theme-btn-primary rounded-xl font-bold text-lg transition-all duration-300 overflow-hidden w-full sm:w-auto"
+                className={`group relative px-8 py-4 theme-btn-primary rounded-xl font-bold text-lg transition-all duration-300 overflow-hidden w-full sm:w-auto ${buttonFontEffectClass}`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   🍸 {locale === 'bg' ? 'Виж менюто' : locale === 'en' ? 'View Menu' : 'Vezi meniul'}
@@ -395,7 +396,7 @@ export default async function HomePage({
               </Link>
               <Link 
                 href={`/${locale}/events`}
-                className="px-8 py-4 theme-btn-secondary rounded-xl font-bold text-lg border-2 transition-all duration-300 w-full sm:w-auto"
+                className={`px-8 py-4 theme-btn-secondary rounded-xl font-bold text-lg border-2 transition-all duration-300 w-full sm:w-auto ${buttonFontEffectClass}`}
               >
                 🎉 {locale === 'bg' ? 'Събития' : locale === 'en' ? 'Events' : 'Evenimente'}
               </Link>

@@ -66,6 +66,10 @@ export type BrandAppearanceSettings = {
   fontBodyFamily: string | null;
   fontDisplayEffect: string | null;
   fontMoodEffect: string | null;
+  fontNavEffect: string | null;
+  fontMenuEffect: string | null;
+  fontProductEffect: string | null;
+  fontButtonEffect: string | null;
 
   navLogoUrl: string | null;
   heroLogoUrl: string | null;
@@ -140,6 +144,10 @@ function sanitize(row: any): BrandAppearanceSettings {
     fontBodyFamily: row.fontBodyFamily ?? null,
     fontDisplayEffect: row.fontDisplayEffect ?? null,
     fontMoodEffect: row.fontMoodEffect ?? null,
+    fontNavEffect: row.fontNavEffect ?? null,
+    fontMenuEffect: row.fontMenuEffect ?? null,
+    fontProductEffect: row.fontProductEffect ?? null,
+    fontButtonEffect: row.fontButtonEffect ?? null,
 
     navLogoUrl: row.navLogoUrl ?? null,
     heroLogoUrl: row.heroLogoUrl ?? null,
@@ -223,6 +231,10 @@ type UpdateDto = Partial<
     | 'fontBodyFamily'
     | 'fontDisplayEffect'
     | 'fontMoodEffect'
+    | 'fontNavEffect'
+    | 'fontMenuEffect'
+    | 'fontProductEffect'
+    | 'fontButtonEffect'
     | 'navLogoUrl'
     | 'heroLogoUrl'
     | 'appIconUrl'
@@ -303,6 +315,10 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         fontBodyFamily: cleanText(dto.fontBodyFamily),
         fontDisplayEffect: normalizeGoogleFontEffect(cleanText(dto.fontDisplayEffect)),
         fontMoodEffect: normalizeGoogleFontEffect(cleanText(dto.fontMoodEffect)),
+        fontNavEffect: normalizeGoogleFontEffect(cleanText(dto.fontNavEffect)),
+        fontMenuEffect: normalizeGoogleFontEffect(cleanText(dto.fontMenuEffect)),
+        fontProductEffect: normalizeGoogleFontEffect(cleanText(dto.fontProductEffect)),
+        fontButtonEffect: normalizeGoogleFontEffect(cleanText(dto.fontButtonEffect)),
 
         navLogoUrl: cleanText(dto.navLogoUrl),
         heroLogoUrl: cleanText(dto.heroLogoUrl),
@@ -375,6 +391,10 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       fontBodyFamily: cleanText(dto.fontBodyFamily),
       fontDisplayEffect: normalizeGoogleFontEffect(cleanText(dto.fontDisplayEffect)),
       fontMoodEffect: normalizeGoogleFontEffect(cleanText(dto.fontMoodEffect)),
+      fontNavEffect: normalizeGoogleFontEffect(cleanText(dto.fontNavEffect)),
+      fontMenuEffect: normalizeGoogleFontEffect(cleanText(dto.fontMenuEffect)),
+      fontProductEffect: normalizeGoogleFontEffect(cleanText(dto.fontProductEffect)),
+      fontButtonEffect: normalizeGoogleFontEffect(cleanText(dto.fontButtonEffect)),
 
       navLogoUrl: cleanText(dto.navLogoUrl),
       heroLogoUrl: cleanText(dto.heroLogoUrl),

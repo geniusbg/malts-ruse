@@ -57,7 +57,11 @@ ALTER TABLE brand_appearance_settings
   ADD COLUMN IF NOT EXISTS font_nav_family TEXT,
   ADD COLUMN IF NOT EXISTS font_body_family TEXT,
   ADD COLUMN IF NOT EXISTS font_display_effect TEXT,
-  ADD COLUMN IF NOT EXISTS font_mood_effect TEXT;
+  ADD COLUMN IF NOT EXISTS font_mood_effect TEXT,
+  ADD COLUMN IF NOT EXISTS font_nav_effect TEXT,
+  ADD COLUMN IF NOT EXISTS font_menu_effect TEXT,
+  ADD COLUMN IF NOT EXISTS font_product_effect TEXT,
+  ADD COLUMN IF NOT EXISTS font_button_effect TEXT;
 
 -- 4) Primary button text on hover
 ALTER TABLE brand_appearance_settings

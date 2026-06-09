@@ -638,6 +638,10 @@ model BrandAppearanceSettings {
   fontBodyFamily     String? @map("font_body_family")
   fontDisplayEffect  String? @map("font_display_effect")
   fontMoodEffect     String? @map("font_mood_effect")
+  fontNavEffect      String? @map("font_nav_effect")
+  fontMenuEffect     String? @map("font_menu_effect")
+  fontProductEffect  String? @map("font_product_effect")
+  fontButtonEffect   String? @map("font_button_effect")
 
   // Logos / icons (URLs)
   navLogoUrl  String? @map("nav_logo_url")

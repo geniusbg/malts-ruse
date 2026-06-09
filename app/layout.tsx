@@ -11,6 +11,7 @@ import {
   resolveSiteTitle,
 } from "@/lib/brand-defaults";
 import { fontVarsFromAppearance, fontVarsToCssRecord } from "@/lib/brand-fonts";
+import { getSiteBaseUrlObject } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,8 +58,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = resolveSiteDescription(appearance, shortName);
 
   return {
+    metadataBase: getSiteBaseUrlObject(),
     title,
     description,
+    alternates: {
+      canonical: '/',
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: "black-translucent",

@@ -69,6 +69,10 @@ type BrandAppearanceSettings = {
   fontBodyFamily: string | null;
   fontDisplayEffect: string | null;
   fontMoodEffect: string | null;
+  fontNavEffect: string | null;
+  fontMenuEffect: string | null;
+  fontProductEffect: string | null;
+  fontButtonEffect: string | null;
 
   navLogoUrl: string | null;
   heroLogoUrl: string | null;
@@ -353,6 +357,10 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       googleFontsCssUrl: fonts.googleFontsCssUrl,
       displayEffectClass: fonts.displayEffectClass,
       moodEffectClass: fonts.moodEffectClass,
+      navEffectClass: fonts.navEffectClass,
+      menuEffectClass: fonts.menuEffectClass,
+      productEffectClass: fonts.productEffectClass,
+      buttonEffectClass: fonts.buttonEffectClass,
       navLogo: (settings.navLogoUrl || '').trim(),
       siteTitle: (settings.siteShortName || settings.siteTitle || 'Вашият бранд').trim(),
     };
@@ -414,7 +422,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 border-b px-3 py-2 text-xs" style={{ borderColor: p.hairline }}>
+        <div className={`flex flex-wrap items-center gap-3 border-b px-3 py-2 text-xs ${p.navEffectClass}`} style={{ borderColor: p.hairline }}>
           <span className="border-b-2 font-semibold" style={{ color: p.navActiveText, borderColor: p.navActiveBorder }}>
             Меню
           </span>
@@ -459,19 +467,19 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
 
           <div className="flex flex-wrap justify-center gap-2">
             <span
-              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
               style={{ background: p.menuActiveBg, color: p.menuActiveText, borderColor: p.menuActiveBorder }}
             >
               Активна категория
             </span>
             <span
-              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
               style={{ background: p.menuInactiveBg, color: p.menuInactiveText, borderColor: p.menuInactiveBorder }}
             >
               Категория
             </span>
             <span
-              className="rounded-full border px-3 py-1 text-xs font-semibold"
+              className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
               style={{ background: p.menuHoverBg, color: p.menuInactiveText, borderColor: p.menuHoverBorder }}
             >
               Hover
@@ -481,14 +489,14 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
           <div className="flex flex-wrap justify-center gap-2">
             <button
               type="button"
-              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.accent, color: p.accentContrast, fontFamily: p.fontButtons }}
             >
               Основен бутон
             </button>
             <button
               type="button"
-              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.accentHover, color: p.accentContrastHover, fontFamily: p.fontButtons }}
               title="Преглед при hover"
             >
@@ -496,7 +504,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             </button>
             <button
               type="button"
-              className="rounded-xl border px-4 py-2 text-sm font-semibold"
+              className={`rounded-xl border px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{
                 background: p.btnSecondaryBg,
                 color: p.btnSecondaryText,
@@ -508,7 +516,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             </button>
             <button
               type="button"
-              className="rounded-xl px-4 py-2 text-sm font-semibold"
+              className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.danger, color: p.dangerContrast, fontFamily: p.fontButtons }}
             >
               Да, излез
@@ -760,6 +768,10 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
               {[
                 ['fontMoodEffect', 'Ефект за mood банера', 'Food • Drinks… в hero секцията'],
                 ['fontDisplayEffect', 'Ефект за display заглавия', 'Големи заглавия и етикети на началната'],
+                ['fontNavEffect', 'Ефект за навигацията', 'Линковете в горното меню'],
+                ['fontMenuEffect', 'Ефект за меню категориите', 'Категорийни бутони в /menu'],
+                ['fontProductEffect', 'Ефект за продуктови заглавия', 'Имената на продуктите в менюто'],
+                ['fontButtonEffect', 'Ефект за CTA бутони', 'Основни бутони на началната'],
               ].map(([key, label, hint]) => (
                 <div key={key} className="space-y-1">
                   <label className="theme-label">{label}</label>

@@ -113,6 +113,10 @@ export type BrandFontVars = {
   body: string | null;
   displayEffectClass: string;
   moodEffectClass: string;
+  navEffectClass: string;
+  menuEffectClass: string;
+  productEffectClass: string;
+  buttonEffectClass: string;
 };
 
 export function fontVarsFromAppearance(row: {
@@ -123,11 +127,25 @@ export function fontVarsFromAppearance(row: {
   fontBodyFamily?: string | null;
   fontDisplayEffect?: string | null;
   fontMoodEffect?: string | null;
+  fontNavEffect?: string | null;
+  fontMenuEffect?: string | null;
+  fontProductEffect?: string | null;
+  fontButtonEffect?: string | null;
 } | null | undefined): BrandFontVars {
   const display = normalizeFontFamilyStack(row?.fontDisplayFamily);
   const buttons = normalizeFontFamilyStack(row?.fontButtonsFamily);
   const nav = normalizeFontFamilyStack(row?.fontNavFamily);
   const body = normalizeFontFamilyStack(row?.fontBodyFamily);
+  const requestedEffects = [
+    row?.fontDisplayEffect,
+    row?.fontMoodEffect,
+    row?.fontNavEffect,
+    row?.fontMenuEffect,
+    row?.fontProductEffect,
+    row?.fontButtonEffect,
+  ]
+    .map(normalizeGoogleFontEffect)
+    .filter(Boolean) as string[];
 
   let googleFontsCssUrl = sanitizeGoogleFontsCssUrl(row?.googleFontsCssUrl);
   if (!googleFontsCssUrl) {
@@ -139,9 +157,12 @@ export function fontVarsFromAppearance(row: {
     ]
       .map((f) => (f ?? '').trim())
       .filter((f) => f && !f.includes(','));
+    if (names.length === 0 && requestedEffects.length > 0) {
+      names.push('Ruslan Display');
+    }
     googleFontsCssUrl = buildGoogleFontsCssUrl(names);
   }
-  googleFontsCssUrl = addGoogleFontEffects(googleFontsCssUrl, [row?.fontDisplayEffect, row?.fontMoodEffect]);
+  googleFontsCssUrl = addGoogleFontEffects(googleFontsCssUrl, requestedEffects);
 
   return {
     googleFontsCssUrl,
@@ -151,6 +172,10 @@ export function fontVarsFromAppearance(row: {
     body,
     displayEffectClass: googleFontEffectClass(row?.fontDisplayEffect),
     moodEffectClass: googleFontEffectClass(row?.fontMoodEffect),
+    navEffectClass: googleFontEffectClass(row?.fontNavEffect),
+    menuEffectClass: googleFontEffectClass(row?.fontMenuEffect),
+    productEffectClass: googleFontEffectClass(row?.fontProductEffect),
+    buttonEffectClass: googleFontEffectClass(row?.fontButtonEffect),
   };
 }
 
