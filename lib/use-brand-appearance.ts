@@ -13,6 +13,15 @@ export type BrandAppearance = {
   navActiveBorder: string | null;
   navHoverText: string | null;
   navMobileActiveBg: string | null;
+  footerBg: string | null;
+  footerText: string | null;
+  footerLinkHover: string | null;
+  footerBorder: string | null;
+  productCardBg: string | null;
+  productCardText: string | null;
+  productCardTitleHover: string | null;
+  productCardBorder: string | null;
+  productCardHoverBorder: string | null;
   fontNavEffect: string | null;
   fontMenuEffect: string | null;
   fontProductEffect: string | null;
@@ -32,6 +41,15 @@ function appearanceFromBootstrap(): BrandAppearance | null {
     navActiveBorder: null,
     navHoverText: null,
     navMobileActiveBg: null,
+    footerBg: null,
+    footerText: null,
+    footerLinkHover: null,
+    footerBorder: null,
+    productCardBg: null,
+    productCardText: null,
+    productCardTitleHover: null,
+    productCardBorder: null,
+    productCardHoverBorder: null,
     fontNavEffect: null,
     fontMenuEffect: null,
     fontProductEffect: null,
@@ -47,6 +65,15 @@ function applyAppearanceCssVars(appearance: BrandAppearance | null) {
     ['--theme-nav-active-border', appearance.navActiveBorder],
     ['--theme-nav-hover-text', appearance.navHoverText],
     ['--theme-nav-mobile-active-bg', appearance.navMobileActiveBg],
+    ['--theme-footer-bg', appearance.footerBg],
+    ['--theme-footer-text', appearance.footerText],
+    ['--theme-footer-link-hover', appearance.footerLinkHover],
+    ['--theme-footer-border', appearance.footerBorder],
+    ['--theme-product-card-bg', appearance.productCardBg],
+    ['--theme-product-card-text', appearance.productCardText],
+    ['--theme-product-card-title-hover', appearance.productCardTitleHover],
+    ['--theme-product-card-border', appearance.productCardBorder],
+    ['--theme-product-card-hover-border', appearance.productCardHoverBorder],
   ];
   for (const [key, value] of vars) {
     const clean = (value ?? '').trim();
@@ -77,6 +104,15 @@ async function fetchAppearance(): Promise<BrandAppearance | null> {
       navActiveBorder: s.navActiveBorder ?? null,
       navHoverText: s.navHoverText ?? null,
       navMobileActiveBg: s.navMobileActiveBg ?? null,
+      footerBg: s.footerBg ?? null,
+      footerText: s.footerText ?? null,
+      footerLinkHover: s.footerLinkHover ?? null,
+      footerBorder: s.footerBorder ?? null,
+      productCardBg: s.productCardBg ?? null,
+      productCardText: s.productCardText ?? null,
+      productCardTitleHover: s.productCardTitleHover ?? null,
+      productCardBorder: s.productCardBorder ?? null,
+      productCardHoverBorder: s.productCardHoverBorder ?? null,
       fontNavEffect: s.fontNavEffect ?? null,
       fontMenuEffect: s.fontMenuEffect ?? null,
       fontProductEffect: s.fontProductEffect ?? null,

@@ -39,6 +39,15 @@ export type BrandAppearanceSettings = {
   navActiveBorder: string | null;
   navHoverText: string | null;
   navMobileActiveBg: string | null;
+  footerBg: string | null;
+  footerText: string | null;
+  footerLinkHover: string | null;
+  footerBorder: string | null;
+  productCardBg: string | null;
+  productCardText: string | null;
+  productCardTitleHover: string | null;
+  productCardBorder: string | null;
+  productCardHoverBorder: string | null;
 
   btnSecondaryBg: string | null;
   btnSecondaryText: string | null;
@@ -117,6 +126,15 @@ function sanitize(row: any): BrandAppearanceSettings {
     navActiveBorder: row.navActiveBorder ?? null,
     navHoverText: row.navHoverText ?? null,
     navMobileActiveBg: row.navMobileActiveBg ?? null,
+    footerBg: row.footerBg ?? null,
+    footerText: row.footerText ?? null,
+    footerLinkHover: row.footerLinkHover ?? null,
+    footerBorder: row.footerBorder ?? null,
+    productCardBg: row.productCardBg ?? null,
+    productCardText: row.productCardText ?? null,
+    productCardTitleHover: row.productCardTitleHover ?? null,
+    productCardBorder: row.productCardBorder ?? null,
+    productCardHoverBorder: row.productCardHoverBorder ?? null,
 
     btnSecondaryBg: row.btnSecondaryBg ?? null,
     btnSecondaryText: row.btnSecondaryText ?? null,
@@ -208,6 +226,15 @@ type UpdateDto = Partial<
     | 'navActiveBorder'
     | 'navHoverText'
     | 'navMobileActiveBg'
+    | 'footerBg'
+    | 'footerText'
+    | 'footerLinkHover'
+    | 'footerBorder'
+    | 'productCardBg'
+    | 'productCardText'
+    | 'productCardTitleHover'
+    | 'productCardBorder'
+    | 'productCardHoverBorder'
     | 'btnSecondaryBg'
     | 'btnSecondaryText'
     | 'btnSecondaryBorder'
@@ -288,6 +315,15 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
         navActiveBorder: cleanText(dto.navActiveBorder),
         navHoverText: cleanText(dto.navHoverText),
         navMobileActiveBg: cleanText(dto.navMobileActiveBg),
+        footerBg: cleanText(dto.footerBg),
+        footerText: cleanText(dto.footerText),
+        footerLinkHover: cleanText(dto.footerLinkHover),
+        footerBorder: cleanText(dto.footerBorder),
+        productCardBg: cleanText(dto.productCardBg),
+        productCardText: cleanText(dto.productCardText),
+        productCardTitleHover: cleanText(dto.productCardTitleHover),
+        productCardBorder: cleanText(dto.productCardBorder),
+        productCardHoverBorder: cleanText(dto.productCardHoverBorder),
 
         btnSecondaryBg: cleanText(dto.btnSecondaryBg),
         btnSecondaryText: cleanText(dto.btnSecondaryText),
@@ -364,6 +400,15 @@ export async function updateBrandAppearanceSettings(dto: UpdateDto): Promise<Bra
       navActiveBorder: cleanText(dto.navActiveBorder),
       navHoverText: cleanText(dto.navHoverText),
       navMobileActiveBg: cleanText(dto.navMobileActiveBg),
+      footerBg: cleanText(dto.footerBg),
+      footerText: cleanText(dto.footerText),
+      footerLinkHover: cleanText(dto.footerLinkHover),
+      footerBorder: cleanText(dto.footerBorder),
+      productCardBg: cleanText(dto.productCardBg),
+      productCardText: cleanText(dto.productCardText),
+      productCardTitleHover: cleanText(dto.productCardTitleHover),
+      productCardBorder: cleanText(dto.productCardBorder),
+      productCardHoverBorder: cleanText(dto.productCardHoverBorder),
 
       btnSecondaryBg: cleanText(dto.btnSecondaryBg),
       btnSecondaryText: cleanText(dto.btnSecondaryText),

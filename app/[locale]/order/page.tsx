@@ -32,6 +32,9 @@ import {
   selectCategoryAtDepth,
   MALLS_MAX_CATEGORY_DEPTH,
 } from '@/lib/category-navigation';
+import { useBrandAppearance } from '@/lib/use-brand-appearance';
+import { resolveNavLogoUrl } from '@/lib/brand-defaults';
+import { googleFontEffectClass } from '@/lib/brand-fonts';
 
 /** API/Prisma понякога връщат snake_case; навигацията използва parentCategoryId. */
 function normalizeCategoryRow(c: any) {
@@ -64,6 +67,9 @@ function OrderPageContent() {
   // Get locale from URL path
   const locale = pathname.split('/')[1] || 'bg';
   const siteName = useSiteDisplayName();
+  const appearance = useBrandAppearance();
+  const navLogoSrc = resolveNavLogoUrl(appearance?.navLogoUrl);
+  const buttonEffectClass = googleFontEffectClass(appearance?.fontButtonEffect);
 
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -1137,7 +1143,7 @@ function OrderPageContent() {
               className="flex h-[6.25rem] max-h-[6.25rem] min-w-0 shrink-0 items-center overflow-hidden sm:h-[5.75rem] sm:max-h-[5.75rem]"
             >
               <Image
-                src="/malts-logo-nav.webp"
+                src={navLogoSrc}
                 alt={siteName}
                 width={400}
                 height={331}
@@ -1650,7 +1656,7 @@ function OrderPageContent() {
                         return (
                           <div
                             key={product.id}
-                            className="group relative theme-card rounded-2xl overflow-hidden hover:border-[var(--theme-accent-tint-border)] hover:shadow-lg transition-all duration-300"
+                            className="group relative overflow-hidden rounded-2xl border border-[var(--theme-product-card-border)] bg-[var(--theme-product-card-bg)] transition-all duration-300 hover:border-[var(--theme-product-card-hover-border)] hover:shadow-lg"
                           >
                             {product.isPromoted && (
                               <div className="absolute top-3 left-3 z-10 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
@@ -1681,7 +1687,7 @@ function OrderPageContent() {
                             <div
                               className={`p-4 ${product.isPromoted && !product.imageUrl ? 'pt-11' : ''}`}
                             >
-                              <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--theme-ink)] transition-colors group-hover:text-[var(--theme-accent)] md:text-xl">
+                              <h3 className="mb-3 text-xl font-bold leading-snug text-[var(--theme-product-card-text)] transition-colors group-hover:text-[var(--theme-product-card-title-hover)] md:text-xl">
                                 {productName}
                               </h3>
                               {variants.length > 0 ? (
@@ -2327,7 +2333,7 @@ function OrderPageContent() {
         <div className="fixed bottom-4 left-4 right-4 z-40 max-md:bottom-[max(1rem,env(safe-area-inset-bottom))] md:left-auto md:right-4">
           <a
             href={`/${locale}/order/call-waiter?table=${tableNumber}`}
-            className="block w-full rounded-xl px-6 py-3 text-center text-base font-bold shadow-2xl transition-all theme-btn-danger md:w-auto md:px-8 md:py-4 md:text-lg"
+            className={`block w-full rounded-xl px-6 py-3 text-center text-base font-bold shadow-2xl transition-all theme-btn-danger md:w-auto md:px-8 md:py-4 md:text-lg ${buttonEffectClass}`}
           >
             🔔 {locale === 'bg' ? 'Повикай сервитьор' : 
                  locale === 'en' ? 'Call Waiter' : 
@@ -2691,5 +2697,3 @@ export default function OrderPage() {
     </Suspense>
   );
 }
-
-

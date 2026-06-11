@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -42,6 +42,15 @@ type BrandAppearanceSettings = {
   navActiveBorder: string | null;
   navHoverText: string | null;
   navMobileActiveBg: string | null;
+  footerBg: string | null;
+  footerText: string | null;
+  footerLinkHover: string | null;
+  footerBorder: string | null;
+  productCardBg: string | null;
+  productCardText: string | null;
+  productCardTitleHover: string | null;
+  productCardBorder: string | null;
+  productCardHoverBorder: string | null;
 
   btnSecondaryBg: string | null;
   btnSecondaryText: string | null;
@@ -110,6 +119,15 @@ const DEFAULTS = {
   navActiveBorder: '#b0162f',
   navHoverText: '#b0162f',
   navMobileActiveBg: '#f2d9de',
+  footerBg: '#d8cfbf',
+  footerText: '#4a4437',
+  footerLinkHover: '#b0162f',
+  footerBorder: '#c9bda8',
+  productCardBg: '#ebe4d6',
+  productCardText: '#1a1810',
+  productCardTitleHover: '#b0162f',
+  productCardBorder: '#c9bda8',
+  productCardHoverBorder: '#c65a6b',
   success: '#166534',
   warning: '#92400e',
   danger: '#991b1b',
@@ -145,121 +163,142 @@ type ColorField = { key: keyof BrandAppearanceSettings; label: string; hint: str
 
 const COLOR_GROUPS: { title: string; description: string; fields: ColorField[] }[] = [
   {
-    title: 'Homepage акценти',
-    description: 'Логото и mood текста в hero, както и таговете в секцията „Предложения“.',
+    title: 'Homepage Ð°ÐºÑ†ÐµÐ½Ñ‚Ð¸',
+    description: 'Ð›Ð¾Ð³Ð¾Ñ‚Ð¾ Ð¸ mood Ñ‚ÐµÐºÑÑ‚Ð° Ð² hero, ÐºÐ°ÐºÑ‚Ð¾ Ð¸ Ñ‚Ð°Ð³Ð¾Ð²ÐµÑ‚Ðµ Ð² ÑÐµÐºÑ†Ð¸ÑÑ‚Ð° â€žÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñâ€œ.',
     fields: [
-      { key: 'heroGlow', label: 'Hero glow / mood рамка', hint: 'Пулсацията около голямото лого и рамката около Food • Drinks…' },
-      { key: 'heroMoodBg', label: 'Фон вътре в mood банера', hint: 'Вътрешният фон зад текста Food • Drinks…' },
-      { key: 'homepageAccent', label: 'Предложения и Акценти', hint: 'Етикет „Предложения“, badge-ове и accent елементи в cards' },
+      { key: 'heroGlow', label: 'Hero glow / mood Ñ€Ð°Ð¼ÐºÐ°', hint: 'ÐŸÑƒÐ»ÑÐ°Ñ†Ð¸ÑÑ‚Ð° Ð¾ÐºÐ¾Ð»Ð¾ Ð³Ð¾Ð»ÑÐ¼Ð¾Ñ‚Ð¾ Ð»Ð¾Ð³Ð¾ Ð¸ Ñ€Ð°Ð¼ÐºÐ°Ñ‚Ð° Ð¾ÐºÐ¾Ð»Ð¾ Food â€¢ Drinksâ€¦' },
+      { key: 'heroMoodBg', label: 'Ð¤Ð¾Ð½ Ð²ÑŠÑ‚Ñ€Ðµ Ð² mood Ð±Ð°Ð½ÐµÑ€Ð°', hint: 'Ð’ÑŠÑ‚Ñ€ÐµÑˆÐ½Ð¸ÑÑ‚ Ñ„Ð¾Ð½ Ð·Ð°Ð´ Ñ‚ÐµÐºÑÑ‚Ð° Food â€¢ Drinksâ€¦' },
+      { key: 'homepageAccent', label: 'ÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ Ð¸ ÐÐºÑ†ÐµÐ½Ñ‚Ð¸', hint: 'Ð•Ñ‚Ð¸ÐºÐµÑ‚ â€žÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñâ€œ, badge-Ð¾Ð²Ðµ Ð¸ accent ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¸ Ð² cards' },
     ],
   },
   {
-    title: 'Menu бутони',
-    description: 'Категории и табове в публичното меню (/bg/menu).',
+    title: 'Menu Ð±ÑƒÑ‚Ð¾Ð½Ð¸',
+    description: 'ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸ Ð¸ Ñ‚Ð°Ð±Ð¾Ð²Ðµ Ð² Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð¾Ñ‚Ð¾ Ð¼ÐµÐ½ÑŽ (/bg/menu).',
     fields: [
-      { key: 'menuActiveBg', label: 'Активен фон', hint: 'Избрана категория / активен таб' },
-      { key: 'menuActiveText', label: 'Активен текст', hint: 'Текст върху активния фон' },
-      { key: 'menuActiveBorder', label: 'Активна рамка', hint: 'Рамка на избраната категория' },
-      { key: 'menuInactiveBg', label: 'Неактивен фон', hint: 'Категории, които не са избрани' },
-      { key: 'menuInactiveText', label: 'Неактивен текст', hint: 'Текст на неактивните категории' },
-      { key: 'menuInactiveBorder', label: 'Неактивна рамка', hint: 'Рамка на неактивните категории' },
-      { key: 'menuHoverBg', label: 'Фон при hover', hint: 'Фон при посочване' },
-      { key: 'menuHoverBorder', label: 'Рамка при hover', hint: 'Рамка при посочване' },
+      { key: 'menuActiveBg', label: 'ÐÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ„Ð¾Ð½', hint: 'Ð˜Ð·Ð±Ñ€Ð°Ð½Ð° ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ / Ð°ÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ‚Ð°Ð±' },
+      { key: 'menuActiveText', label: 'ÐÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'Ð¢ÐµÐºÑÑ‚ Ð²ÑŠÑ€Ñ…Ñƒ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ Ñ„Ð¾Ð½' },
+      { key: 'menuActiveBorder', label: 'ÐÐºÑ‚Ð¸Ð²Ð½Ð° Ñ€Ð°Ð¼ÐºÐ°', hint: 'Ð Ð°Ð¼ÐºÐ° Ð½Ð° Ð¸Ð·Ð±Ñ€Ð°Ð½Ð°Ñ‚Ð° ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ' },
+      { key: 'menuInactiveBg', label: 'ÐÐµÐ°ÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ„Ð¾Ð½', hint: 'ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸, ÐºÐ¾Ð¸Ñ‚Ð¾ Ð½Ðµ ÑÐ° Ð¸Ð·Ð±Ñ€Ð°Ð½Ð¸' },
+      { key: 'menuInactiveText', label: 'ÐÐµÐ°ÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'Ð¢ÐµÐºÑÑ‚ Ð½Ð° Ð½ÐµÐ°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸' },
+      { key: 'menuInactiveBorder', label: 'ÐÐµÐ°ÐºÑ‚Ð¸Ð²Ð½Ð° Ñ€Ð°Ð¼ÐºÐ°', hint: 'Ð Ð°Ð¼ÐºÐ° Ð½Ð° Ð½ÐµÐ°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ‚Ðµ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸' },
+      { key: 'menuHoverBg', label: 'Ð¤Ð¾Ð½ Ð¿Ñ€Ð¸ hover', hint: 'Ð¤Ð¾Ð½ Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ' },
+      { key: 'menuHoverBorder', label: 'Ð Ð°Ð¼ÐºÐ° Ð¿Ñ€Ð¸ hover', hint: 'Ð Ð°Ð¼ÐºÐ° Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ' },
     ],
   },
   {
-    title: 'Основна навигация',
-    description: 'Горното публично меню: Начало, Меню, Събития, Контакти.',
+    title: 'Product cards',
+    description: 'Карти с продукти в /menu и /order. Празно поле = използва глобалните цветове.',
     fields: [
-      { key: 'navActiveBg', label: 'Активен фон', hint: 'Mobile active фон; desktop остава с подчертаване' },
-      { key: 'navActiveText', label: 'Активен текст', hint: 'Цвят на текущата страница' },
-      { key: 'navActiveBorder', label: 'Активна линия/рамка', hint: 'Desktop underline и mobile left border' },
-      { key: 'navHoverText', label: 'Текст при hover', hint: 'Цвят при посочване върху линк' },
-      { key: 'navMobileActiveBg', label: 'Mobile активен фон', hint: 'Фон на активния линк в мобилното меню' },
+      { key: 'productCardBg', label: 'Card фон', hint: 'Фон на продуктовата карта' },
+      { key: 'productCardText', label: 'Заглавие / текст', hint: 'Основен цвят на името на продукта' },
+      { key: 'productCardTitleHover', label: 'Заглавие при hover', hint: 'Цвят на името при посочване' },
+      { key: 'productCardBorder', label: 'Card рамка', hint: 'Нормална рамка на картата' },
+      { key: 'productCardHoverBorder', label: 'Рамка при hover', hint: 'Рамка при посочване върху картата' },
     ],
   },
   {
-    title: 'Фон и повърхности',
-    description: 'Общ фон на сайта, картички и полета.',
+    title: 'ÐžÑÐ½Ð¾Ð²Ð½Ð° Ð½Ð°Ð²Ð¸Ð³Ð°Ñ†Ð¸Ñ',
+    description: 'Ð“Ð¾Ñ€Ð½Ð¾Ñ‚Ð¾ Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð¾ Ð¼ÐµÐ½ÑŽ: ÐÐ°Ñ‡Ð°Ð»Ð¾, ÐœÐµÐ½ÑŽ, Ð¡ÑŠÐ±Ð¸Ñ‚Ð¸Ñ, ÐšÐ¾Ð½Ñ‚Ð°ÐºÑ‚Ð¸.',
     fields: [
-      { key: 'paper', label: 'Фон на страницата', hint: 'Целият сайт (body), админ, staff' },
-      { key: 'card', label: 'Фон на картички', hint: 'Блокове, менюта, форми в админ' },
-      { key: 'cardHover', label: 'Картичка при hover', hint: 'Леко потъмняване при посочване' },
-      { key: 'inset', label: 'Вдлъбнати полета', hint: 'Input полета, вътрешни панели' },
-      { key: 'hairline', label: 'Рамки / разделители', hint: 'Граници между секции' },
-      { key: 'hoverBorder', label: 'Рамки при hover', hint: 'Цвят на рамката при посочване върху картички, вторични бутони и pills' },
+      { key: 'navActiveBg', label: 'ÐÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ„Ð¾Ð½', hint: 'Mobile active Ñ„Ð¾Ð½; desktop Ð¾ÑÑ‚Ð°Ð²Ð° Ñ Ð¿Ð¾Ð´Ñ‡ÐµÑ€Ñ‚Ð°Ð²Ð°Ð½Ðµ' },
+      { key: 'navActiveText', label: 'ÐÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ñ‚ÐµÐºÑƒÑ‰Ð°Ñ‚Ð° ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð°' },
+      { key: 'navActiveBorder', label: 'ÐÐºÑ‚Ð¸Ð²Ð½Ð° Ð»Ð¸Ð½Ð¸Ñ/Ñ€Ð°Ð¼ÐºÐ°', hint: 'Desktop underline Ð¸ mobile left border' },
+      { key: 'navHoverText', label: 'Ð¢ÐµÐºÑÑ‚ Ð¿Ñ€Ð¸ hover', hint: 'Ð¦Ð²ÑÑ‚ Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ Ð²ÑŠÑ€Ñ…Ñƒ Ð»Ð¸Ð½Ðº' },
+      { key: 'navMobileActiveBg', label: 'Mobile Ð°ÐºÑ‚Ð¸Ð²ÐµÐ½ Ñ„Ð¾Ð½', hint: 'Ð¤Ð¾Ð½ Ð½Ð° Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ Ð»Ð¸Ð½Ðº Ð² Ð¼Ð¾Ð±Ð¸Ð»Ð½Ð¾Ñ‚Ð¾ Ð¼ÐµÐ½ÑŽ' },
     ],
   },
   {
-    title: 'Текст',
-    description: 'Йерархия на текста в публичната част и админа.',
+    title: 'Footer / GSoft',
+    description: 'Ð”Ð¾Ð»Ð½Ð¸ÑÑ‚ Ñ€ÐµÐ´ â€žÐ ÐµÐ°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð½Ð¾ Ð¾Ñ‚ GSoft.bgâ€œ Ð¸ Ð½ÐµÐ³Ð¾Ð²Ð¸ÑÑ‚ hover Ñ†Ð²ÑÑ‚.',
     fields: [
-      { key: 'ink', label: 'Основен текст', hint: 'Заглавия, параграфи, меню' },
-      { key: 'muted', label: 'Вторичен текст', hint: 'Подзаглавия, описания' },
-      { key: 'subtle', label: 'Блед текст', hint: 'Етикети, помощен текст' },
+      { key: 'footerBg', label: 'Footer Ñ„Ð¾Ð½', hint: 'Ð¤Ð¾Ð½ Ð½Ð° Ð´Ð¾Ð»Ð½Ð°Ñ‚Ð° Ð»ÐµÐ½Ñ‚Ð°' },
+      { key: 'footerText', label: 'Footer Ñ‚ÐµÐºÑÑ‚', hint: 'ÐÐ¾Ñ€Ð¼Ð°Ð»ÐµÐ½ Ñ†Ð²ÑÑ‚ Ð½Ð° Ñ‚ÐµÐºÑÑ‚Ð°' },
+      { key: 'footerLinkHover', label: 'Link hover', hint: 'Ð¦Ð²ÑÑ‚ Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ Ð²ÑŠÑ€Ñ…Ñƒ GSoft.bg' },
+      { key: 'footerBorder', label: 'Footer Ð»Ð¸Ð½Ð¸Ñ', hint: 'Ð“Ð¾Ñ€Ð½Ð° Ñ€Ð°Ð·Ð´ÐµÐ»Ð¸Ñ‚ÐµÐ»Ð½Ð° Ð»Ð¸Ð½Ð¸Ñ' },
     ],
   },
   {
-    title: 'Акцент и бутони',
-    description: 'Главни CTA бутони (Меню, Поръчай, Запази).',
+    title: 'Ð¤Ð¾Ð½ Ð¸ Ð¿Ð¾Ð²ÑŠÑ€Ñ…Ð½Ð¾ÑÑ‚Ð¸',
+    description: 'ÐžÐ±Ñ‰ Ñ„Ð¾Ð½ Ð½Ð° ÑÐ°Ð¹Ñ‚Ð°, ÐºÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ¸ Ð¸ Ð¿Ð¾Ð»ÐµÑ‚Ð°.',
     fields: [
-      { key: 'accent', label: 'Цвят на бутоните', hint: 'theme-btn-primary — акцентен фон' },
-      { key: 'accentHover', label: 'Бутон при hover', hint: 'Фон, когато мишката е върху бутона' },
-      { key: 'accentContrast', label: 'Текст на бутона', hint: 'Цвят на буквите — нормално състояние' },
-      { key: 'accentContrastHover', label: 'Текст на бутона при hover', hint: 'Цвят на буквите при hover' },
+      { key: 'paper', label: 'Ð¤Ð¾Ð½ Ð½Ð° ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð°Ñ‚Ð°', hint: 'Ð¦ÐµÐ»Ð¸ÑÑ‚ ÑÐ°Ð¹Ñ‚ (body), Ð°Ð´Ð¼Ð¸Ð½, staff' },
+      { key: 'card', label: 'Ð¤Ð¾Ð½ Ð½Ð° ÐºÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ¸', hint: 'Ð‘Ð»Ð¾ÐºÐ¾Ð²Ðµ, Ð¼ÐµÐ½ÑŽÑ‚Ð°, Ñ„Ð¾Ñ€Ð¼Ð¸ Ð² Ð°Ð´Ð¼Ð¸Ð½' },
+      { key: 'cardHover', label: 'ÐšÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ° Ð¿Ñ€Ð¸ hover', hint: 'Ð›ÐµÐºÐ¾ Ð¿Ð¾Ñ‚ÑŠÐ¼Ð½ÑÐ²Ð°Ð½Ðµ Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ' },
+      { key: 'inset', label: 'Ð’Ð´Ð»ÑŠÐ±Ð½Ð°Ñ‚Ð¸ Ð¿Ð¾Ð»ÐµÑ‚Ð°', hint: 'Input Ð¿Ð¾Ð»ÐµÑ‚Ð°, Ð²ÑŠÑ‚Ñ€ÐµÑˆÐ½Ð¸ Ð¿Ð°Ð½ÐµÐ»Ð¸' },
+      { key: 'hairline', label: 'Ð Ð°Ð¼ÐºÐ¸ / Ñ€Ð°Ð·Ð´ÐµÐ»Ð¸Ñ‚ÐµÐ»Ð¸', hint: 'Ð“Ñ€Ð°Ð½Ð¸Ñ†Ð¸ Ð¼ÐµÐ¶Ð´Ñƒ ÑÐµÐºÑ†Ð¸Ð¸' },
+      { key: 'hoverBorder', label: 'Ð Ð°Ð¼ÐºÐ¸ Ð¿Ñ€Ð¸ hover', hint: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ñ€Ð°Ð¼ÐºÐ°Ñ‚Ð° Ð¿Ñ€Ð¸ Ð¿Ð¾ÑÐ¾Ñ‡Ð²Ð°Ð½Ðµ Ð²ÑŠÑ€Ñ…Ñƒ ÐºÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ¸, Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‡Ð½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸ Ð¸ pills' },
     ],
   },
   {
-    title: 'Вторични бутони',
-    description: 'Отказ в modals (theme-btn-secondary). Празно поле = стойност от Фон/Текст по-горе.',
+    title: 'Ð¢ÐµÐºÑÑ‚',
+    description: 'Ð™ÐµÑ€Ð°Ñ€Ñ…Ð¸Ñ Ð½Ð° Ñ‚ÐµÐºÑÑ‚Ð° Ð² Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð°Ñ‚Ð° Ñ‡Ð°ÑÑ‚ Ð¸ Ð°Ð´Ð¼Ð¸Ð½Ð°.',
     fields: [
-      { key: 'btnSecondaryBg', label: 'Фон', hint: 'По подразбиране: Фон на картички' },
-      { key: 'btnSecondaryText', label: 'Текст', hint: 'По подразбиране: Основен текст' },
-      { key: 'btnSecondaryBorder', label: 'Рамка', hint: 'По подразбиране: Рамки / разделители' },
-      { key: 'btnSecondaryBgHover', label: 'Фон при hover', hint: 'По подразбиране: Картичка при hover' },
-      { key: 'btnSecondaryTextHover', label: 'Текст при hover', hint: 'По подразбиране: същият като Текст' },
+      { key: 'ink', label: 'ÐžÑÐ½Ð¾Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'Ð—Ð°Ð³Ð»Ð°Ð²Ð¸Ñ, Ð¿Ð°Ñ€Ð°Ð³Ñ€Ð°Ñ„Ð¸, Ð¼ÐµÐ½ÑŽ' },
+      { key: 'muted', label: 'Ð’Ñ‚Ð¾Ñ€Ð¸Ñ‡ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'ÐŸÐ¾Ð´Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ, Ð¾Ð¿Ð¸ÑÐ°Ð½Ð¸Ñ' },
+      { key: 'subtle', label: 'Ð‘Ð»ÐµÐ´ Ñ‚ÐµÐºÑÑ‚', hint: 'Ð•Ñ‚Ð¸ÐºÐµÑ‚Ð¸, Ð¿Ð¾Ð¼Ð¾Ñ‰ÐµÐ½ Ñ‚ÐµÐºÑÑ‚' },
     ],
   },
   {
-    title: 'Опасни бутони',
-    description: 'Да, излез / Изтрий (theme-btn-danger) в modals.',
+    title: 'ÐÐºÑ†ÐµÐ½Ñ‚ Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸',
+    description: 'Ð“Ð»Ð°Ð²Ð½Ð¸ CTA Ð±ÑƒÑ‚Ð¾Ð½Ð¸ (ÐœÐµÐ½ÑŽ, ÐŸÐ¾Ñ€ÑŠÑ‡Ð°Ð¹, Ð—Ð°Ð¿Ð°Ð·Ð¸).',
     fields: [
-      { key: 'danger', label: 'Фон', hint: 'Същото като „Грешка / опасност“ за badges' },
-      { key: 'dangerHover', label: 'Фон при hover', hint: 'По-тъмен фон при hover' },
-      { key: 'dangerContrast', label: 'Текст', hint: 'Букви върху червения фон' },
-      { key: 'dangerContrastHover', label: 'Текст при hover', hint: 'Букви при hover' },
+      { key: 'accent', label: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ð±ÑƒÑ‚Ð¾Ð½Ð¸Ñ‚Ðµ', hint: 'theme-btn-primary â€” Ð°ÐºÑ†ÐµÐ½Ñ‚ÐµÐ½ Ñ„Ð¾Ð½' },
+      { key: 'accentHover', label: 'Ð‘ÑƒÑ‚Ð¾Ð½ Ð¿Ñ€Ð¸ hover', hint: 'Ð¤Ð¾Ð½, ÐºÐ¾Ð³Ð°Ñ‚Ð¾ Ð¼Ð¸ÑˆÐºÐ°Ñ‚Ð° Ðµ Ð²ÑŠÑ€Ñ…Ñƒ Ð±ÑƒÑ‚Ð¾Ð½Ð°' },
+      { key: 'accentContrast', label: 'Ð¢ÐµÐºÑÑ‚ Ð½Ð° Ð±ÑƒÑ‚Ð¾Ð½Ð°', hint: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ð±ÑƒÐºÐ²Ð¸Ñ‚Ðµ â€” Ð½Ð¾Ñ€Ð¼Ð°Ð»Ð½Ð¾ ÑÑŠÑÑ‚Ð¾ÑÐ½Ð¸Ðµ' },
+      { key: 'accentContrastHover', label: 'Ð¢ÐµÐºÑÑ‚ Ð½Ð° Ð±ÑƒÑ‚Ð¾Ð½Ð° Ð¿Ñ€Ð¸ hover', hint: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ð±ÑƒÐºÐ²Ð¸Ñ‚Ðµ Ð¿Ñ€Ð¸ hover' },
     ],
   },
   {
-    title: 'Съобщения (успех / грешка)',
-    description: 'Банери и badges. Червен badge ползва „Фон“ от Опасни бутони.',
+    title: 'Ð’Ñ‚Ð¾Ñ€Ð¸Ñ‡Ð½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸',
+    description: 'ÐžÑ‚ÐºÐ°Ð· Ð² modals (theme-btn-secondary). ÐŸÑ€Ð°Ð·Ð½Ð¾ Ð¿Ð¾Ð»Ðµ = ÑÑ‚Ð¾Ð¹Ð½Ð¾ÑÑ‚ Ð¾Ñ‚ Ð¤Ð¾Ð½/Ð¢ÐµÐºÑÑ‚ Ð¿Ð¾-Ð³Ð¾Ñ€Ðµ.',
     fields: [
-      { key: 'success', label: 'Успех', hint: 'Потвърждения, „запазено“' },
-      { key: 'warning', label: 'Предупреждение', hint: 'Внимание, изчакващи действия' },
-      { key: 'info', label: 'Информация', hint: 'Неутрални съобщения' },
+      { key: 'btnSecondaryBg', label: 'Ð¤Ð¾Ð½', hint: 'ÐŸÐ¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ: Ð¤Ð¾Ð½ Ð½Ð° ÐºÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ¸' },
+      { key: 'btnSecondaryText', label: 'Ð¢ÐµÐºÑÑ‚', hint: 'ÐŸÐ¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ: ÐžÑÐ½Ð¾Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚' },
+      { key: 'btnSecondaryBorder', label: 'Ð Ð°Ð¼ÐºÐ°', hint: 'ÐŸÐ¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ: Ð Ð°Ð¼ÐºÐ¸ / Ñ€Ð°Ð·Ð´ÐµÐ»Ð¸Ñ‚ÐµÐ»Ð¸' },
+      { key: 'btnSecondaryBgHover', label: 'Ð¤Ð¾Ð½ Ð¿Ñ€Ð¸ hover', hint: 'ÐŸÐ¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ: ÐšÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ° Ð¿Ñ€Ð¸ hover' },
+      { key: 'btnSecondaryTextHover', label: 'Ð¢ÐµÐºÑÑ‚ Ð¿Ñ€Ð¸ hover', hint: 'ÐŸÐ¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ: ÑÑŠÑ‰Ð¸ÑÑ‚ ÐºÐ°Ñ‚Ð¾ Ð¢ÐµÐºÑÑ‚' },
     ],
   },
   {
-    title: 'Браузър и телефон',
-    description: 'Лента над адресната лента и PWA.',
+    title: 'ÐžÐ¿Ð°ÑÐ½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸',
+    description: 'Ð”Ð°, Ð¸Ð·Ð»ÐµÐ· / Ð˜Ð·Ñ‚Ñ€Ð¸Ð¹ (theme-btn-danger) Ð² modals.',
     fields: [
-      { key: 'themeColor', label: 'Цвят на лентата (theme-color)', hint: 'Safari/Chrome горна лента, splash screen' },
+      { key: 'danger', label: 'Ð¤Ð¾Ð½', hint: 'Ð¡ÑŠÑ‰Ð¾Ñ‚Ð¾ ÐºÐ°Ñ‚Ð¾ â€žÐ“Ñ€ÐµÑˆÐºÐ° / Ð¾Ð¿Ð°ÑÐ½Ð¾ÑÑ‚â€œ Ð·Ð° badges' },
+      { key: 'dangerHover', label: 'Ð¤Ð¾Ð½ Ð¿Ñ€Ð¸ hover', hint: 'ÐŸÐ¾-Ñ‚ÑŠÐ¼ÐµÐ½ Ñ„Ð¾Ð½ Ð¿Ñ€Ð¸ hover' },
+      { key: 'dangerContrast', label: 'Ð¢ÐµÐºÑÑ‚', hint: 'Ð‘ÑƒÐºÐ²Ð¸ Ð²ÑŠÑ€Ñ…Ñƒ Ñ‡ÐµÑ€Ð²ÐµÐ½Ð¸Ñ Ñ„Ð¾Ð½' },
+      { key: 'dangerContrastHover', label: 'Ð¢ÐµÐºÑÑ‚ Ð¿Ñ€Ð¸ hover', hint: 'Ð‘ÑƒÐºÐ²Ð¸ Ð¿Ñ€Ð¸ hover' },
+    ],
+  },
+  {
+    title: 'Ð¡ÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ (ÑƒÑÐ¿ÐµÑ… / Ð³Ñ€ÐµÑˆÐºÐ°)',
+    description: 'Ð‘Ð°Ð½ÐµÑ€Ð¸ Ð¸ badges. Ð§ÐµÑ€Ð²ÐµÐ½ badge Ð¿Ð¾Ð»Ð·Ð²Ð° â€žÐ¤Ð¾Ð½â€œ Ð¾Ñ‚ ÐžÐ¿Ð°ÑÐ½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸.',
+    fields: [
+      { key: 'success', label: 'Ð£ÑÐ¿ÐµÑ…', hint: 'ÐŸÐ¾Ñ‚Ð²ÑŠÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ, â€žÐ·Ð°Ð¿Ð°Ð·ÐµÐ½Ð¾â€œ' },
+      { key: 'warning', label: 'ÐŸÑ€ÐµÐ´ÑƒÐ¿Ñ€ÐµÐ¶Ð´ÐµÐ½Ð¸Ðµ', hint: 'Ð’Ð½Ð¸Ð¼Ð°Ð½Ð¸Ðµ, Ð¸Ð·Ñ‡Ð°ÐºÐ²Ð°Ñ‰Ð¸ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ' },
+      { key: 'info', label: 'Ð˜Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ', hint: 'ÐÐµÑƒÑ‚Ñ€Ð°Ð»Ð½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ' },
+    ],
+  },
+  {
+    title: 'Ð‘Ñ€Ð°ÑƒÐ·ÑŠÑ€ Ð¸ Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½',
+    description: 'Ð›ÐµÐ½Ñ‚Ð° Ð½Ð°Ð´ Ð°Ð´Ñ€ÐµÑÐ½Ð°Ñ‚Ð° Ð»ÐµÐ½Ñ‚Ð° Ð¸ PWA.',
+    fields: [
+      { key: 'themeColor', label: 'Ð¦Ð²ÑÑ‚ Ð½Ð° Ð»ÐµÐ½Ñ‚Ð°Ñ‚Ð° (theme-color)', hint: 'Safari/Chrome Ð³Ð¾Ñ€Ð½Ð° Ð»ÐµÐ½Ñ‚Ð°, splash screen' },
     ],
   },
 ];
 
 const LOGO_FIELDS: { key: keyof BrandAppearanceSettings; label: string; hint: string }[] = [
-  { key: 'navLogoUrl', label: 'Лого в горната лента', hint: 'Винаги видимо при скрол — всички публични страници' },
-  { key: 'heroLogoUrl', label: 'Голямо лого на начална', hint: 'Само homepage hero' },
-  { key: 'appIconUrl', label: 'Икона за приложение (PWA)', hint: '„Добави към началния екран“, push известия' },
-  { key: 'faviconUrl', label: 'Favicon (таб)', hint: 'Малката икона в таба на браузъра' },
+  { key: 'navLogoUrl', label: 'Ð›Ð¾Ð³Ð¾ Ð² Ð³Ð¾Ñ€Ð½Ð°Ñ‚Ð° Ð»ÐµÐ½Ñ‚Ð°', hint: 'Ð’Ð¸Ð½Ð°Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ð¼Ð¾ Ð¿Ñ€Ð¸ ÑÐºÑ€Ð¾Ð» â€” Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð¸ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð¸' },
+  { key: 'heroLogoUrl', label: 'Ð“Ð¾Ð»ÑÐ¼Ð¾ Ð»Ð¾Ð³Ð¾ Ð½Ð° Ð½Ð°Ñ‡Ð°Ð»Ð½Ð°', hint: 'Ð¡Ð°Ð¼Ð¾ homepage hero' },
+  { key: 'appIconUrl', label: 'Ð˜ÐºÐ¾Ð½Ð° Ð·Ð° Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ (PWA)', hint: 'â€žÐ”Ð¾Ð±Ð°Ð²Ð¸ ÐºÑŠÐ¼ Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¸Ñ ÐµÐºÑ€Ð°Ð½â€œ, push Ð¸Ð·Ð²ÐµÑÑ‚Ð¸Ñ' },
+  { key: 'faviconUrl', label: 'Favicon (Ñ‚Ð°Ð±)', hint: 'ÐœÐ°Ð»ÐºÐ°Ñ‚Ð° Ð¸ÐºÐ¾Ð½Ð° Ð² Ñ‚Ð°Ð±Ð° Ð½Ð° Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€Ð°' },
 ];
 
 const FONT_FIELDS: { key: keyof BrandAppearanceSettings; label: string; hint: string; placeholder: string }[] = [
-  { key: 'fontDisplayFamily', label: 'Заглавия / банер', hint: 'Mood banner на начална, големи надписи', placeholder: 'Ruslan Display' },
-  { key: 'fontButtonsFamily', label: 'Бутони', hint: 'Всички основни и вторични бутони', placeholder: 'Pangolin' },
-  { key: 'fontNavFamily', label: 'Навигация', hint: 'Меню: Начало, Меню, Събития…', placeholder: 'Reggae One' },
-  { key: 'fontBodyFamily', label: 'Обикновен текст', hint: 'Параграфи, форми (ако е празно — Inter)', placeholder: 'Inter' },
+  { key: 'fontDisplayFamily', label: 'Ð—Ð°Ð³Ð»Ð°Ð²Ð¸Ñ / Ð±Ð°Ð½ÐµÑ€', hint: 'Mood banner Ð½Ð° Ð½Ð°Ñ‡Ð°Ð»Ð½Ð°, Ð³Ð¾Ð»ÐµÐ¼Ð¸ Ð½Ð°Ð´Ð¿Ð¸ÑÐ¸', placeholder: 'Ruslan Display' },
+  { key: 'fontButtonsFamily', label: 'Ð‘ÑƒÑ‚Ð¾Ð½Ð¸', hint: 'Ð’ÑÐ¸Ñ‡ÐºÐ¸ Ð¾ÑÐ½Ð¾Ð²Ð½Ð¸ Ð¸ Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‡Ð½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸', placeholder: 'Pangolin' },
+  { key: 'fontNavFamily', label: 'ÐÐ°Ð²Ð¸Ð³Ð°Ñ†Ð¸Ñ', hint: 'ÐœÐµÐ½ÑŽ: ÐÐ°Ñ‡Ð°Ð»Ð¾, ÐœÐµÐ½ÑŽ, Ð¡ÑŠÐ±Ð¸Ñ‚Ð¸Ñâ€¦', placeholder: 'Reggae One' },
+  { key: 'fontBodyFamily', label: 'ÐžÐ±Ð¸ÐºÐ½Ð¾Ð²ÐµÐ½ Ñ‚ÐµÐºÑÑ‚', hint: 'ÐŸÐ°Ñ€Ð°Ð³Ñ€Ð°Ñ„Ð¸, Ñ„Ð¾Ñ€Ð¼Ð¸ (Ð°ÐºÐ¾ Ðµ Ð¿Ñ€Ð°Ð·Ð½Ð¾ â€” Inter)', placeholder: 'Inter' },
 ];
 
 function ColorInput({
@@ -288,7 +327,7 @@ function ColorInput({
           value={pickerValue}
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-12 shrink-0 cursor-pointer rounded border border-[var(--theme-hairline)] bg-white p-0.5"
-          aria-label={`${label} — цветов избор`}
+          aria-label={`${label} â€” Ñ†Ð²ÐµÑ‚Ð¾Ð² Ð¸Ð·Ð±Ð¾Ñ€`}
         />
         <input
           className="theme-field flex-1 font-mono text-sm"
@@ -339,6 +378,15 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       navActiveBorder: c('navActiveBorder'),
       navHoverText: c('navHoverText'),
       navMobileActiveBg: c('navMobileActiveBg'),
+      footerBg: c('footerBg'),
+      footerText: c('footerText'),
+      footerLinkHover: c('footerLinkHover'),
+      footerBorder: c('footerBorder'),
+      productCardBg: c('productCardBg'),
+      productCardText: c('productCardText'),
+      productCardTitleHover: c('productCardTitleHover'),
+      productCardBorder: c('productCardBorder'),
+      productCardHoverBorder: c('productCardHoverBorder'),
       btnSecondaryBg: coalesceColor(settings.btnSecondaryBg, c('card')),
       btnSecondaryText: coalesceColor(settings.btnSecondaryText, c('ink')),
       btnSecondaryBorder: coalesceColor(settings.btnSecondaryBorder, c('hairline')),
@@ -362,7 +410,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
       productEffectClass: fonts.productEffectClass,
       buttonEffectClass: fonts.buttonEffectClass,
       navLogo: (settings.navLogoUrl || '').trim(),
-      siteTitle: (settings.siteShortName || settings.siteTitle || 'Вашият бранд').trim(),
+      siteTitle: (settings.siteShortName || settings.siteTitle || 'Ð’Ð°ÑˆÐ¸ÑÑ‚ Ð±Ñ€Ð°Ð½Ð´').trim(),
     };
   }, [settings]);
 
@@ -391,10 +439,10 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
   return (
     <div className="sticky top-24 space-y-4">
       <div className="rounded-xl border border-[var(--theme-hairline)] bg-[var(--theme-card)] p-4">
-        <h3 className="text-lg font-bold text-[var(--theme-ink)]">Преглед (локален)</h3>
+        <h3 className="text-lg font-bold text-[var(--theme-ink)]">ÐŸÑ€ÐµÐ³Ð»ÐµÐ´ (Ð»Ð¾ÐºÐ°Ð»ÐµÐ½)</h3>
         <p className="theme-muted mt-1 text-xs leading-relaxed">
-          Показва текущите стойности в полетата — <strong>без запазване</strong>. След „Запази“ презареди
-          публичния сайт за финален вид. Пълен site preview не е нужен — това е достатъчно за цветове и бутони.
+          ÐŸÐ¾ÐºÐ°Ð·Ð²Ð° Ñ‚ÐµÐºÑƒÑ‰Ð¸Ñ‚Ðµ ÑÑ‚Ð¾Ð¹Ð½Ð¾ÑÑ‚Ð¸ Ð² Ð¿Ð¾Ð»ÐµÑ‚Ð°Ñ‚Ð° â€” <strong>Ð±ÐµÐ· Ð·Ð°Ð¿Ð°Ð·Ð²Ð°Ð½Ðµ</strong>. Ð¡Ð»ÐµÐ´ â€žÐ—Ð°Ð¿Ð°Ð·Ð¸â€œ Ð¿Ñ€ÐµÐ·Ð°Ñ€ÐµÐ´Ð¸
+          Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð¸Ñ ÑÐ°Ð¹Ñ‚ Ð·Ð° Ñ„Ð¸Ð½Ð°Ð»ÐµÐ½ Ð²Ð¸Ð´. ÐŸÑŠÐ»ÐµÐ½ site preview Ð½Ðµ Ðµ Ð½ÑƒÐ¶ÐµÐ½ â€” Ñ‚Ð¾Ð²Ð° Ðµ Ð´Ð¾ÑÑ‚Ð°Ñ‚ÑŠÑ‡Ð½Ð¾ Ð·Ð° Ñ†Ð²ÐµÑ‚Ð¾Ð²Ðµ Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸.
         </p>
       </div>
 
@@ -418,13 +466,13 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             )}
           </div>
           <span className="text-xs opacity-70" style={{ fontFamily: p.fontNav }}>
-            Меню · Контакти
+            ÐœÐµÐ½ÑŽ Â· ÐšÐ¾Ð½Ñ‚Ð°ÐºÑ‚Ð¸
           </span>
         </div>
 
         <div className={`flex flex-wrap items-center gap-3 border-b px-3 py-2 text-xs ${p.navEffectClass}`} style={{ borderColor: p.hairline }}>
           <span className="border-b-2 font-semibold" style={{ color: p.navActiveText, borderColor: p.navActiveBorder }}>
-            Меню
+            ÐœÐµÐ½ÑŽ
           </span>
           <span style={{ color: p.navHoverText }}>Hover</span>
           <span
@@ -447,7 +495,7 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
               boxShadow: `0 0 22px ${p.heroGlow}55`,
             }}
           >
-            Добро настроение
+            Ð”Ð¾Ð±Ñ€Ð¾ Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐ½Ð¸Ðµ
           </p>
 
           <div className="flex flex-wrap justify-center gap-2 text-xs font-medium">
@@ -455,13 +503,13 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
               className={`rounded-full border px-3 py-1 uppercase tracking-[0.18em] ${p.displayEffectClass}`}
               style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
             >
-              Предложения
+              ÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ
             </span>
             <span
               className={`rounded-full border px-3 py-1 ${p.displayEffectClass}`}
               style={{ borderColor: p.homepageAccent, color: p.homepageAccent, background: `${p.homepageAccent}18` }}
             >
-              Класика
+              ÐšÐ»Ð°ÑÐ¸ÐºÐ°
             </span>
           </div>
 
@@ -470,13 +518,13 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
               className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
               style={{ background: p.menuActiveBg, color: p.menuActiveText, borderColor: p.menuActiveBorder }}
             >
-              Активна категория
+              ÐÐºÑ‚Ð¸Ð²Ð½Ð° ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ
             </span>
             <span
               className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
               style={{ background: p.menuInactiveBg, color: p.menuInactiveText, borderColor: p.menuInactiveBorder }}
             >
-              Категория
+              ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ñ
             </span>
             <span
               className={`rounded-full border px-3 py-1 text-xs font-semibold ${p.menuEffectClass}`}
@@ -492,15 +540,15 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
               className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.accent, color: p.accentContrast, fontFamily: p.fontButtons }}
             >
-              Основен бутон
+              ÐžÑÐ½Ð¾Ð²ÐµÐ½ Ð±ÑƒÑ‚Ð¾Ð½
             </button>
             <button
               type="button"
               className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.accentHover, color: p.accentContrastHover, fontFamily: p.fontButtons }}
-              title="Преглед при hover"
+              title="ÐŸÑ€ÐµÐ³Ð»ÐµÐ´ Ð¿Ñ€Ð¸ hover"
             >
-              При hover
+              ÐŸÑ€Ð¸ hover
             </button>
             <button
               type="button"
@@ -512,14 +560,14 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
                 fontFamily: p.fontButtons,
               }}
             >
-              Отказ
+              ÐžÑ‚ÐºÐ°Ð·
             </button>
             <button
               type="button"
               className={`rounded-xl px-4 py-2 text-sm font-semibold ${p.buttonEffectClass}`}
               style={{ background: p.danger, color: p.dangerContrast, fontFamily: p.fontButtons }}
             >
-              Да, излез
+              Ð”Ð°, Ð¸Ð·Ð»ÐµÐ·
             </button>
           </div>
 
@@ -533,17 +581,17 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
                 borderColor: p.btnSecondaryBorder,
                 fontFamily: p.fontButtons,
               }}
-              title="Отказ при hover"
+              title="ÐžÑ‚ÐºÐ°Ð· Ð¿Ñ€Ð¸ hover"
             >
-              Отказ hover
+              ÐžÑ‚ÐºÐ°Ð· hover
             </button>
             <button
               type="button"
               className="rounded-xl px-4 py-2 text-sm font-semibold"
               style={{ background: p.dangerHover, color: p.dangerContrastHover, fontFamily: p.fontButtons }}
-              title="Опасен при hover"
+              title="ÐžÐ¿Ð°ÑÐµÐ½ Ð¿Ñ€Ð¸ hover"
             >
-              Излез hover
+              Ð˜Ð·Ð»ÐµÐ· hover
             </button>
           </div>
 
@@ -551,11 +599,11 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
             className="rounded-xl border p-3 text-sm"
             style={{ background: p.card, borderColor: p.hoverBorder, color: p.ink }}
           >
-            <p className="font-semibold">Примерна картичка</p>
-            <p style={{ color: p.muted }}>Вторичен текст в меню или админ.</p>
+            <p className="font-semibold">ÐŸÑ€Ð¸Ð¼ÐµÑ€Ð½Ð° ÐºÐ°Ñ€Ñ‚Ð¸Ñ‡ÐºÐ°</p>
+            <p style={{ color: p.muted }}>Ð’Ñ‚Ð¾Ñ€Ð¸Ñ‡ÐµÐ½ Ñ‚ÐµÐºÑÑ‚ Ð² Ð¼ÐµÐ½ÑŽ Ð¸Ð»Ð¸ Ð°Ð´Ð¼Ð¸Ð½.</p>
             <input
               readOnly
-              value="Примерно поле"
+              value="ÐŸÑ€Ð¸Ð¼ÐµÑ€Ð½Ð¾ Ð¿Ð¾Ð»Ðµ"
               className="mt-2 w-full rounded-lg border px-2 py-1.5 text-sm"
               style={{ background: p.inset, borderColor: p.hairline, color: p.ink }}
             />
@@ -563,21 +611,28 @@ function BrandingPreview({ settings }: { settings: BrandAppearanceSettings }) {
 
           <div className="flex flex-wrap gap-2 text-xs font-medium">
             <span className="rounded-full px-2 py-1" style={{ background: `${p.success}22`, color: p.success }}>
-              Успех
+              Ð£ÑÐ¿ÐµÑ…
             </span>
             <span className="rounded-full px-2 py-1" style={{ background: `${p.warning}22`, color: p.warning }}>
-              Внимание
+              Ð’Ð½Ð¸Ð¼Ð°Ð½Ð¸Ðµ
             </span>
             <span className="rounded-full px-2 py-1" style={{ background: `${p.danger}22`, color: p.danger }}>
-              Грешка
+              Ð“Ñ€ÐµÑˆÐºÐ°
             </span>
+          </div>
+          <div
+            className="rounded-xl border px-3 py-2 text-center text-xs"
+            style={{ background: p.footerBg, borderColor: p.footerBorder, color: p.footerText }}
+          >
+            Реализирано от{' '}
+            <span style={{ color: p.footerLinkHover, fontWeight: 700 }}>GSoft.bg</span>
           </div>
         </div>
       </div>
 
       <p className="theme-muted text-xs">
-        За шрифтове: ако смениш Google Fonts URL, прегледът може да използва шрифта едва след запазване и презареждане
-        (браузърът трябва да зареди CSS файла).
+        Ð—Ð° ÑˆÑ€Ð¸Ñ„Ñ‚Ð¾Ð²Ðµ: Ð°ÐºÐ¾ ÑÐ¼ÐµÐ½Ð¸Ñˆ Google Fonts URL, Ð¿Ñ€ÐµÐ³Ð»ÐµÐ´ÑŠÑ‚ Ð¼Ð¾Ð¶Ðµ Ð´Ð° Ð¸Ð·Ð¿Ð¾Ð»Ð·Ð²Ð° ÑˆÑ€Ð¸Ñ„Ñ‚Ð° ÐµÐ´Ð²Ð° ÑÐ»ÐµÐ´ Ð·Ð°Ð¿Ð°Ð·Ð²Ð°Ð½Ðµ Ð¸ Ð¿Ñ€ÐµÐ·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ
+        (Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€ÑŠÑ‚ Ñ‚Ñ€ÑÐ±Ð²Ð° Ð´Ð° Ð·Ð°Ñ€ÐµÐ´Ð¸ CSS Ñ„Ð°Ð¹Ð»Ð°).
       </p>
     </div>
   );
@@ -611,7 +666,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
         const data = await res.json();
         setSettings((data?.settings ?? null) as BrandAppearanceSettings | null);
       } catch {
-        setToast({ message: 'Грешка при зареждане на настройките', type: 'error' });
+        setToast({ message: 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸Ñ‚Ðµ', type: 'error' });
       } finally {
         setLoading(false);
       }
@@ -623,7 +678,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
     fd.set('file', file);
     const res = await fetch('/api/upload', { method: 'POST', body: fd });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error || 'Грешка при качване');
+    if (!res.ok) throw new Error(data?.error || 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ ÐºÐ°Ñ‡Ð²Ð°Ð½Ðµ');
     return String(data.url || '');
   }
 
@@ -637,11 +692,11 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
         body: JSON.stringify(settings),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Грешка при запазване');
+      if (!res.ok) throw new Error(data?.error || 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ð¿Ð°Ð·Ð²Ð°Ð½Ðµ');
       setSettings(data.settings as BrandAppearanceSettings);
-      setToast({ message: '✅ Запазено — презареди сайта за пълен ефект', type: 'success' });
+      setToast({ message: 'âœ… Ð—Ð°Ð¿Ð°Ð·ÐµÐ½Ð¾ â€” Ð¿Ñ€ÐµÐ·Ð°Ñ€ÐµÐ´Ð¸ ÑÐ°Ð¹Ñ‚Ð° Ð·Ð° Ð¿ÑŠÐ»ÐµÐ½ ÐµÑ„ÐµÐºÑ‚', type: 'success' });
     } catch (e: any) {
-      setToast({ message: e?.message || 'Грешка при запазване', type: 'error' });
+      setToast({ message: e?.message || 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ð¿Ð°Ð·Ð²Ð°Ð½Ðµ', type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -653,7 +708,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
     return (
       <div className="mx-auto w-full max-w-2xl p-6 md:p-8">
         <div className="theme-card p-6">
-          <p className="theme-muted">Само Super Admin може да редактира брандинга.</p>
+          <p className="theme-muted">Ð¡Ð°Ð¼Ð¾ Super Admin Ð¼Ð¾Ð¶Ðµ Ð´Ð° Ñ€ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð° Ð±Ñ€Ð°Ð½Ð´Ð¸Ð½Ð³Ð°.</p>
         </div>
       </div>
     );
@@ -673,15 +728,15 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
           onClick={() => router.push(`/${locale}/admin`)}
           className="theme-muted mb-4 flex items-center gap-2 transition-colors hover:text-[var(--theme-ink)]"
         >
-          <span>←</span>
-          <span>Назад към таблото</span>
+          <span>â†</span>
+          <span>ÐÐ°Ð·Ð°Ð´ ÐºÑŠÐ¼ Ñ‚Ð°Ð±Ð»Ð¾Ñ‚Ð¾</span>
         </button>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <h1 className="theme-admin-heading-font theme-admin-page-title">🎨 Брандинг и външен вид</h1>
+            <h1 className="theme-admin-heading-font theme-admin-page-title">ðŸŽ¨ Ð‘Ñ€Ð°Ð½Ð´Ð¸Ð½Ð³ Ð¸ Ð²ÑŠÐ½ÑˆÐµÐ½ Ð²Ð¸Ð´</h1>
             <p className="theme-muted mt-2 max-w-2xl text-sm leading-relaxed">
-              Цветове, лога, шрифтове и заглавие в таба. Празно поле = стойност по подразбиране от темата. Промените
-              важат за публичния сайт, админ и staff след „Запази“.
+              Ð¦Ð²ÐµÑ‚Ð¾Ð²Ðµ, Ð»Ð¾Ð³Ð°, ÑˆÑ€Ð¸Ñ„Ñ‚Ð¾Ð²Ðµ Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ðµ Ð² Ñ‚Ð°Ð±Ð°. ÐŸÑ€Ð°Ð·Ð½Ð¾ Ð¿Ð¾Ð»Ðµ = ÑÑ‚Ð¾Ð¹Ð½Ð¾ÑÑ‚ Ð¿Ð¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ Ð¾Ñ‚ Ñ‚ÐµÐ¼Ð°Ñ‚Ð°. ÐŸÑ€Ð¾Ð¼ÐµÐ½Ð¸Ñ‚Ðµ
+              Ð²Ð°Ð¶Ð°Ñ‚ Ð·Ð° Ð¿ÑƒÐ±Ð»Ð¸Ñ‡Ð½Ð¸Ñ ÑÐ°Ð¹Ñ‚, Ð°Ð´Ð¼Ð¸Ð½ Ð¸ staff ÑÐ»ÐµÐ´ â€žÐ—Ð°Ð¿Ð°Ð·Ð¸â€œ.
             </p>
           </div>
           <button
@@ -690,7 +745,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
             disabled={saving}
             className="theme-btn-primary theme-btn-admin-compact w-full shrink-0 rounded-lg font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
-            {saving ? 'Запазване...' : 'Запази всичко'}
+            {saving ? 'Ð—Ð°Ð¿Ð°Ð·Ð²Ð°Ð½Ðµ...' : 'Ð—Ð°Ð¿Ð°Ð·Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¾'}
           </button>
         </div>
       </div>
@@ -698,14 +753,14 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[1fr_minmax(280px,340px)]">
         <div className="min-w-0 space-y-6">
           <section className="theme-card rounded-xl p-6 md:p-8 space-y-4">
-            <h2 className="text-xl font-bold text-[var(--theme-ink)]">Име и таб на браузъра</h2>
-            <p className="theme-muted text-sm">Какво пише в заглавието на таба и при „Добави към началния екран“.</p>
+            <h2 className="text-xl font-bold text-[var(--theme-ink)]">Ð˜Ð¼Ðµ Ð¸ Ñ‚Ð°Ð± Ð½Ð° Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€Ð°</h2>
+            <p className="theme-muted text-sm">ÐšÐ°ÐºÐ²Ð¾ Ð¿Ð¸ÑˆÐµ Ð² Ð·Ð°Ð³Ð»Ð°Ð²Ð¸ÐµÑ‚Ð¾ Ð½Ð° Ñ‚Ð°Ð±Ð° Ð¸ Ð¿Ñ€Ð¸ â€žÐ”Ð¾Ð±Ð°Ð²Ð¸ ÐºÑŠÐ¼ Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¸Ñ ÐµÐºÑ€Ð°Ð½â€œ.</p>
             <div className="grid grid-cols-1 gap-4">
               {(
                 [
-                  ['siteTitle', 'Заглавие в таба', 'напр. Ресторантски комплекс Дунав – Русе'],
-                  ['siteShortName', 'Кратко име (икона на телефона)', 'напр. Дунав'],
-                  ['siteDescription', 'Описание за Google / споделяне', 'напр. Меню, събития и поръчки…'],
+                  ['siteTitle', 'Ð—Ð°Ð³Ð»Ð°Ð²Ð¸Ðµ Ð² Ñ‚Ð°Ð±Ð°', 'Ð½Ð°Ð¿Ñ€. Ð ÐµÑÑ‚Ð¾Ñ€Ð°Ð½Ñ‚ÑÐºÐ¸ ÐºÐ¾Ð¼Ð¿Ð»ÐµÐºÑ Ð”ÑƒÐ½Ð°Ð² â€“ Ð ÑƒÑÐµ'],
+                  ['siteShortName', 'ÐšÑ€Ð°Ñ‚ÐºÐ¾ Ð¸Ð¼Ðµ (Ð¸ÐºÐ¾Ð½Ð° Ð½Ð° Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½Ð°)', 'Ð½Ð°Ð¿Ñ€. Ð”ÑƒÐ½Ð°Ð²'],
+                  ['siteDescription', 'ÐžÐ¿Ð¸ÑÐ°Ð½Ð¸Ðµ Ð·Ð° Google / ÑÐ¿Ð¾Ð´ÐµÐ»ÑÐ½Ðµ', 'Ð½Ð°Ð¿Ñ€. ÐœÐµÐ½ÑŽ, ÑÑŠÐ±Ð¸Ñ‚Ð¸Ñ Ð¸ Ð¿Ð¾Ñ€ÑŠÑ‡ÐºÐ¸â€¦'],
                 ] as const
               ).map(([key, label, placeholder]) => (
                 <div key={key} className="space-y-1">
@@ -722,9 +777,9 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
           </section>
 
           <section className="theme-card rounded-xl p-6 md:p-8 space-y-4">
-            <h2 className="text-xl font-bold text-[var(--theme-ink)]">Шрифтове</h2>
+            <h2 className="text-xl font-bold text-[var(--theme-ink)]">Ð¨Ñ€Ð¸Ñ„Ñ‚Ð¾Ð²Ðµ</h2>
             <p className="theme-muted text-sm leading-relaxed">
-              От{' '}
+              ÐžÑ‚{' '}
               <a
                 href="https://fonts.google.com/specimen/Ruslan+Display?lang=bg_Cyrl"
                 target="_blank"
@@ -733,11 +788,11 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
               >
                 Google Fonts
               </a>
-              : „Get font“ → копирай <strong>link</strong> URL (не целия HTML таг) или само въведи името на шрифта
-              по-долу.
+              : â€žGet fontâ€œ â†’ ÐºÐ¾Ð¿Ð¸Ñ€Ð°Ð¹ <strong>link</strong> URL (Ð½Ðµ Ñ†ÐµÐ»Ð¸Ñ HTML Ñ‚Ð°Ð³) Ð¸Ð»Ð¸ ÑÐ°Ð¼Ð¾ Ð²ÑŠÐ²ÐµÐ´Ð¸ Ð¸Ð¼ÐµÑ‚Ð¾ Ð½Ð° ÑˆÑ€Ð¸Ñ„Ñ‚Ð°
+              Ð¿Ð¾-Ð´Ð¾Ð»Ñƒ.
             </p>
             <div className="space-y-1">
-              <label className="theme-label">Link към Google Fonts (по избор)</label>
+              <label className="theme-label">Link ÐºÑŠÐ¼ Google Fonts (Ð¿Ð¾ Ð¸Ð·Ð±Ð¾Ñ€)</label>
               <input
                 className="theme-field font-mono text-xs"
                 value={settings.googleFontsCssUrl ?? ''}
@@ -766,12 +821,12 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {[
-                ['fontMoodEffect', 'Ефект за mood банера', 'Food • Drinks… в hero секцията'],
-                ['fontDisplayEffect', 'Ефект за display заглавия', 'Големи заглавия и етикети на началната'],
-                ['fontNavEffect', 'Ефект за навигацията', 'Линковете в горното меню'],
-                ['fontMenuEffect', 'Ефект за меню категориите', 'Категорийни бутони в /menu'],
-                ['fontProductEffect', 'Ефект за продуктови заглавия', 'Имената на продуктите в менюто'],
-                ['fontButtonEffect', 'Ефект за CTA бутони', 'Основни бутони на началната'],
+                ['fontMoodEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° mood Ð±Ð°Ð½ÐµÑ€Ð°', 'Food â€¢ Drinksâ€¦ Ð² hero ÑÐµÐºÑ†Ð¸ÑÑ‚Ð°'],
+                ['fontDisplayEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° display Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ', 'Ð“Ð¾Ð»ÐµÐ¼Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ Ð¸ ÐµÑ‚Ð¸ÐºÐµÑ‚Ð¸ Ð½Ð° Ð½Ð°Ñ‡Ð°Ð»Ð½Ð°Ñ‚Ð°'],
+                ['fontNavEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° Ð½Ð°Ð²Ð¸Ð³Ð°Ñ†Ð¸ÑÑ‚Ð°', 'Ð›Ð¸Ð½ÐºÐ¾Ð²ÐµÑ‚Ðµ Ð² Ð³Ð¾Ñ€Ð½Ð¾Ñ‚Ð¾ Ð¼ÐµÐ½ÑŽ'],
+                ['fontMenuEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° Ð¼ÐµÐ½ÑŽ ÐºÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¸Ñ‚Ðµ', 'ÐšÐ°Ñ‚ÐµÐ³Ð¾Ñ€Ð¸Ð¹Ð½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸ Ð² /menu'],
+                ['fontProductEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚Ð¾Ð²Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ', 'Ð˜Ð¼ÐµÐ½Ð°Ñ‚Ð° Ð½Ð° Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚Ð¸Ñ‚Ðµ Ð² Ð¼ÐµÐ½ÑŽÑ‚Ð¾'],
+                ['fontButtonEffect', 'Ð•Ñ„ÐµÐºÑ‚ Ð·Ð° CTA Ð±ÑƒÑ‚Ð¾Ð½Ð¸', 'ÐžÑÐ½Ð¾Ð²Ð½Ð¸ Ð±ÑƒÑ‚Ð¾Ð½Ð¸ Ð½Ð° Ð½Ð°Ñ‡Ð°Ð»Ð½Ð°Ñ‚Ð°'],
               ].map(([key, label, hint]) => (
                 <div key={key} className="space-y-1">
                   <label className="theme-label">{label}</label>
@@ -788,7 +843,7 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
                   >
                     {GOOGLE_FONT_EFFECTS.map((effect) => (
                       <option key={effect} value={effect}>
-                        {effect === 'none' ? 'Без ефект' : effect}
+                        {effect === 'none' ? 'Ð‘ÐµÐ· ÐµÑ„ÐµÐºÑ‚' : effect}
                       </option>
                     ))}
                   </select>
@@ -820,8 +875,8 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
 
           <section className="theme-card rounded-xl p-6 md:p-8 space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-[var(--theme-ink)]">Лога и икони</h2>
-              <p className="theme-muted mt-1 text-sm">Качи PNG/WebP/SVG. Всяко поле има мини преглед отдолу.</p>
+              <h2 className="text-xl font-bold text-[var(--theme-ink)]">Ð›Ð¾Ð³Ð° Ð¸ Ð¸ÐºÐ¾Ð½Ð¸</h2>
+              <p className="theme-muted mt-1 text-sm">ÐšÐ°Ñ‡Ð¸ PNG/WebP/SVG. Ð’ÑÑÐºÐ¾ Ð¿Ð¾Ð»Ðµ Ð¸Ð¼Ð° Ð¼Ð¸Ð½Ð¸ Ð¿Ñ€ÐµÐ³Ð»ÐµÐ´ Ð¾Ñ‚Ð´Ð¾Ð»Ñƒ.</p>
             </div>
 
             {LOGO_FIELDS.map(({ key, label, hint }) => {
@@ -838,11 +893,11 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
                       {url ? (
                         <p className="theme-muted mt-2 break-all text-xs font-mono">{url}</p>
                       ) : (
-                        <p className="theme-muted mt-2 text-xs italic">Няма качен файл — ползва се резервна икона</p>
+                        <p className="theme-muted mt-2 text-xs italic">ÐÑÐ¼Ð° ÐºÐ°Ñ‡ÐµÐ½ Ñ„Ð°Ð¹Ð» â€” Ð¿Ð¾Ð»Ð·Ð²Ð° ÑÐµ Ñ€ÐµÐ·ÐµÑ€Ð²Ð½Ð° Ð¸ÐºÐ¾Ð½Ð°</p>
                       )}
                     </div>
                     <label className="theme-btn-secondary inline-flex shrink-0 cursor-pointer items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold">
-                      Качи файл
+                      ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»
                       <input
                         type="file"
                         className="hidden"
@@ -854,9 +909,9 @@ export default function BrandingAdminPage({ params }: { params: Promise<{ locale
                           try {
                             const nextUrl = await handleUpload(f);
                             setSettings({ ...settings, [key]: nextUrl || null } as any);
-                            setToast({ message: '✅ Качено', type: 'success' });
+                            setToast({ message: 'âœ… ÐšÐ°Ñ‡ÐµÐ½Ð¾', type: 'success' });
                           } catch (err: any) {
-                            setToast({ message: err?.message || 'Грешка при качване', type: 'error' });
+                            setToast({ message: err?.message || 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ ÐºÐ°Ñ‡Ð²Ð°Ð½Ðµ', type: 'error' });
                           }
                         }}
                       />

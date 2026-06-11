@@ -40,6 +40,15 @@
   --theme-nav-active-border: var(--theme-accent);
   --theme-nav-hover-text: var(--theme-accent);
   --theme-nav-mobile-active-bg: var(--theme-accent-tint);
+  --theme-footer-bg: var(--theme-paper);
+  --theme-footer-text: var(--theme-muted);
+  --theme-footer-link-hover: var(--theme-accent);
+  --theme-footer-border: var(--theme-hairline);
+  --theme-product-card-bg: var(--theme-card);
+  --theme-product-card-text: var(--theme-ink);
+  --theme-product-card-title-hover: var(--theme-accent);
+  --theme-product-card-border: var(--theme-hairline);
+  --theme-product-card-hover-border: var(--theme-hover-border);
 
   --theme-success: #166534;
   --theme-warning: #92400e;

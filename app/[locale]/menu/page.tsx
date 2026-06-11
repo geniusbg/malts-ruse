@@ -571,7 +571,7 @@ function MenuPageContent() {
                       selectProductInUrl(product);
                     }
                   }}
-                  className={`group relative theme-card rounded-2xl overflow-hidden shadow-sm hover:border-[var(--theme-menu-hover-border)] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer ${
+                  className={`group relative rounded-2xl overflow-hidden border border-[var(--theme-product-card-border)] bg-[var(--theme-product-card-bg)] shadow-sm hover:border-[var(--theme-product-card-hover-border)] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer ${
                     !product.isAvailable ? 'opacity-60' : ''
                   }`}
                 >
@@ -620,7 +620,7 @@ function MenuPageContent() {
                   <div
                     className={`p-6 ${product.isPromoted && !product.imageUrl ? 'pt-12' : ''}`}
                   >
-                    <h3 className={`text-xl font-bold text-[var(--theme-ink)] mb-2 group-hover:text-[var(--theme-accent)] transition-colors ${productEffectClass}`}>
+                    <h3 className={`text-xl font-bold text-[var(--theme-product-card-text)] mb-2 group-hover:text-[var(--theme-product-card-title-hover)] transition-colors ${productEffectClass}`}>
                       {productName}
                     </h3>
                     

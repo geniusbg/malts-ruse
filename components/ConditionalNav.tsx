@@ -89,7 +89,7 @@ export default function ConditionalNav({
         </div>
       </div>
       <footer
-        className={`theme-muted border-t border-[var(--theme-hairline)] bg-[var(--theme-paper)]/80 py-4 text-center text-sm ${
+        className={`border-t border-[var(--theme-footer-border)] bg-[var(--theme-footer-bg)]/80 py-4 text-center text-sm text-[var(--theme-footer-text)] ${
           orderFooterClearance ? 'max-md:mb-28' : ''
         }`}
       >
@@ -98,7 +98,7 @@ export default function ConditionalNav({
             href="https://gsoft.bg" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-[var(--theme-accent)] transition-colors"
+            className="transition-colors hover:text-[var(--theme-footer-link-hover)]"
           >
             Реализирано от GSoft.bg
           </a>
@@ -112,4 +112,3 @@ export default function ConditionalNav({
     </SessionProvider>
   );
 }
-

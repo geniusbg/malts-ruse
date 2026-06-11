@@ -610,6 +610,17 @@ model BrandAppearanceSettings {
   navHoverText      String? @map("nav_hover_text")
   navMobileActiveBg String? @map("nav_mobile_active_bg")
 
+  footerBg        String? @map("footer_bg")
+  footerText      String? @map("footer_text")
+  footerLinkHover String? @map("footer_link_hover")
+  footerBorder    String? @map("footer_border")
+
+  productCardBg          String? @map("product_card_bg")
+  productCardText        String? @map("product_card_text")
+  productCardTitleHover  String? @map("product_card_title_hover")
+  productCardBorder      String? @map("product_card_border")
+  productCardHoverBorder String? @map("product_card_hover_border")
+
   btnSecondaryBg       String? @map("btn_secondary_bg")
   btnSecondaryText     String? @map("btn_secondary_text")
   btnSecondaryBorder   String? @map("btn_secondary_border")
